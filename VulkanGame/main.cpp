@@ -1,2 +1,6 @@
-define GLFW_INLCUDE_VULKAN
-#include <GLFW/glfw3.h
+#include "GraphicsEngine.h"
+
+int main() {
+	GraphicsEngine* GE = new GraphicsEngine();
+	delete GE;
+}
