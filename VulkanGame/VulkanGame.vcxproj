@@ -152,11 +152,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.cpp" />
+    <ClCompile Include="Instance.cpp" />
+    <ClCompile Include="Logging.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
     <ClInclude Include="GraphicsEngine.h" />
+    <ClInclude Include="Instance.h" />
+    <ClInclude Include="Logging.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,5 +1,6 @@
 #include "GraphicsEngine.h"
-
+#include "Instance.h"
+#include "Logging.h"
 void GraphicsEngine::build_glfw_window()
 {
 	//initialize glfw
@@ -23,6 +24,15 @@ void GraphicsEngine::build_glfw_window()
 		}
 	}
 }
+void GraphicsEngine::make_instance()
+{
+	this->instance = vkInit::make_instance(this->debugMode, this->appName);
+	this->dldi = vk::DispatchLoaderDynamic(instance, vkGetInstanceProcAddr);
+}
+void GraphicsEngine::make_debug_messenger()
+{
+	debugMessenger = vkInit::make_debug_messenger(instance, dldi);
+}
 ////////////////////////////////////
 GraphicsEngine::GraphicsEngine()
 {
@@ -31,8 +41,15 @@ GraphicsEngine::GraphicsEngine()
 	}
 
 	build_glfw_window();
+	make_instance();
 }
 
 GraphicsEngine::~GraphicsEngine()
 {
+	if (debugMode) std::cout << "End Application";
+	
+	instance.destroyDebugUtilsMessengerEXT(debugMessenger,nullptr,dldi);
+	instance.destroy();
+	glfwTerminate();
+
 }
