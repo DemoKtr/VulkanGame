@@ -16,5 +16,6 @@ namespace vkInit {
 		\returns the created messenger
 	*/
 	vk::DebugUtilsMessengerEXT make_debug_messenger(vk::Instance& instance, vk::DispatchLoaderDynamic& dldi);
+	void log_device_properties(const vk::PhysicalDevice& device);
 }
 

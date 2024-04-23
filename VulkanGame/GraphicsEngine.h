@@ -15,9 +15,14 @@ class GraphicsEngine
 	vk::DebugUtilsMessengerEXT debugMessenger{ nullptr };
 	//dynamic instance dispatcher
 	vk::DispatchLoaderDynamic dldi;
+
+	//physical device
+	vk::PhysicalDevice physicalDevice{ nullptr };
+
 	void build_glfw_window(); //glfw Setup
 	void make_instance(); //instance Setup
 	void make_debug_messenger();
+	void choice_device();
 public:
 	GraphicsEngine();
 	~GraphicsEngine();

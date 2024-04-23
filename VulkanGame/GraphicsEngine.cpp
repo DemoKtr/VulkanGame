@@ -1,6 +1,7 @@
 #include "GraphicsEngine.h"
 #include "Instance.h"
 #include "Logging.h"
+#include "Device.h"
 void GraphicsEngine::build_glfw_window()
 {
 	//initialize glfw
@@ -33,6 +34,10 @@ void GraphicsEngine::make_debug_messenger()
 {
 	debugMessenger = vkInit::make_debug_messenger(instance, dldi);
 }
+void GraphicsEngine::choice_device()
+{
+	this->physicalDevice = vkInit::choose_physical_device(instance, debugMode);
+}
 ////////////////////////////////////
 GraphicsEngine::GraphicsEngine()
 {
@@ -42,6 +47,7 @@ GraphicsEngine::GraphicsEngine()
 
 	build_glfw_window();
 	make_instance();
+	choice_device();
 }
 
 GraphicsEngine::~GraphicsEngine()
