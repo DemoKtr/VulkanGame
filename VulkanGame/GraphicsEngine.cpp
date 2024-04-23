@@ -55,6 +55,7 @@ GraphicsEngine::~GraphicsEngine()
 	if (debugMode) std::cout << "End Application";
 	
 	instance.destroyDebugUtilsMessengerEXT(debugMessenger,nullptr,dldi);
+	
 	instance.destroy();
 	glfwTerminate();
 
