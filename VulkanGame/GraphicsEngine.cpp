@@ -29,6 +29,17 @@ void GraphicsEngine::make_instance()
 {
 	this->instance = vkInit::make_instance(this->debugMode, this->appName);
 	this->dldi = vk::DispatchLoaderDynamic(instance, vkGetInstanceProcAddr);
+	VkSurfaceKHR helpersurface;
+	if (glfwCreateWindowSurface(instance, mainWindow, nullptr, &helpersurface) == VK_SUCCESS) {
+		if (debugMode) {
+			
+			std::cout << "GLFW surface success" << std::endl;
+		}
+	}
+	else if (debugMode) {
+		std::cout << "Failed to abstract the glfw surface for Vulkan" << std::endl;
+	}
+	this->surface = helpersurface;
 }
 void GraphicsEngine::make_debug_messenger()
 {
@@ -37,7 +48,11 @@ void GraphicsEngine::make_debug_messenger()
 void GraphicsEngine::choice_device()
 {
 	this->physicalDevice = vkInit::choose_physical_device(instance, debugMode);
-	vkInit::findQueueFamilies(this->physicalDevice, this->debugMode);
+	this->device = vkInit::create_logical_device(physicalDevice, surface,debugMode);
+	std::array<vk::Queue, 2> queues = vkInit::get_Queues(physicalDevice, device, surface, debugMode);
+	this->graphicsQueue = queues[0];
+	this->presentQueue = queues[1];
+	vkInit::query_swapchain_support(physicalDevice, surface, debugMode);
 }
 ////////////////////////////////////
 GraphicsEngine::GraphicsEngine()
@@ -54,8 +69,10 @@ GraphicsEngine::GraphicsEngine()
 GraphicsEngine::~GraphicsEngine()
 {
 	if (debugMode) std::cout << "End Application";
-	
-	instance.destroyDebugUtilsMessengerEXT(debugMessenger,nullptr,dldi);
+	device.destroy();
+	instance.destroySurfaceKHR(surface);
+
+	if (debugMode) instance.destroyDebugUtilsMessengerEXT(debugMessenger,nullptr,dldi);
 	
 	instance.destroy();
 	glfwTerminate();

@@ -1,6 +1,7 @@
 #pragma once
-#include <GLFW/glfw3.h>
 #include "config.h"
+#include <GLFW/glfw3.h>
+
 
 
 class GraphicsEngine
@@ -15,9 +16,13 @@ class GraphicsEngine
 	vk::DebugUtilsMessengerEXT debugMessenger{ nullptr };
 	//dynamic instance dispatcher
 	vk::DispatchLoaderDynamic dldi;
+	vk::SurfaceKHR surface;
 
 	//physical device
 	vk::PhysicalDevice physicalDevice{ nullptr };
+	vk::Device device{ nullptr };
+	vk::Queue graphicsQueue{ nullptr };
+	vk::Queue presentQueue{ nullptr };
 
 	void build_glfw_window(); //glfw Setup
 	void make_instance(); //instance Setup

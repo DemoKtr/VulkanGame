@@ -98,7 +98,7 @@ bool vkInit::checkDeviceExtensionSupport(
 	return requiredExtensions.empty();
 }
 
-vkInit::QueueFamilyIndices vkInit::findQueueFamilies(vk::PhysicalDevice device, bool debugMode)
+vkInit::QueueFamilyIndices vkInit::findQueueFamilies(vk::PhysicalDevice device,vk::SurfaceKHR surface ,bool debugMode)
 {
 	QueueFamilyIndices indices;
 	std::vector<vk::QueueFamilyProperties> queueFamilies =device.getQueueFamilyProperties();
@@ -110,12 +110,20 @@ vkInit::QueueFamilyIndices vkInit::findQueueFamilies(vk::PhysicalDevice device, 
 	for (vk::QueueFamilyProperties queueFamily : queueFamilies) {
 		if (queueFamily.queueFlags & vk::QueueFlagBits::eGraphics) {
 			indices.graphicsFamily = i;
-			indices.presentFamily = i;
+			
 
 			if (debugMode) {
-				std::cout << "Queue Family " << i << "is suitable"<<std::endl;
+				std::cout << "Queue Family " << i << "is suitable for graphic"<<std::endl;
 			}
 		}
+
+		if (device.getSurfaceSupportKHR(i, surface)) {
+			indices.presentFamily = i;
+			if (debugMode) {
+				std::cout << "Queue Family " << i << "is suitable for present" << std::endl;
+			}
+		}
+
 		if (indices.isComplete()) {
 			break;
 		}
@@ -123,4 +131,131 @@ vkInit::QueueFamilyIndices vkInit::findQueueFamilies(vk::PhysicalDevice device, 
 	}
 
 	return indices;
+}
+
+vk::Device vkInit::create_logical_device(vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface, bool debugMode)
+{
+	QueueFamilyIndices indices = findQueueFamilies(physicalDevice,surface ,debugMode);
+	std::vector<uint32_t> uniqueIndices;
+	uniqueIndices.push_back(indices.graphicsFamily.value());
+	if (indices.graphicsFamily.value() != indices.presentFamily.value()) {
+		uniqueIndices.push_back(indices.presentFamily.value());
+	}
+	float queuePriority = 1.0f;
+	std::vector<vk::DeviceQueueCreateInfo> queueCreateInfo;
+	for (uint32_t queueFamilyIndex : uniqueIndices) {
+		queueCreateInfo.push_back(vk::DeviceQueueCreateInfo(vk::DeviceQueueCreateFlags(), indices.graphicsFamily.value(), 1, &queuePriority));
+	}
+	
+	std::vector<const char*> deviceExtensions = {
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	};
+
+	vk::PhysicalDeviceFeatures deviceFeatures = vk::PhysicalDeviceFeatures();
+	//deviceFeatures.samplerAnisotropy = true;
+	std::vector<const char*> enabledLayers;
+	if (debugMode) {
+		enabledLayers.push_back("VK_LAYER_KHRONOS_validation");
+	}
+	
+	
+	vk::DeviceCreateInfo deviceInfo = vk::DeviceCreateInfo(vk::DeviceCreateFlags(),
+		queueCreateInfo.size(), queueCreateInfo.data(),
+		enabledLayers.size(), enabledLayers.data(),
+		deviceExtensions.size(), deviceExtensions.data(),
+		&deviceFeatures);
+
+	try {
+		vk::Device device = physicalDevice.createDevice(deviceInfo);
+		if (debugMode) {
+			std::cout << "Device is successfully created" << std::endl;
+		}
+		return device;
+	}
+	catch (vk::SystemError err) {
+		if (debugMode) {
+			std::cout << "Device creation FAILED!!!" << std::endl;
+			return nullptr;
+		}
+	}
+	return nullptr;
+}
+
+std::array<vk::Queue,2> vkInit::get_Queues(vk::PhysicalDevice physicalDevice, vk::Device device,vk::SurfaceKHR surface, bool debugMode)
+{
+	QueueFamilyIndices indices = findQueueFamilies(physicalDevice, surface ,debugMode);
+	return { { device.getQueue(indices.graphicsFamily.value(),0), device.getQueue(indices.presentFamily.value(),0)} };
+}
+
+vkInit::SwapChainSupportDetails vkInit::query_swapchain_support(vk::PhysicalDevice device, vk::SurfaceKHR surface, bool debugMode)
+{
+	SwapChainSupportDetails support;
+	/*
+* typedef struct VkSurfaceCapabilitiesKHR {
+	uint32_t                         minImageCount;
+	uint32_t                         maxImageCount;
+	VkExtent2D                       currentExtent;
+	VkExtent2D                       minImageExtent;
+	VkExtent2D                       maxImageExtent;
+	uint32_t                         maxImageArrayLayers;
+	VkSurfaceTransformFlagsKHR       supportedTransforms;
+	VkSurfaceTransformFlagBitsKHR    currentTransform;
+	VkCompositeAlphaFlagsKHR         supportedCompositeAlpha;
+	VkImageUsageFlags                supportedUsageFlags;
+} VkSurfaceCapabilitiesKHR;
+*/
+	support.capabilities = device.getSurfaceCapabilitiesKHR(surface);
+	if (debugMode) {
+		std::cout << "Swapchain can support the following surface capabilities:"<< std::endl;
+
+		std::cout << "tminimum image count: " << support.capabilities.minImageCount << std::endl;
+		std::cout << "tmaximum image count: " << support.capabilities.maxImageCount << std::endl;
+
+		std::cout << "\tcurrent extent: \n";
+		/*typedef struct VkExtent2D {
+			uint32_t    width;
+			uint32_t    height;
+		} VkExtent2D;
+		*/
+		std::cout << "\t\twidth: " << support.capabilities.currentExtent.width << std::endl;
+		std::cout << "\t\theight: " << support.capabilities.currentExtent.height << std::endl;
+
+		std::cout << "\tminimum supported extent: "<< std::endl;
+		std::cout << "\t\twidth: " << support.capabilities.minImageExtent.width << std::endl;
+		std::cout << "\t\theight: " << support.capabilities.minImageExtent.height << std::endl;
+
+		std::cout << "\tmaximum supported extent: "<<std::endl;
+		std::cout << "\t\twidth: " << support.capabilities.maxImageExtent.width << std::endl;
+		std::cout << "\t\theight: " << support.capabilities.maxImageExtent.height << std::endl;
+
+		std::cout << "\tmaximum image array layers: " << support.capabilities.maxImageArrayLayers << std::endl;
+
+		std::cout << "\tsupported transforms: " << std::endl;;
+		std::vector<std::string> stringList = log_transform_bits(support.capabilities.supportedTransforms);
+		for (std::string line : stringList) {
+			std::cout << "\t\t" << line << std::endl;;
+		}
+
+		std::cout << "\tcurrent transform:\n";
+		stringList = log_transform_bits(support.capabilities.currentTransform);
+		for (std::string line : stringList) {
+			std::cout << "\t\t" << line << std::endl;
+		}
+
+		std::cout << "\tsupported alpha operations:"<< std::endl;;
+		stringList = log_alpha_composite_bits(support.capabilities.supportedCompositeAlpha);
+		for (std::string line : stringList) {
+			std::cout << "\t\t" << line << std::endl;;
+		}
+
+		std::cout << "\tsupported image usage:"<< std::endl;
+		stringList = log_image_usage_bits(support.capabilities.supportedUsageFlags);
+		for (std::string line : stringList) {
+			std::cout << "\t\t" << line << std::endl;
+		}
+	}
+	
+
+
+	return support;
 }
