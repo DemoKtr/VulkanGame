@@ -29,17 +29,19 @@ void GraphicsEngine::make_instance()
 {
 	this->instance = vkInit::make_instance(this->debugMode, this->appName);
 	this->dldi = vk::DispatchLoaderDynamic(instance, vkGetInstanceProcAddr);
-	VkSurfaceKHR helpersurface;
-	if (glfwCreateWindowSurface(instance, mainWindow, nullptr, &helpersurface) == VK_SUCCESS) {
+	if (debugMode) {
+		debugMessenger = vkInit::make_debug_messenger(instance, dldi);
+	}
+	VkSurfaceKHR c_style_surface;
+	if (glfwCreateWindowSurface(instance, mainWindow, nullptr, &c_style_surface) != VK_SUCCESS) {
 		if (debugMode) {
-			
-			std::cout << "GLFW surface success" << std::endl;
+			std::cout << "Failed to abstract glfw surface for Vulkan\n";
 		}
 	}
 	else if (debugMode) {
-		std::cout << "Failed to abstract the glfw surface for Vulkan" << std::endl;
+		std::cout << "Successfully abstracted glfw surface for Vulkan\n";
 	}
-	this->surface = helpersurface;
+	surface = c_style_surface;
 }
 void GraphicsEngine::make_debug_messenger()
 {
@@ -52,7 +54,11 @@ void GraphicsEngine::choice_device()
 	std::array<vk::Queue, 2> queues = vkInit::get_Queues(physicalDevice, device, surface, debugMode);
 	this->graphicsQueue = queues[0];
 	this->presentQueue = queues[1];
-	vkInit::query_swapchain_support(physicalDevice, surface, debugMode);
+	vkInit::SwapChainBundle bundle = vkInit::create_swapchain(physicalDevice, device, surface, screenSize, debugMode);
+	this->swapchainImages = bundle.images;
+	this->swapchainFormat = bundle.format;
+	this->swapchainExtent = bundle.extent;
+	//vkInit::query_swapchain_support(physicalDevice, surface, debugMode);
 }
 ////////////////////////////////////
 GraphicsEngine::GraphicsEngine()
@@ -68,11 +74,19 @@ GraphicsEngine::GraphicsEngine()
 
 GraphicsEngine::~GraphicsEngine()
 {
-	if (debugMode) std::cout << "End Application";
+
+	if (debugMode) {
+		std::cout << "End!\n";
+	}
+
+	device.destroySwapchainKHR(swapchain);
 	device.destroy();
+
 	instance.destroySurfaceKHR(surface);
 
-	if (debugMode) instance.destroyDebugUtilsMessengerEXT(debugMessenger,nullptr,dldi);
+	if (debugMode) {
+		instance.destroyDebugUtilsMessengerEXT(debugMessenger, nullptr, dldi);
+	}
 	
 	instance.destroy();
 	glfwTerminate();

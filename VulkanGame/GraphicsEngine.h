@@ -24,6 +24,12 @@ class GraphicsEngine
 	vk::Queue graphicsQueue{ nullptr };
 	vk::Queue presentQueue{ nullptr };
 
+	//swapchain
+	vk::SwapchainKHR swapchain;
+	std::vector<vk::Image> swapchainImages;
+	vk::Format swapchainFormat;
+	vk::Extent2D swapchainExtent;
+
 	void build_glfw_window(); //glfw Setup
 	void make_instance(); //instance Setup
 	void make_debug_messenger();
