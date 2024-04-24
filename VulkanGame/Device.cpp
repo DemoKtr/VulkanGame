@@ -97,3 +97,30 @@ bool vkInit::checkDeviceExtensionSupport(
 	//if the set is empty then all requirements have been satisfied
 	return requiredExtensions.empty();
 }
+
+vkInit::QueueFamilyIndices vkInit::findQueueFamilies(vk::PhysicalDevice device, bool debugMode)
+{
+	QueueFamilyIndices indices;
+	std::vector<vk::QueueFamilyProperties> queueFamilies =device.getQueueFamilyProperties();
+	if (debugMode) {
+		std::cout << "There are " << queueFamilies.size() << "supported" << std::endl;
+	}
+
+	int i{ 0 };
+	for (vk::QueueFamilyProperties queueFamily : queueFamilies) {
+		if (queueFamily.queueFlags & vk::QueueFlagBits::eGraphics) {
+			indices.graphicsFamily = i;
+			indices.presentFamily = i;
+
+			if (debugMode) {
+				std::cout << "Queue Family " << i << "is suitable"<<std::endl;
+			}
+		}
+		if (indices.isComplete()) {
+			break;
+		}
+		i++;
+	}
+
+	return indices;
+}

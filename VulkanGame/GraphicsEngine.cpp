@@ -14,9 +14,9 @@ void GraphicsEngine::build_glfw_window()
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 	//GLFWwindow* glfwCreateWindow (int width, int height, const char *title, GLFWmonitor *monitor, GLFWwindow *share)
-	if (mainWindow = glfwCreateWindow(screenSize.x, screenSize.y, "ID Tech 12", nullptr, nullptr)) {
+	if (mainWindow = glfwCreateWindow(screenSize.x, screenSize.y, this->appName, nullptr, nullptr)) {
 		if (debugMode) {
-			std::cout << "Successfully made a glfw window called \"ID Tech 12\", width: " << screenSize.x << ", height: " << screenSize.y << '\n';
+			std::cout << "Successfully made a glfw window , width: " << screenSize.x << ", height: " << screenSize.y << '\n';
 		}
 	}
 	else {
@@ -37,6 +37,7 @@ void GraphicsEngine::make_debug_messenger()
 void GraphicsEngine::choice_device()
 {
 	this->physicalDevice = vkInit::choose_physical_device(instance, debugMode);
+	vkInit::findQueueFamilies(this->physicalDevice, this->debugMode);
 }
 ////////////////////////////////////
 GraphicsEngine::GraphicsEngine()
