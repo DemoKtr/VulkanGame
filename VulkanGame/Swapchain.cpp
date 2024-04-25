@@ -188,7 +188,7 @@ vkInit::SwapChainBundle vkInit::create_swapchain(vk::PhysicalDevice physicalDevi
 		createInfo.subresourceRange.levelCount = 1;
 		createInfo.subresourceRange.baseArrayLayer = 0;
 		createInfo.subresourceRange.layerCount = 1;
-
+		createInfo.format = format.format;
 
 		bundle.frames[i].image = images[i];
 		bundle.frames[i].imageView = logicalDevice.createImageView(createInfo);

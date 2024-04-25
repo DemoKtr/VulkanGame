@@ -80,7 +80,9 @@ GraphicsEngine::~GraphicsEngine()
 	if (debugMode) {
 		std::cout << "End!\n";
 	}
-
+	for (vkInit::SwapChainFrame frame : swapchainFrames) {
+		device.destroyImageView(frame.imageView);
+	}
 	device.destroySwapchainKHR(swapchain);
 	device.destroy();
 
