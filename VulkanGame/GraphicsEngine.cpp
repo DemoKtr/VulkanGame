@@ -2,6 +2,8 @@
 #include "Instance.h"
 #include "Logging.h"
 #include "Device.h"
+
+
 void GraphicsEngine::build_glfw_window()
 {
 	//initialize glfw
@@ -55,7 +57,7 @@ void GraphicsEngine::choice_device()
 	this->graphicsQueue = queues[0];
 	this->presentQueue = queues[1];
 	vkInit::SwapChainBundle bundle = vkInit::create_swapchain(physicalDevice, device, surface, screenSize, debugMode);
-	this->swapchainImages = bundle.images;
+	this->swapchainFrames = bundle.frames;
 	this->swapchainFormat = bundle.format;
 	this->swapchainExtent = bundle.extent;
 	//vkInit::query_swapchain_support(physicalDevice, surface, debugMode);

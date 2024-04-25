@@ -1,7 +1,7 @@
 #pragma once
 #include "config.h"
 #include <GLFW/glfw3.h>
-
+#include "Swapchain.h"
 
 
 class GraphicsEngine
@@ -26,7 +26,7 @@ class GraphicsEngine
 
 	//swapchain
 	vk::SwapchainKHR swapchain;
-	std::vector<vk::Image> swapchainImages;
+	std::vector<vkInit::SwapChainFrame> swapchainFrames;
 	vk::Format swapchainFormat;
 	vk::Extent2D swapchainExtent;
 

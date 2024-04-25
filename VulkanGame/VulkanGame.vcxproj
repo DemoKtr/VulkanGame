@@ -156,6 +156,8 @@
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="Logging.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Queues.cpp" />
+    <ClCompile Include="Swapchain.cpp" />
     <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -164,6 +166,8 @@
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="Logging.h" />
+    <ClInclude Include="Queues.h" />
+    <ClInclude Include="Swapchain.h" />
     <ClInclude Include="Transform.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
