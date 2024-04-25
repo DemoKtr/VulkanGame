@@ -31,7 +31,9 @@ class GraphicsEngine
 	vk::Extent2D swapchainExtent;
 
 	//pipeline
-
+	vk::PipelineLayout layout;
+	vk::RenderPass renderpass;
+	vk::Pipeline graphicsPipeline;
 
 	void build_glfw_window(); //glfw Setup
 	void make_instance(); //instance Setup

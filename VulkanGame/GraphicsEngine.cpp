@@ -67,7 +67,14 @@ void GraphicsEngine::create_pipeline()
 	vkInit::GraphicsPipelineInBundle specification = {};
 	specification.device = device;
 	specification.vertexFilePath = "shaders/shader.vert.spv";
+	specification.fragmentFilePath = "shaders/shader.frag.spv";
+	specification.swapchainExtent = swapchainExtent;
+	specification.swapchainImageFormat = swapchainFormat;
+
 	vkInit::GraphicsPipelineOutBundle output = vkInit::create_graphic_pipeline(specification,debugMode);
+	layout = output.layout;
+	renderpass = output.renderpass;
+	graphicsPipeline = output.graphicsPipeline;
 
 }
 ////////////////////////////////////
@@ -89,6 +96,10 @@ GraphicsEngine::~GraphicsEngine()
 	if (debugMode) {
 		std::cout << "End!\n";
 	}
+	device.destroyPipeline(graphicsPipeline);
+	
+	device.destroyRenderPass(renderpass);
+	device.destroyPipelineLayout(layout);
 	for (vkInit::SwapChainFrame frame : swapchainFrames) {
 		device.destroyImageView(frame.imageView);
 	}
