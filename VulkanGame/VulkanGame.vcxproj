@@ -157,7 +157,6 @@
     <ClCompile Include="Logging.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Queues.cpp" />
-    <ClCompile Include="Shaders.cpp" />
     <ClCompile Include="Swapchain.cpp" />
     <ClCompile Include="Transform.cpp" />
   </ItemGroup>
@@ -167,6 +166,7 @@
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="Logging.h" />
+    <ClInclude Include="Pipeline.h" />
     <ClInclude Include="Queues.h" />
     <ClInclude Include="Shaders.h" />
     <ClInclude Include="Swapchain.h" />

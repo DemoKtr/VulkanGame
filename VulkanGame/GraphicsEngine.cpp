@@ -2,7 +2,7 @@
 #include "Instance.h"
 #include "Logging.h"
 #include "Device.h"
-
+#include "Pipeline.h"
 
 void GraphicsEngine::build_glfw_window()
 {
@@ -62,6 +62,14 @@ void GraphicsEngine::choice_device()
 	this->swapchainExtent = bundle.extent;
 	//vkInit::query_swapchain_support(physicalDevice, surface, debugMode);
 }
+void GraphicsEngine::create_pipeline()
+{
+	vkInit::GraphicsPipelineInBundle specification = {};
+	specification.device = device;
+	specification.vertexFilePath = "shaders/shader.vert.spv";
+	vkInit::GraphicsPipelineOutBundle output = vkInit::create_graphic_pipeline(specification,debugMode);
+
+}
 ////////////////////////////////////
 GraphicsEngine::GraphicsEngine()
 {
@@ -72,6 +80,7 @@ GraphicsEngine::GraphicsEngine()
 	build_glfw_window();
 	make_instance();
 	choice_device();
+	create_pipeline();
 }
 
 GraphicsEngine::~GraphicsEngine()

@@ -30,10 +30,14 @@ class GraphicsEngine
 	vk::Format swapchainFormat;
 	vk::Extent2D swapchainExtent;
 
+	//pipeline
+
+
 	void build_glfw_window(); //glfw Setup
 	void make_instance(); //instance Setup
 	void make_debug_messenger();
 	void choice_device();
+	void create_pipeline();
 public:
 	GraphicsEngine();
 	~GraphicsEngine();
