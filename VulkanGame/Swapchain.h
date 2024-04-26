@@ -1,6 +1,6 @@
 #pragma once
 #include "config.h"
-
+#include "Frame.h"
 namespace vkInit
 {
 
@@ -12,7 +12,7 @@ namespace vkInit
 	
 	struct SwapChainBundle {
 		vk::SwapchainKHR swapchain;
-		std::vector<SwapChainFrame> frames;
+		std::vector<vkUtil::SwapChainFrame> frames;
 		vk::Format format;
 		vk::Extent2D extent;
 	};
