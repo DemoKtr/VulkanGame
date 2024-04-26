@@ -142,12 +142,13 @@ namespace vkInit {
             std::cout << "Create Fragment Shader " << std::endl;
         }
         vk::ShaderModule fragmentShader = vkUtil::createModule(specyfication.fragmentFilePath, specyfication.device, debugMode);
-        vk::PipelineShaderStageCreateInfo fragmentShaderInfo = {  };
+        vk::PipelineShaderStageCreateInfo fragmentShaderInfo = {};
         fragmentShaderInfo.flags = vk::PipelineShaderStageCreateFlags();
         fragmentShaderInfo.stage = vk::ShaderStageFlagBits::eFragment;
         fragmentShaderInfo.module = fragmentShader;
         fragmentShaderInfo.pName = "main";
         shaderStages.push_back(fragmentShaderInfo);
+        //Now both shaders have been made, we can declare them to the pipeline info
         pipelineInfo.stageCount = shaderStages.size();
         pipelineInfo.pStages = shaderStages.data();
 

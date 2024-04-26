@@ -6,9 +6,9 @@
 
 class GraphicsEngine
 {
-	ivec2 screenSize{ 640, 480 };
-	bool debugMode = { true };
-	GLFWwindow* mainWindow{ nullptr };
+	ivec2 screenSize;
+	bool debugMode;;
+	GLFWwindow* mainWindow;
 	const char* appName{ "VulkanGame" };
 	//Vulkan Instance
 	vk::Instance instance{ nullptr };
@@ -41,10 +41,10 @@ class GraphicsEngine
 
 	//synchronizers 
 	vk::Fence inFlightFence;
-	vk::Semaphore imageAvilable;
+	vk::Semaphore imageAvailable;
 	vk::Semaphore renderFinished;
 
-	void build_glfw_window(); //glfw Setup
+
 	void make_instance(); //instance Setup
 	void make_debug_messenger();
 	void choice_device();
@@ -52,7 +52,8 @@ class GraphicsEngine
 	void finalize_setup();
 	void record_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex);
 public:
-	GraphicsEngine();
+	GraphicsEngine(ivec2 screenSize, GLFWwindow* window, bool debugMode);
+	void render();
 	~GraphicsEngine();
 };
 

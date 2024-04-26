@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="app.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="GraphicsEngine.cpp" />
     <ClCompile Include="Instance.cpp" />

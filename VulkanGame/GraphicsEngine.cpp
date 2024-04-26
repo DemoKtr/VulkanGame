@@ -8,29 +8,7 @@
 #include "Commands.h"
 #include "Synchronizer.h"
 
-void GraphicsEngine::build_glfw_window()
-{
-	//initialize glfw
-	glfwInit();
 
-	//no default rendering client, we'll hook vulkan up
-	//to the window later
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	//resizing breaks the swapchain, we'll disable it for now
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-	//GLFWwindow* glfwCreateWindow (int width, int height, const char *title, GLFWmonitor *monitor, GLFWwindow *share)
-	if (mainWindow = glfwCreateWindow(screenSize.x, screenSize.y, this->appName, nullptr, nullptr)) {
-		if (debugMode) {
-			std::cout << "Successfully made a glfw window , width: " << screenSize.x << ", height: " << screenSize.y << '\n';
-		}
-	}
-	else {
-		if (debugMode) {
-			std::cout << "GLFW window creation failed\n";
-		}
-	}
-}
 void GraphicsEngine::make_instance()
 {
 	this->instance = vkInit::make_instance(this->debugMode, this->appName);
@@ -61,6 +39,7 @@ void GraphicsEngine::choice_device()
 	this->graphicsQueue = queues[0];
 	this->presentQueue = queues[1];
 	vkInit::SwapChainBundle bundle = vkInit::create_swapchain(physicalDevice, device, surface, screenSize, debugMode);
+	this->swapchain = bundle.swapchain;
 	this->swapchainFrames = bundle.frames;
 	this->swapchainFormat = bundle.format;
 	this->swapchainExtent = bundle.extent;
@@ -70,8 +49,8 @@ void GraphicsEngine::create_pipeline()
 {
 	vkInit::GraphicsPipelineInBundle specification = {};
 	specification.device = device;
-	specification.vertexFilePath = "shaders/shader.vert.spv";
-	specification.fragmentFilePath = "shaders/shader.frag.spv";
+	specification.vertexFilePath = "shaders/vertex.spv";
+	specification.fragmentFilePath = "shaders/fragment.spv";
 	specification.swapchainExtent = swapchainExtent;
 	specification.swapchainImageFormat = swapchainFormat;
 
@@ -82,13 +61,16 @@ void GraphicsEngine::create_pipeline()
 
 }
 ////////////////////////////////////
-GraphicsEngine::GraphicsEngine()
+GraphicsEngine::GraphicsEngine(ivec2 screenSize, GLFWwindow* window, bool debugMode)
 {
+	this->screenSize = screenSize;
+	this->mainWindow = window;
+	this->debugMode = debugMode;
 	if (debugMode) {
 		std::cout << "Making a graphics engine\n";
 	}
 
-	build_glfw_window();
+	
 	make_instance();
 	choice_device();
 	create_pipeline();
@@ -97,12 +79,12 @@ GraphicsEngine::GraphicsEngine()
 
 GraphicsEngine::~GraphicsEngine()
 {
-
+	device.waitIdle();
 	if (debugMode) {
 		std::cout << "End!\n";
 	}
 	device.destroyFence(inFlightFence);
-	device.destroySemaphore(imageAvilable);
+	device.destroySemaphore(imageAvailable);
 	device.destroySemaphore(renderFinished);
 
 	device.destroyCommandPool(commandPool);
@@ -136,18 +118,112 @@ void GraphicsEngine::finalize_setup()
 	frameBufferInput.swapchainExtent = swapchainExtent;
 	vkInit::make_framebuffers(frameBufferInput, swapchainFrames, debugMode);
 
-	commandPool = vkInit::make_command_pool(physicalDevice,device,surface,debugMode);
+	commandPool = vkInit::make_command_pool( physicalDevice, device, surface, debugMode);
 
-	vkInit::commandBufferInputChunk commandBufferInput = { device,commandPool,swapchainFrames };
-
+	vkInit::commandBufferInputChunk commandBufferInput = { device, commandPool, swapchainFrames };
 	maincommandBuffer = vkInit::make_command_buffers(commandBufferInput, debugMode);
 
 	inFlightFence = vkInit::make_fence(device, debugMode);
-	imageAvilable = vkInit::make_semaphore(device, debugMode);
+	imageAvailable = vkInit::make_semaphore(device, debugMode);
 	renderFinished = vkInit::make_semaphore(device, debugMode);
 	
 }
 
 void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex)
 {
+	vk::CommandBufferBeginInfo beginInfo = {};
+
+	try {
+		commandBuffer.begin(beginInfo);
+	}
+	catch (vk::SystemError err) {
+		if (debugMode) {
+			std::cout << "Failed to begin recording command buffer!" << std::endl;
+		}
+	}
+
+	vk::RenderPassBeginInfo renderPassInfo = {};
+	renderPassInfo.renderPass = renderpass;
+	renderPassInfo.framebuffer = swapchainFrames[imageIndex].framebuffer;
+	renderPassInfo.renderArea.offset.x = 0;
+	renderPassInfo.renderArea.offset.y = 0;
+	renderPassInfo.renderArea.extent = swapchainExtent;
+
+	vk::ClearValue clearColor = { std::array<float, 4>{1.0f, 0.5f, 0.25f, 1.0f} };
+	renderPassInfo.clearValueCount = 1;
+	renderPassInfo.pClearValues = &clearColor;
+
+	commandBuffer.beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
+
+	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, graphicsPipeline);
+
+	commandBuffer.draw(3, 1, 0, 0);
+
+	commandBuffer.endRenderPass();
+
+	try {
+		commandBuffer.end();
+	}
+	catch (vk::SystemError err) {
+
+		if (debugMode) {
+			std::cout << "failed to record command buffer!" << std::endl;
+		}
+	}
+}
+void GraphicsEngine::render()
+{
+	
+	
+	device.waitForFences(1, &inFlightFence, VK_TRUE, UINT64_MAX);
+	device.resetFences(1, &inFlightFence);
+	
+	//acquireNextImageKHR(vk::SwapChainKHR, timeout, semaphore_to_signal, fence)
+	uint32_t imageIndex{ device.acquireNextImageKHR(swapchain, UINT64_MAX, imageAvailable, nullptr).value };
+
+	
+	
+	vk::CommandBuffer commandBuffer = swapchainFrames[imageIndex].commandBuffer;
+
+	commandBuffer.reset();
+
+	record_draw_commands(commandBuffer, imageIndex);
+
+	vk::SubmitInfo submitInfo = {};
+
+	vk::Semaphore waitSemaphores[] = { imageAvailable };
+	vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores = waitSemaphores;
+	submitInfo.pWaitDstStageMask = waitStages;
+
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &commandBuffer;
+
+	vk::Semaphore signalSemaphores[] = { renderFinished };
+	submitInfo.signalSemaphoreCount = 1;
+	submitInfo.pSignalSemaphores = signalSemaphores;
+
+	try {
+		graphicsQueue.submit(submitInfo, inFlightFence);
+	}
+	catch (vk::SystemError err) {
+
+		if (debugMode) {
+			std::cout << "failed to submit draw command buffer!" << std::endl;
+		}
+	}
+
+	vk::PresentInfoKHR presentInfo = {};
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores = signalSemaphores;
+
+	vk::SwapchainKHR swapChains[] = { swapchain };
+	presentInfo.swapchainCount = 1;
+	presentInfo.pSwapchains = swapChains;
+
+	presentInfo.pImageIndices = &imageIndex;
+
+	presentQueue.presentKHR(presentInfo);
+	
 }
