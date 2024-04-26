@@ -101,6 +101,10 @@ GraphicsEngine::~GraphicsEngine()
 	if (debugMode) {
 		std::cout << "End!\n";
 	}
+	device.destroyFence(inFlightFence);
+	device.destroySemaphore(imageAvilable);
+	device.destroySemaphore(renderFinished);
+
 	device.destroyCommandPool(commandPool);
 	device.destroyPipeline(graphicsPipeline);
 	
@@ -134,6 +138,13 @@ void GraphicsEngine::finalize_setup()
 
 	commandPool = vkInit::make_command_pool(physicalDevice,device,surface,debugMode);
 
+	vkInit::commandBufferInputChunk commandBufferInput = { device,commandPool,swapchainFrames };
+
+	maincommandBuffer = vkInit::make_command_buffers(commandBufferInput, debugMode);
+
+	inFlightFence = vkInit::make_fence(device, debugMode);
+	imageAvilable = vkInit::make_semaphore(device, debugMode);
+	renderFinished = vkInit::make_semaphore(device, debugMode);
 	
 }
 

@@ -37,7 +37,12 @@ class GraphicsEngine
 
 	//command
 	vk::CommandPool commandPool;
-	vk::CommandBuffer commandBuffer;
+	vk::CommandBuffer maincommandBuffer;
+
+	//synchronizers 
+	vk::Fence inFlightFence;
+	vk::Semaphore imageAvilable;
+	vk::Semaphore renderFinished;
 
 	void build_glfw_window(); //glfw Setup
 	void make_instance(); //instance Setup
