@@ -105,6 +105,7 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyPipelineLayout(layout);
 	for (vkUtil::SwapChainFrame frame : swapchainFrames) {
 		device.destroyImageView(frame.imageView);
+		device.destroyFramebuffer(frame.framebuffer);
 	}
 	device.destroySwapchainKHR(swapchain);
 	device.destroy();
