@@ -35,6 +35,10 @@ class GraphicsEngine
 	vk::RenderPass renderpass;
 	vk::Pipeline graphicsPipeline;
 
+	//command
+	vk::CommandPool commandPool;
+	vk::CommandBuffer commandBuffer;
+
 	void build_glfw_window(); //glfw Setup
 	void make_instance(); //instance Setup
 	void make_debug_messenger();

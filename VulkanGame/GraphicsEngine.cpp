@@ -5,6 +5,8 @@
 #include "Pipeline.h"
 #include "Swapchain.h"
 #include "FrameBuffer.h"
+#include "Commands.h"
+#include "Synchronizer.h"
 
 void GraphicsEngine::build_glfw_window()
 {
@@ -99,6 +101,7 @@ GraphicsEngine::~GraphicsEngine()
 	if (debugMode) {
 		std::cout << "End!\n";
 	}
+	device.destroyCommandPool(commandPool);
 	device.destroyPipeline(graphicsPipeline);
 	
 	device.destroyRenderPass(renderpass);
@@ -128,6 +131,8 @@ void GraphicsEngine::finalize_setup()
 	frameBufferInput.renderpass = renderpass;
 	frameBufferInput.swapchainExtent = swapchainExtent;
 	vkInit::make_framebuffers(frameBufferInput, swapchainFrames, debugMode);
+
+	commandPool = vkInit::make_command_pool(physicalDevice,device,surface,debugMode);
 
 	
 }
