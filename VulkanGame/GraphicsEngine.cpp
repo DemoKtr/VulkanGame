@@ -3,6 +3,7 @@
 #include "Logging.h"
 #include "Device.h"
 #include "Pipeline.h"
+#include "Swapchain.h"
 
 void GraphicsEngine::build_glfw_window()
 {
@@ -100,7 +101,7 @@ GraphicsEngine::~GraphicsEngine()
 	
 	device.destroyRenderPass(renderpass);
 	device.destroyPipelineLayout(layout);
-	for (vkInit::SwapChainFrame frame : swapchainFrames) {
+	for (vkUtil::SwapChainFrame frame : swapchainFrames) {
 		device.destroyImageView(frame.imageView);
 	}
 	device.destroySwapchainKHR(swapchain);

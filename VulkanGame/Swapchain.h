@@ -9,10 +9,7 @@ namespace vkInit
 		std::vector<vk::SurfaceFormatKHR> formats; //pixelformat
 		std::vector<vk::PresentModeKHR> presentModes; // wybiera jak dobieraæ obrazy
 	};
-	struct SwapChainFrame {
-		vk::Image image;
-		vk::ImageView imageView;
-	};
+	
 	struct SwapChainBundle {
 		vk::SwapchainKHR swapchain;
 		std::vector<SwapChainFrame> frames;
