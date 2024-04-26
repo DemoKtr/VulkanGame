@@ -1,6 +1,7 @@
 #pragma once
 #include "config.h"
 #include "Shaders.h"
+#include "RenderStruct.h"
 namespace vkInit {
 	struct GraphicsPipelineInBundle {
 		vk::Device device;
@@ -18,7 +19,13 @@ namespace vkInit {
         vk::PipelineLayoutCreateInfo layoutInfo;
         layoutInfo.flags = vk::PipelineLayoutCreateFlags();
         layoutInfo.setLayoutCount = 0;
-        layoutInfo.pushConstantRangeCount = 0;
+        layoutInfo.pushConstantRangeCount =1;
+        vk::PushConstantRange pushConstantInfo;
+        pushConstantInfo.offset = 0;
+        pushConstantInfo.size = sizeof(vkUtil::ObjectData);
+        pushConstantInfo.stageFlags = vk::ShaderStageFlagBits::eVertex;
+        layoutInfo.pPushConstantRanges = &pushConstantInfo;
+
         try {
             return device.createPipelineLayout(layoutInfo);
         }

@@ -6,7 +6,7 @@ class Transform
 {
 protected:
 	//Local space information
-	glm::vec3 m_pos = { 1.0f, 0.0f, 0.0f };
+	glm::vec3 m_pos = { 0.0f, 0.0f, 0.0f };
 	glm::quat m_rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f); // Quaternion for rotation
 	glm::vec3 m_scale = { 1.0f, 1.0f, 1.0f };
 
@@ -43,21 +43,12 @@ public:
 		m_isDirty = true;
 	}
 
-	void setLocalRotationX(float angle)
-	{
-		m_rotation = glm::quat(angle, 1, 0, 0) * m_rotation;
-		m_isDirty = true;
-	}
-	void setLocalRotationY(float angle)
-	{
-		m_rotation = glm::quat(angle, 0, 1, 0) * m_rotation;
-		m_isDirty = true;
-	}
-	void setLocalRotationZ(float angle)
-	{
-		m_rotation = glm::quat(angle, 0, 0, 1) * m_rotation;
-		m_isDirty = true;
-	}
+	void rotate(const glm::vec3& axis, float angle)
+{
+    glm::quat rotationQuat = glm::angleAxis(angle, axis);
+    m_rotation = rotationQuat * m_rotation;
+    m_isDirty = true;
+}
 
 	void setLocalScale(const glm::vec3& newScale)
 	{

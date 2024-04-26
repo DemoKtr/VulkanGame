@@ -2,6 +2,7 @@
 #include "config.h"
 #include <GLFW/glfw3.h>
 #include "Frame.h"
+#include "Transform.h"
 
 
 class GraphicsEngine
@@ -38,12 +39,11 @@ class GraphicsEngine
 	//command
 	vk::CommandPool commandPool;
 	vk::CommandBuffer maincommandBuffer;
-
+	
 	//synchronizers 
-	vk::Fence inFlightFence;
-	vk::Semaphore imageAvailable;
-	vk::Semaphore renderFinished;
-
+	int maxFramesInFlight, frameNumber;
+	Transform transform;
+	float ang{ 0 };
 
 	void make_instance(); //instance Setup
 	void make_debug_messenger();

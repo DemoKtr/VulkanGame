@@ -8,6 +8,9 @@ namespace vkUtil {
 		vk::ImageView imageView;
 		vk::Framebuffer framebuffer;
 		vk::CommandBuffer commandBuffer;
+		//syncchronization
+		vk::Semaphore imageAvailable, renderFinished;
+		vk::Fence inFlight;
 	};
 	
 }
