@@ -4,6 +4,7 @@
 #include "Device.h"
 #include "Pipeline.h"
 #include "Swapchain.h"
+#include "FrameBuffer.h"
 
 void GraphicsEngine::build_glfw_window()
 {
@@ -89,6 +90,7 @@ GraphicsEngine::GraphicsEngine()
 	make_instance();
 	choice_device();
 	create_pipeline();
+	finalize_setup();
 }
 
 GraphicsEngine::~GraphicsEngine()
@@ -116,4 +118,19 @@ GraphicsEngine::~GraphicsEngine()
 	instance.destroy();
 	glfwTerminate();
 
+}
+
+void GraphicsEngine::finalize_setup()
+{
+	vkInit::framebufferInput frameBufferInput;
+	frameBufferInput.device = device;
+	frameBufferInput.renderpass = renderpass;
+	frameBufferInput.swapchainExtent = swapchainExtent;
+	vkInit::make_framebuffers(frameBufferInput, swapchainFrames, debugMode);
+
+	
+}
+
+void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex)
+{
 }

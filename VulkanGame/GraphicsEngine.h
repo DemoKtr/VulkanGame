@@ -40,6 +40,8 @@ class GraphicsEngine
 	void make_debug_messenger();
 	void choice_device();
 	void create_pipeline();
+	void finalize_setup();
+	void record_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex);
 public:
 	GraphicsEngine();
 	~GraphicsEngine();

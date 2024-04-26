@@ -151,19 +151,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="app.cpp" />
-    <ClCompile Include="Commands.cpp" />
     <ClCompile Include="Device.cpp" />
-    <ClCompile Include="Frame.cpp" />
-    <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="GraphicsEngine.cpp" />
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="Logging.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Queues.cpp" />
     <ClCompile Include="Swapchain.cpp" />
-    <ClCompile Include="Synchronizer.cpp" />
-    <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app.h" />
