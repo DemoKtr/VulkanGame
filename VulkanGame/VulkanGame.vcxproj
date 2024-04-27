@@ -158,6 +158,8 @@
     <ClCompile Include="Logging.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Queues.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="Swapchain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -173,6 +175,8 @@
     <ClInclude Include="Pipeline.h" />
     <ClInclude Include="Queues.h" />
     <ClInclude Include="RenderStruct.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="SceneObject.h" />
     <ClInclude Include="Shaders.h" />
     <ClInclude Include="Swapchain.h" />
     <ClInclude Include="Synchronizer.h" />
