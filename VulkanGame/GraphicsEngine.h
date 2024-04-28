@@ -48,8 +48,14 @@ class GraphicsEngine
 	void make_instance(); //instance Setup
 	void make_debug_messenger();
 	void choice_device();
+	void create_swapchain();
+	void recreate_swapchain();
 	void create_pipeline();
 	void finalize_setup();
+	void create_sync_objects();
+	void create_framebuffers();
+	void cleanup_swapchain();
+
 	void record_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex);
 public:
 	GraphicsEngine(ivec2 screenSize, GLFWwindow* window, bool debugMode);

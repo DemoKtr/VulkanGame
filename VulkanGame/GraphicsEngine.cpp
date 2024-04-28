@@ -38,13 +38,7 @@ void GraphicsEngine::choice_device()
 	std::array<vk::Queue, 2> queues = vkInit::get_Queues(physicalDevice, device, surface, debugMode);
 	this->graphicsQueue = queues[0];
 	this->presentQueue = queues[1];
-	vkInit::SwapChainBundle bundle = vkInit::create_swapchain(physicalDevice, device, surface, screenSize, debugMode);
-	this->swapchain = bundle.swapchain;
-	this->swapchainFrames = bundle.frames;
-	this->swapchainFormat = bundle.format;
-	this->swapchainExtent = bundle.extent;
-	//vkInit::query_swapchain_support(physicalDevice, surface, debugMode);
-	maxFramesInFlight = static_cast<int>(swapchainFrames.size());
+	this->create_swapchain();
 	frameNumber = 0;
 }
 void GraphicsEngine::create_pipeline()
@@ -61,6 +55,16 @@ void GraphicsEngine::create_pipeline()
 	renderpass = output.renderpass;
 	graphicsPipeline = output.graphicsPipeline;
 
+}
+void GraphicsEngine::create_swapchain()
+{
+	vkInit::SwapChainBundle bundle = vkInit::create_swapchain(physicalDevice, device, surface, screenSize, debugMode);
+	this->swapchain = bundle.swapchain;
+	this->swapchainFrames = bundle.frames;
+	this->swapchainFormat = bundle.format;
+	this->swapchainExtent = bundle.extent;
+	//vkInit::query_swapchain_support(physicalDevice, surface, debugMode);
+	maxFramesInFlight = static_cast<int>(swapchainFrames.size());
 }
 ////////////////////////////////////
 GraphicsEngine::GraphicsEngine(ivec2 screenSize, GLFWwindow* window, bool debugMode)
@@ -79,6 +83,8 @@ GraphicsEngine::GraphicsEngine(ivec2 screenSize, GLFWwindow* window, bool debugM
 	finalize_setup();
 }
 
+
+
 GraphicsEngine::~GraphicsEngine()
 {
 	device.waitIdle();
@@ -91,14 +97,7 @@ GraphicsEngine::~GraphicsEngine()
 	
 	device.destroyRenderPass(renderpass);
 	device.destroyPipelineLayout(layout);
-	for (vkUtil::SwapChainFrame frame : swapchainFrames) {
-		device.destroyImageView(frame.imageView);
-		device.destroyFramebuffer(frame.framebuffer);
-		device.destroyFence(frame.inFlight);
-		device.destroySemaphore(frame.imageAvailable);
-		device.destroySemaphore(frame.renderFinished);
-	}
-	device.destroySwapchainKHR(swapchain);
+	this->cleanup_swapchain();
 	device.destroy();
 
 	instance.destroySurfaceKHR(surface);
@@ -112,27 +111,50 @@ GraphicsEngine::~GraphicsEngine()
 
 }
 
+void GraphicsEngine::cleanup_swapchain()
+{
+	for (vkUtil::SwapChainFrame frame : swapchainFrames) {
+		device.destroyImageView(frame.imageView);
+		device.destroyFramebuffer(frame.framebuffer);
+		device.destroyFence(frame.inFlight);
+		device.destroySemaphore(frame.imageAvailable);
+		device.destroySemaphore(frame.renderFinished);
+	}
+	device.destroySwapchainKHR(swapchain);
+}
+
 void GraphicsEngine::finalize_setup()
 {
-	vkInit::framebufferInput frameBufferInput;
-	frameBufferInput.device = device;
-	frameBufferInput.renderpass = renderpass;
-	frameBufferInput.swapchainExtent = swapchainExtent;
-	vkInit::make_framebuffers(frameBufferInput, swapchainFrames, debugMode);
+	create_framebuffers();
+
 
 	commandPool = vkInit::make_command_pool( physicalDevice, device, surface, debugMode);
 
 	vkInit::commandBufferInputChunk commandBufferInput = { device, commandPool, swapchainFrames };
-	maincommandBuffer = vkInit::make_command_buffers(commandBufferInput, debugMode);
+	maincommandBuffer = vkInit::make_command_buffer(commandBufferInput, debugMode);
+	vkInit::make_frame_command_buffers(commandBufferInput, debugMode);
 
-	for (vkUtil::SwapChainFrame &frame : swapchainFrames) //referencja 
-	{
-		frame.inFlight = vkInit::make_fence(device, debugMode);
-		frame.imageAvailable = vkInit::make_semaphore(device, debugMode);
-		frame.renderFinished = vkInit::make_semaphore(device, debugMode);
+	create_sync_objects();
+
+}
+
+void GraphicsEngine::recreate_swapchain()
+{
+	this->screenSize.x = 0;
+	this->screenSize.y = 0;
+	while (this->screenSize.x == 0 || this->screenSize.y == 0) {
+		glfwGetFramebufferSize(mainWindow, &this->screenSize.x, &this->screenSize.y);
+		glfwWaitEvents();
 	}
-	
-	
+
+	device.waitIdle();
+
+	cleanup_swapchain();
+	create_swapchain();
+	create_framebuffers();
+	create_sync_objects();
+	vkInit::commandBufferInputChunk commandBufferInput = { device, commandPool, swapchainFrames };
+	vkInit::make_frame_command_buffers(commandBufferInput, debugMode);
 }
 
 void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex)
@@ -181,6 +203,8 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint3
 		}
 	}
 }
+
+
 void GraphicsEngine::render()
 {
 	
@@ -236,4 +260,23 @@ void GraphicsEngine::render()
 
 	presentQueue.presentKHR(presentInfo);
 	frameNumber = (frameNumber + 1) % maxFramesInFlight;
+}
+
+void GraphicsEngine::create_sync_objects()
+{
+	for (vkUtil::SwapChainFrame& frame : swapchainFrames) //referencja 
+	{
+		frame.inFlight = vkInit::make_fence(device, debugMode);
+		frame.imageAvailable = vkInit::make_semaphore(device, debugMode);
+		frame.renderFinished = vkInit::make_semaphore(device, debugMode);
+	}
+}
+
+void GraphicsEngine::create_framebuffers()
+{
+	vkInit::framebufferInput frameBufferInput;
+	frameBufferInput.device = device;
+	frameBufferInput.renderpass = renderpass;
+	frameBufferInput.swapchainExtent = swapchainExtent;
+	vkInit::make_framebuffers(frameBufferInput, swapchainFrames, debugMode);
 }
