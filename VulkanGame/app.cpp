@@ -8,7 +8,7 @@ void App::build_glfw_window(ivec2 screenSize, bool debugMode)
 	//to the window later
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	//resizing breaks the swapchain, we'll disable it for now
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
 	//GLFWwindow* glfwCreateWindow (int width, int height, const char *title, GLFWmonitor *monitor, GLFWwindow *share)
 	if (window = glfwCreateWindow(screenSize.x, screenSize.y, "VulkanGame", nullptr, nullptr)) {

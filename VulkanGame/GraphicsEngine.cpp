@@ -213,7 +213,27 @@ void GraphicsEngine::render()
 	device.resetFences(1, &swapchainFrames[frameNumber].inFlight);
 	
 	//acquireNextImageKHR(vk::SwapChainKHR, timeout, semaphore_to_signal, fence)
-	uint32_t imageIndex{ device.acquireNextImageKHR(swapchain, UINT64_MAX,  swapchainFrames[frameNumber].imageAvailable, nullptr).value };
+	uint32_t imageIndex;
+	try {
+		vk::ResultValue acquire = device.acquireNextImageKHR(
+			swapchain, UINT64_MAX,
+			swapchainFrames[frameNumber].imageAvailable, nullptr
+		);
+		imageIndex = acquire.value;
+	}
+	catch (vk::OutOfDateKHRError error) {
+		std::cout << "Recreate" << std::endl;
+		recreate_swapchain();
+		return;
+	}
+	catch (vk::IncompatibleDisplayKHRError error) {
+		std::cout << "Recreate" << std::endl;
+		recreate_swapchain();
+		return;
+	}
+	catch (vk::SystemError error) {
+		std::cout << "Failed to acquire swapchain image!" << std::endl;
+	}
 
 	
 	
@@ -258,7 +278,21 @@ void GraphicsEngine::render()
 
 	presentInfo.pImageIndices = &imageIndex;
 
-	presentQueue.presentKHR(presentInfo);
+	vk::Result present;
+
+	try {
+		present = presentQueue.presentKHR(presentInfo);
+	}
+	catch (vk::OutOfDateKHRError error) {
+		present = vk::Result::eErrorOutOfDateKHR;
+	}
+
+	if (present == vk::Result::eErrorOutOfDateKHR || present == vk::Result::eSuboptimalKHR) {
+		std::cout << "Recreate" << std::endl;
+		recreate_swapchain();
+		return;
+	}
+
 	frameNumber = (frameNumber + 1) % maxFramesInFlight;
 }
 
