@@ -172,6 +172,7 @@
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="Logging.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="Pipeline.h" />
     <ClInclude Include="Queues.h" />
     <ClInclude Include="RenderStruct.h" />
