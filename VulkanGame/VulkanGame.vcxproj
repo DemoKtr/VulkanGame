@@ -157,10 +157,12 @@
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="Logging.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Memory.cpp" />
     <ClCompile Include="Queues.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="Swapchain.cpp" />
+    <ClCompile Include="TriangleMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app.h" />
@@ -172,6 +174,7 @@
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="Logging.h" />
+    <ClInclude Include="Memory.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Pipeline.h" />
     <ClInclude Include="Queues.h" />
@@ -182,6 +185,7 @@
     <ClInclude Include="Swapchain.h" />
     <ClInclude Include="Synchronizer.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="TriangleMesh.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

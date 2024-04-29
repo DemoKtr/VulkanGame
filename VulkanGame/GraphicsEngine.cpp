@@ -9,6 +9,18 @@
 #include "Synchronizer.h"
 
 
+void GraphicsEngine::make_assets()
+{
+	triangleMesh = new TriangleMesh(device,physicalDevice);
+}
+
+void GraphicsEngine::prepare_scene(vk::CommandBuffer commandBuffer)
+{
+	vk::Buffer vertexBuffers[] = { triangleMesh->vertexBuffer.buffer };
+	vk::DeviceSize offets[] = { 0 };
+	commandBuffer.bindVertexBuffers(0, 1, vertexBuffers, offets);
+}
+
 void GraphicsEngine::make_instance()
 {
 	this->instance = vkInit::make_instance(this->debugMode, this->appName);
@@ -81,6 +93,7 @@ GraphicsEngine::GraphicsEngine(ivec2 screenSize, GLFWwindow* window, bool debugM
 	choice_device();
 	create_pipeline();
 	finalize_setup();
+	make_assets();
 }
 
 
@@ -98,6 +111,8 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyRenderPass(renderpass);
 	device.destroyPipelineLayout(layout);
 	this->cleanup_swapchain();
+	delete triangleMesh;
+
 	device.destroy();
 
 	instance.destroySurfaceKHR(surface);
@@ -186,6 +201,9 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint3
 	commandBuffer.beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
 
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, graphicsPipeline);
+
+	prepare_scene(commandBuffer);
+
 	vkUtil::ObjectData objectData;
 	objectData.modelMatrix = this->transform.getModelMatrix();
 	commandBuffer.pushConstants(layout,vk::ShaderStageFlagBits::eVertex,0,sizeof(objectData), &objectData);

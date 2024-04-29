@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include "Frame.h"
 #include "Transform.h"
+#include "TriangleMesh.h"
 
 
 class GraphicsEngine
@@ -42,6 +43,13 @@ class GraphicsEngine
 	
 	//synchronizers 
 	int maxFramesInFlight, frameNumber;
+
+	TriangleMesh* triangleMesh;
+	void make_assets();
+	void prepare_scene(vk::CommandBuffer commandBuffer);
+
+
+	//Scene
 	Transform transform;
 	float ang{ 0 };
 
