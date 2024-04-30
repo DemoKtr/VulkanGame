@@ -15,6 +15,7 @@ struct BufferInputChunk {
 	vk::BufferUsageFlags usage;
 	vk::Device logicalDevice;
 	vk::PhysicalDevice physicalDevice;
+	vk::MemoryPropertyFlags memoryProperties;
 };
 
 enum class meshTypes {

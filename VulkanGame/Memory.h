@@ -30,4 +30,5 @@ namespace vkUtil {
 	*/
 	Buffer createBuffer(BufferInputChunk input);
 
+	void copyBuffer(Buffer& srcBuffer, Buffer& dstBuffer, vk::DeviceSize, vk::Queue queue, vk::CommandBuffer commandBuffer);
 }

@@ -61,7 +61,12 @@ void GraphicsEngine::make_assets()
 	type = meshTypes::STAR;
 	meshes->consume(type, vertices);
 
-	meshes->finalize(device, physicalDevice);
+	FinalizationChunk finalizationChunk;
+	finalizationChunk.logicalDevice = device;
+	finalizationChunk.physicalDevice = physicalDevice;
+	finalizationChunk.queue =graphicsQueue;
+	finalizationChunk.commandBuffer = maincommandBuffer;
+	meshes->finalize(finalizationChunk);
 }
 
 void GraphicsEngine::prepare_scene(vk::CommandBuffer commandBuffer)

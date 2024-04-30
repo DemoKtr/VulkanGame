@@ -3,6 +3,15 @@
 #include "Memory.h"
 #include <unordered_map>
 
+
+struct  FinalizationChunk {
+	vk::Device logicalDevice;
+	vk::PhysicalDevice physicalDevice;
+	vk::Queue queue;
+	vk::CommandBuffer commandBuffer;
+
+};
+
 class VertexMenagerie
 {
 	int offset;
@@ -12,7 +21,7 @@ class VertexMenagerie
 		VertexMenagerie();
 		~VertexMenagerie();
 		void consume(meshTypes meshType, std::vector<float> data);
-		void finalize(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice);
+		void finalize(FinalizationChunk finalizationChink);
 		Buffer vertexBuffer;
 		std::unordered_map<meshTypes, int> offsets;
 		std::unordered_map<meshTypes, int> sizes;
