@@ -169,6 +169,7 @@
     <ClInclude Include="app.h" />
     <ClInclude Include="Commands.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="Descrpitors.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="Frame.h" />
     <ClInclude Include="FrameBuffer.h" />

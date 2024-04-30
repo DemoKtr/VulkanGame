@@ -46,8 +46,16 @@ class GraphicsEngine
 
 	VertexMenagerie* meshes;
 
+	//Descriptor objects
+
+	vk::DescriptorSetLayout descriptorSetLayout;
+	vk::DescriptorPool descriptorPool;
+
+
+
 	void make_assets();
 	void prepare_scene(vk::CommandBuffer commandBuffer);
+	void prepare_frame(uint32_t imageIndex);
 
 
 	//Scene
@@ -59,9 +67,10 @@ class GraphicsEngine
 	void choice_device();
 	void create_swapchain();
 	void recreate_swapchain();
+	void create_descriptor_set_layout();
 	void create_pipeline();
 	void finalize_setup();
-	void create_sync_objects();
+	void create_frame_resources();
 	void create_framebuffers();
 	void cleanup_swapchain();
 

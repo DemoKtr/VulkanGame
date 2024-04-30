@@ -122,5 +122,8 @@
     <ClInclude Include="VertexMenagerie.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Descrpitors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
