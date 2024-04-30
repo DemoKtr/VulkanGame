@@ -16,3 +16,9 @@ struct BufferInputChunk {
 	vk::Device logicalDevice;
 	vk::PhysicalDevice physicalDevice;
 };
+
+enum class meshTypes {
+	TRIANGLE,	
+	SQUARE,
+	STAR
+};

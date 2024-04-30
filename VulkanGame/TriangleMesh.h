@@ -13,3 +13,20 @@ private:
 };
 
 
+class SquareMesh {
+public:
+	SquareMesh(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice);
+	~SquareMesh();
+	Buffer vertexBuffer;
+private:
+	vk::Device logicalDevice;
+};
+
+class StarMesh {
+public:
+	StarMesh(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice);
+	~StarMesh();
+	Buffer vertexBuffer;
+private:
+	vk::Device logicalDevice;
+};

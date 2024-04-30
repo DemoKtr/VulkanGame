@@ -11,12 +11,62 @@
 
 void GraphicsEngine::make_assets()
 {
-	triangleMesh = new TriangleMesh(device,physicalDevice);
+	meshes = new VertexMenagerie();
+
+	std::vector<float> vertices = { {
+		 0.0f, -0.05f, 0.0f, 1.0f, 0.0f,
+		 0.05f, 0.05f, 0.0f, 1.0f, 0.0f,
+		-0.05f, 0.05f, 0.0f, 1.0f, 0.0f
+	} };
+	meshTypes type = meshTypes::TRIANGLE;
+	meshes->consume(type, vertices);
+
+	vertices = { {
+		-0.05f,  0.05f, 1.0f, 0.0f, 0.0f,
+		-0.05f, -0.05f, 1.0f, 0.0f, 0.0f,
+		 0.05f, -0.05f, 1.0f, 0.0f, 0.0f,
+		 0.05f, -0.05f, 1.0f, 0.0f, 0.0f,
+		 0.05f,  0.05f, 1.0f, 0.0f, 0.0f,
+		-0.05f,  0.05f, 1.0f, 0.0f, 0.0f
+	} };
+	type = meshTypes::SQUARE;
+	meshes->consume(type, vertices);
+
+	vertices = { {
+		-0.05f, -0.025f, 0.0f, 0.0f, 1.0f,
+		-0.02f, -0.025f, 0.0f, 0.0f, 1.0f,
+		-0.03f,    0.0f, 0.0f, 0.0f, 1.0f,
+		-0.02f, -0.025f, 0.0f, 0.0f, 1.0f,
+		  0.0f,  -0.05f, 0.0f, 0.0f, 1.0f,
+		 0.02f, -0.025f, 0.0f, 0.0f, 1.0f,
+		-0.03f,    0.0f, 0.0f, 0.0f, 1.0f,
+		-0.02f, -0.025f, 0.0f, 0.0f, 1.0f,
+		 0.02f, -0.025f, 0.0f, 0.0f, 1.0f,
+		 0.02f, -0.025f, 0.0f, 0.0f, 1.0f,
+		 0.05f, -0.025f, 0.0f, 0.0f, 1.0f,
+		 0.03f,    0.0f, 0.0f, 0.0f, 1.0f,
+		-0.03f,    0.0f, 0.0f, 0.0f, 1.0f,
+		 0.02f, -0.025f, 0.0f, 0.0f, 1.0f,
+		 0.03f,    0.0f, 0.0f, 0.0f, 1.0f,
+		 0.03f,    0.0f, 0.0f, 0.0f, 1.0f,
+		 0.04f,   0.05f, 0.0f, 0.0f, 1.0f,
+		  0.0f,   0.01f, 0.0f, 0.0f, 1.0f,
+		-0.03f,    0.0f, 0.0f, 0.0f, 1.0f,
+		 0.03f,    0.0f, 0.0f, 0.0f, 1.0f,
+		  0.0f,   0.01f, 0.0f, 0.0f, 1.0f,
+		-0.03f,    0.0f, 0.0f, 0.0f, 1.0f,
+		  0.0f,   0.01f, 0.0f, 0.0f, 1.0f,
+		-0.04f,   0.05f, 0.0f, 0.0f, 1.0f
+	} };
+	type = meshTypes::STAR;
+	meshes->consume(type, vertices);
+
+	meshes->finalize(device, physicalDevice);
 }
 
 void GraphicsEngine::prepare_scene(vk::CommandBuffer commandBuffer)
 {
-	vk::Buffer vertexBuffers[] = { triangleMesh->vertexBuffer.buffer };
+	vk::Buffer vertexBuffers[] = { meshes->vertexBuffer.buffer };
 	vk::DeviceSize offets[] = { 0 };
 	commandBuffer.bindVertexBuffers(0, 1, vertexBuffers, offets);
 }
@@ -111,8 +161,7 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyRenderPass(renderpass);
 	device.destroyPipelineLayout(layout);
 	this->cleanup_swapchain();
-	delete triangleMesh;
-
+	delete meshes;
 	device.destroy();
 
 	instance.destroySurfaceKHR(surface);
@@ -204,10 +253,34 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint3
 
 	prepare_scene(commandBuffer);
 
+	int vertexCount = meshes->sizes.find(meshTypes::TRIANGLE)->second;
+	int firstVertex = meshes->offsets.find(meshTypes::TRIANGLE)->second;
+
 	vkUtil::ObjectData objectData;
+	this->transform.setLocalPosition(glm::vec3(0.0, 0.0, 0));
+	transform.computeModelMatrix();
 	objectData.modelMatrix = this->transform.getModelMatrix();
 	commandBuffer.pushConstants(layout,vk::ShaderStageFlagBits::eVertex,0,sizeof(objectData), &objectData);
-	commandBuffer.draw(3, 1, 0, 0);
+	commandBuffer.draw(vertexCount, 1, firstVertex, 0);
+
+
+	vertexCount = meshes->sizes.find(meshTypes::SQUARE)->second;
+	firstVertex = meshes->offsets.find(meshTypes::SQUARE)->second;
+	this->transform.setLocalPosition(glm::vec3(0.1, 0.1, 0));
+	transform.computeModelMatrix();
+	objectData.modelMatrix = this->transform.getModelMatrix();
+	commandBuffer.pushConstants(layout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(objectData), &objectData);
+	commandBuffer.draw(vertexCount, 1, firstVertex, 0);
+
+
+	 firstVertex = meshes->offsets.find(meshTypes::STAR)->second;
+	 vertexCount = meshes->sizes.find(meshTypes::STAR)->second;
+	this->transform.setLocalPosition(glm::vec3(0.2, 0.2, 0));
+	transform.computeModelMatrix();
+	objectData.modelMatrix = this->transform.getModelMatrix();
+	commandBuffer.pushConstants(layout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(objectData), &objectData);
+	commandBuffer.draw(vertexCount, 1, firstVertex, 0);
+
 
 	commandBuffer.endRenderPass();
 

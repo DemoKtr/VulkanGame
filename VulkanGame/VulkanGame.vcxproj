@@ -163,6 +163,7 @@
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="Swapchain.cpp" />
     <ClCompile Include="TriangleMesh.cpp" />
+    <ClCompile Include="VertexMenagerie.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app.h" />
@@ -186,6 +187,7 @@
     <ClInclude Include="Synchronizer.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="TriangleMesh.h" />
+    <ClInclude Include="VertexMenagerie.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

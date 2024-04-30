@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include "Frame.h"
 #include "Transform.h"
-#include "TriangleMesh.h"
+#include "VertexMenagerie.h"
 
 
 class GraphicsEngine
@@ -44,7 +44,8 @@ class GraphicsEngine
 	//synchronizers 
 	int maxFramesInFlight, frameNumber;
 
-	TriangleMesh* triangleMesh;
+	VertexMenagerie* meshes;
+
 	void make_assets();
 	void prepare_scene(vk::CommandBuffer commandBuffer);
 
