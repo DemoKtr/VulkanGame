@@ -4,22 +4,37 @@
 #include "Transform.h"
 class SceneObject
 {
+protected:
 	Transform transform;
 public:
 	 virtual void draw() = 0;
-	 void rotate(glm::vec4 rotation);
-	 void translate(glm::vec3 translate);
-	 void scale(glm::vec3 scale);
-	 virtual void update();
-	
+	 virtual void update() =0;
+	 Transform& getTransform();
 };
 
-class StaticSceneObject : SceneObject{
-	// Inherited via SceneObject
-	void draw() override;
-};
 
-class DynamicSceneObject : SceneObject {
-	// Inherited via SceneObject
+
+class Triangle : public SceneObject {
+	// Inherited via StaticSceneObject
+public:
 	void draw() override;
+	void update() override;
+
+	Triangle();
+};
+class Star : public SceneObject {
+	// Inherited via StaticSceneObject
+public:
+	void draw() override;
+	void update() override;
+
+	Star();
+};
+class Square : public SceneObject {
+	// Inherited via StaticSceneObject
+public:
+	void draw() override;
+	void update() override;
+
+	Square();
 };

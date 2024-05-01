@@ -45,18 +45,20 @@ App::App(ivec2 screenSize, bool debugMode)
 {
 	build_glfw_window(screenSize, debugMode);
 	graphicsEngine = new GraphicsEngine(screenSize, window, debugMode);
+	scene = new Scene();
 }
 
 App::~App()
 {
 	delete graphicsEngine;
+	delete scene;
 }
 
 void App::run()
 {
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
-		graphicsEngine->render();
+		graphicsEngine->render(scene);
 		calculateFrameRate();
 	}
 }

@@ -5,6 +5,7 @@ class App
 {
 	GraphicsEngine* graphicsEngine;
 	GLFWwindow* window;
+	Scene* scene;
 
 	double lastTime, currentTime;
 	int numFrames;

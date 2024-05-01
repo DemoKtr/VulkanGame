@@ -33,11 +33,18 @@ namespace vkUtil {
 		Buffer cameraDataBuffer;
 		void* cameraDataWriteLocation;
 
+
+		std::vector<glm::mat4> modelTransforms;
+		Buffer modelBuffer;
+		void* modelBufferWriteLocation;
+
 		//Resource Descriptors
 		vk::DescriptorBufferInfo uniformBufferDescriptor;
+		vk::DescriptorBufferInfo modelBufferDescriptor;
+
 		vk::DescriptorSet descriptorSet;
 
-		void make_ubo_resources(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice) {
+		void make_descriptor_resources(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice) {
 
 			BufferInputChunk input;
 			input.logicalDevice = logicalDevice;
@@ -48,6 +55,20 @@ namespace vkUtil {
 			cameraDataBuffer = createBuffer(input);
 
 			cameraDataWriteLocation = logicalDevice.mapMemory(cameraDataBuffer.bufferMemory, 0, sizeof(UBO));
+			////////////
+
+
+			input.size = 1024 * sizeof(glm::mat4);
+			input.usage = vk::BufferUsageFlagBits::eStorageBuffer;
+			modelBuffer = createBuffer(input);
+
+			modelBufferWriteLocation = logicalDevice.mapMemory(modelBuffer.bufferMemory, 0,1024* sizeof(glm::mat4));
+
+			modelTransforms.reserve(1024);
+			for (int i = 0; i < 1024; ++i)
+			{
+				modelTransforms.push_back(glm::mat4(1.0f));
+			}
 
 			/*
 			typedef struct VkDescriptorBufferInfo {
@@ -59,6 +80,10 @@ namespace vkUtil {
 			uniformBufferDescriptor.buffer = cameraDataBuffer.buffer;
 			uniformBufferDescriptor.offset = 0;
 			uniformBufferDescriptor.range = sizeof(UBO);
+
+			modelBufferDescriptor.buffer = modelBuffer.buffer;
+			modelBufferDescriptor.offset = 0;
+			modelBufferDescriptor.range = 1024*sizeof(glm::mat4);
 
 		}
 
@@ -88,6 +113,16 @@ namespace vkUtil {
 			writeInfo.pBufferInfo = &uniformBufferDescriptor;
 
 			device.updateDescriptorSets(writeInfo, nullptr);
+
+			vk::WriteDescriptorSet writeInfo2;
+			writeInfo2.dstSet = descriptorSet;
+			writeInfo2.dstBinding = 1;
+			writeInfo2.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+			writeInfo2.descriptorCount = 1;
+			writeInfo2.descriptorType = vk::DescriptorType::eStorageBuffer;
+			writeInfo2.pBufferInfo = &modelBufferDescriptor;
+
+			device.updateDescriptorSets(writeInfo2, nullptr);
 		}
 	};
 	

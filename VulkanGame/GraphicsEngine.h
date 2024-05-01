@@ -4,6 +4,7 @@
 #include "Frame.h"
 #include "Transform.h"
 #include "VertexMenagerie.h"
+#include "Scene.h"
 
 
 class GraphicsEngine
@@ -55,7 +56,7 @@ class GraphicsEngine
 
 	void make_assets();
 	void prepare_scene(vk::CommandBuffer commandBuffer);
-	void prepare_frame(uint32_t imageIndex);
+	void prepare_frame(uint32_t imageIndex, Scene* scene);
 
 
 	//Scene
@@ -74,10 +75,10 @@ class GraphicsEngine
 	void create_framebuffers();
 	void cleanup_swapchain();
 
-	void record_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex);
+	void record_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex,Scene *scene);
 public:
 	GraphicsEngine(ivec2 screenSize, GLFWwindow* window, bool debugMode);
-	void render();
+	void render(Scene *scene);
 	~GraphicsEngine();
 };
 

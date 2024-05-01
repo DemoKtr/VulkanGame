@@ -4,11 +4,14 @@
 #include "SceneObject.h"
 class Scene
 {
-	std::vector<SceneObject*> staticSceneObjects;
-	std::deque<SceneObject*> dynamicSceneObjects;
+
 
 public:
 	Scene();
 	~Scene();
+	std::vector<Triangle*> triangles;
+	std::vector<Star*> stars;
+	std::vector<Square*> squares;
+
 };
 

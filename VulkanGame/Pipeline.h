@@ -158,9 +158,7 @@ namespace vkInit {
 		layoutInfo.setLayoutCount = 1;
 		layoutInfo.pSetLayouts = &descriptorSetLayout;
 
-		layoutInfo.pushConstantRangeCount = 1;
-		vk::PushConstantRange pushConstantInfo = make_push_constant_info();
-		layoutInfo.pPushConstantRanges = &pushConstantInfo;
+		layoutInfo.pushConstantRangeCount = 0;
 
         try {
             return device.createPipelineLayout(layoutInfo);
@@ -401,15 +399,7 @@ namespace vkInit {
 
         return colorBlending;
     }
-    vk::PushConstantRange make_push_constant_info() {
 
-        vk::PushConstantRange pushConstantInfo;
-        pushConstantInfo.offset = 0;
-        pushConstantInfo.size = sizeof(vkUtil::ObjectData);
-        pushConstantInfo.stageFlags = vk::ShaderStageFlagBits::eVertex;
-
-        return pushConstantInfo;
-    }
 
     vk::AttachmentDescription make_color_attachment(const vk::Format& swapchainImageFormat) {
 
