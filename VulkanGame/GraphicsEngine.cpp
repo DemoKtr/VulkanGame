@@ -20,7 +20,10 @@ void GraphicsEngine::make_assets()
 		-0.1f, 0.1f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
 	} };
 	meshTypes type = meshTypes::TRIANGLE;
-	meshes->consume(type, vertices);
+	std::vector<uint32_t> indices = { {
+			0, 1, 2
+	} };
+	meshes->consume(type, vertices, indices);
 
 	vertices = { {
 		-0.1f,  0.1f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
@@ -30,37 +33,37 @@ void GraphicsEngine::make_assets()
 		 0.1f,  0.1f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
 		-0.1f,  0.1f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f
 	} };
+	indices = { {
+			0, 1, 2,
+			2, 3, 0
+	} };
 	type = meshTypes::SQUARE;
-	meshes->consume(type, vertices);
+	meshes->consume(type, vertices, indices);
 
 	vertices = { {
-		 -0.1f, -0.05f, 0.0f, 0.0f, 1.0f, 0.0f, 0.25f,
-		-0.04f, -0.05f, 0.0f, 0.0f, 1.0f, 0.3f, 0.25f,
-		-0.06f,   0.0f, 0.0f, 0.0f, 1.0f, 0.2f,  0.5f,
-		-0.04f, -0.05f, 0.0f, 0.0f, 1.0f, 0.3f, 0.25f,
-		  0.0f,  -0.1f, 0.0f, 0.0f, 1.0f, 0.5f,  0.0f,
-		 0.04f, -0.05f, 0.0f, 0.0f, 1.0f, 0.7f, 0.25f,
-		-0.06f,   0.0f, 0.0f, 0.0f, 1.0f, 0.2f,  0.5f,
-		-0.04f, -0.05f, 0.0f, 0.0f, 1.0f, 0.3f, 0.25f,
-		 0.04f, -0.05f, 0.0f, 0.0f, 1.0f, 0.7f, 0.25f,
-		 0.04f, -0.05f, 0.0f, 0.0f, 1.0f, 0.7f, 0.25f,
-		  0.1f, -0.05f, 0.0f, 0.0f, 1.0f, 1.0f, 0.25f,
-		 0.06f,   0.0f, 0.0f, 0.0f, 1.0f, 0.8f,  0.5f,
-		-0.06f,   0.0f, 0.0f, 0.0f, 1.0f, 0.2f,  0.5f,
-		 0.04f, -0.05f, 0.0f, 0.0f, 1.0f, 0.7f, 0.25f,
-		 0.06f,   0.0f, 0.0f, 0.0f, 1.0f, 0.8f,  0.5f,
-		 0.06f,   0.0f, 0.0f, 0.0f, 1.0f, 0.8f,  0.5f,
-		 0.08f,   0.1f, 0.0f, 0.0f, 1.0f, 0.9f,  1.0f,
-		  0.0f,  0.02f, 0.0f, 0.0f, 1.0f, 0.5f,  0.6f,
-		-0.06f,   0.0f, 0.0f, 0.0f, 1.0f, 0.2f,  0.5f,
-		 0.06f,   0.0f, 0.0f, 0.0f, 1.0f, 0.8f,  0.5f,
-		  0.0f,  0.02f, 0.0f, 0.0f, 1.0f, 0.5f,  0.6f,
-		-0.06f,   0.0f, 0.0f, 0.0f, 1.0f, 0.2f,  0.5f,
-		  0.0f,  0.02f, 0.0f, 0.0f, 1.0f, 0.5f,  0.6f,
-		-0.08f,   0.1f, 0.0f, 0.0f, 1.0f, 0.1f,  1.0f
+		 -0.1f, -0.05f, 1.0f, 1.0f, 1.0f, 0.0f, 0.25f, //0
+		-0.04f, -0.05f, 1.0f, 1.0f, 1.0f, 0.3f, 0.25f, //1
+		-0.06f,   0.0f, 1.0f, 1.0f, 1.0f, 0.2f,  0.5f, //2
+		  0.0f,  -0.1f, 1.0f, 1.0f, 1.0f, 0.5f,  0.0f, //3
+		 0.04f, -0.05f, 1.0f, 1.0f, 1.0f, 0.7f, 0.25f, //4
+		  0.1f, -0.05f, 1.0f, 1.0f, 1.0f, 1.0f, 0.25f, //5
+		 0.06f,   0.0f, 1.0f, 1.0f, 1.0f, 0.8f,  0.5f, //6
+		 0.08f,   0.1f, 1.0f, 1.0f, 1.0f, 0.9f,  1.0f, //7
+		  0.0f,  0.02f, 1.0f, 1.0f, 1.0f, 0.5f,  0.6f, //8
+		-0.08f,   0.1f, 1.0f, 1.0f, 1.0f, 0.1f,  1.0f  //9
+	} };
+	indices = { {
+			0, 1, 2,
+			1, 3, 4,
+			2, 1, 4,
+			4, 5, 6,
+			2, 4, 6,
+			6, 7, 8,
+			2, 6, 8,
+			2, 8, 9
 	} };
 	type = meshTypes::STAR;
-	meshes->consume(type, vertices);
+	meshes->consume(type, vertices, indices);
 
 	FinalizationChunk finalizationChunk;
 	finalizationChunk.logicalDevice = device;
@@ -104,6 +107,7 @@ void GraphicsEngine::prepare_scene(vk::CommandBuffer commandBuffer)
 	vk::Buffer vertexBuffers[] = { meshes->vertexBuffer.buffer };
 	vk::DeviceSize offets[] = { 0 };
 	commandBuffer.bindVertexBuffers(0, 1, vertexBuffers, offets);
+	commandBuffer.bindIndexBuffer(meshes->indexBuffer.buffer,0,vk::IndexType::eUint32);
 }
 
 void GraphicsEngine::make_instance()
@@ -362,10 +366,10 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint3
 }
 void GraphicsEngine::render_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& startInstance, uint32_t instanceCount) {
 	//Triangles
-	int vertexCount = meshes->sizes.find(objectType)->second;
-	int firstVertex = meshes->offsets.find(objectType)->second;
+	int indexCount = meshes->indexCounts.find(objectType)->second;
+	int firstIndex = meshes->firstIndices.find(objectType)->second;
 	materials[objectType]->useTexture(commandBuffer, layout);
-	commandBuffer.draw(vertexCount, instanceCount, firstVertex, startInstance);
+	commandBuffer.drawIndexed(indexCount, instanceCount, firstIndex,0 ,startInstance);
 	startInstance += instanceCount;
 }
 

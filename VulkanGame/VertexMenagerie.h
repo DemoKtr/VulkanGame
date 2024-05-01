@@ -14,17 +14,18 @@ struct  FinalizationChunk {
 
 class VertexMenagerie
 {
-	int offset;
+	int indexOffset;
 	vk::Device logicalDevice;
-	std::vector<float> lump;
+	std::vector<float> vertexLump;
+	std::vector<uint32_t> indexLump;
 	public:
 		VertexMenagerie();
 		~VertexMenagerie();
-		void consume(meshTypes meshType, std::vector<float> data);
+		void consume(meshTypes meshType, std::vector<float> data, std::vector<uint32_t> indicies);
 		void finalize(FinalizationChunk finalizationChink);
-		Buffer vertexBuffer;
-		std::unordered_map<meshTypes, int> offsets;
-		std::unordered_map<meshTypes, int> sizes;
+		Buffer vertexBuffer, indexBuffer;
+		std::unordered_map<meshTypes, int> firstIndices;
+		std::unordered_map<meshTypes, int> indexCounts;
 
 };
 
