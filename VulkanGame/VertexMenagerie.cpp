@@ -17,7 +17,7 @@ void VertexMenagerie::consume(meshTypes meshType, std::vector<float> data)
 	for (float attribute : data) {
 		lump.push_back(attribute);
 	}
-	int vertexCount = static_cast<int>(data.size() / 5);
+	int vertexCount = static_cast<int>(data.size() / 7);
 	offsets.insert(std::make_pair(meshType, offset));
 	sizes.insert(std::make_pair(meshType, vertexCount));
 	offset += vertexCount;

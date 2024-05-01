@@ -10,26 +10,23 @@ namespace vkInit {
 		std::string fragmentFilePath;
         vk::Extent2D swapchainExtent;
         vk::Format swapchainImageFormat;
-        vk::DescriptorSetLayout descriptorSetLayout;
+        std::vector<vk::DescriptorSetLayout> descriptorSetLayouts;
 	};
 	struct GraphicsPipelineOutBundle {
         vk::PipelineLayout layout;
         vk::RenderPass renderpass;
         vk::Pipeline graphicsPipeline;
 	};
-    vk::PipelineLayout create_pipeline_layout(vk::Device device, vk::DescriptorSetLayout descriptorSetLayout ,bool debugMode);
+    vk::PipelineLayout create_pipeline_layout(vk::Device device, std::vector<vk::DescriptorSetLayout> descriptorSetLayouts ,bool debugMode);
     vk::RenderPass create_renderpass(vk::Device device, vk::Format swapchainImageFormat, bool debugMode);
     GraphicsPipelineOutBundle create_graphic_pipeline(GraphicsPipelineInBundle specyfication, bool debugMode);
-    vk::PipelineVertexInputStateCreateInfo make_vertex_input_info(
-        const vk::VertexInputBindingDescription& bindingDescription,
-        const std::array<vk::VertexInputAttributeDescription, 2>& attributeDescriptions);
     vk::PipelineInputAssemblyStateCreateInfo make_input_assembly_info();
     vk::PipelineShaderStageCreateInfo make_shader_info(
         const vk::ShaderModule& shaderModule, const vk::ShaderStageFlagBits& stage);
 
     vk::PipelineVertexInputStateCreateInfo make_vertex_input_info(
         const vk::VertexInputBindingDescription& bindingDescription,
-        const std::array<vk::VertexInputAttributeDescription, 2>& attributeDescriptions);
+        const std::vector<vk::VertexInputAttributeDescription>& attributeDescriptions);
 
     /**
         \returns the input assembly stage creation info
@@ -101,10 +98,7 @@ namespace vkInit {
     */
 
 
-    /**
-        \returns the created push constant range
-    */
-    vk::PushConstantRange make_push_constant_info();
+
     /**
         Make a color attachment description
 
@@ -139,7 +133,7 @@ namespace vkInit {
 
 
 
-    vk::PipelineLayout create_pipeline_layout(vk::Device device, vk::DescriptorSetLayout descriptorSetLayout, bool debugMode) {
+    vk::PipelineLayout create_pipeline_layout(vk::Device device,std::vector<vk::DescriptorSetLayout> descriptorSetLayouts, bool debugMode) {
         /*
         typedef struct VkPipelineLayoutCreateInfo {
             VkStructureType                 sType;
@@ -155,8 +149,8 @@ namespace vkInit {
        vk::PipelineLayoutCreateInfo layoutInfo;
 		layoutInfo.flags = vk::PipelineLayoutCreateFlags();
 
-		layoutInfo.setLayoutCount = 1;
-		layoutInfo.pSetLayouts = &descriptorSetLayout;
+        layoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
+		layoutInfo.pSetLayouts = descriptorSetLayouts.data();
 
 		layoutInfo.pushConstantRangeCount = 0;
 
@@ -200,7 +194,7 @@ namespace vkInit {
 
         //Vertex Input
         vk::VertexInputBindingDescription bindingDescription = vkMesh::getPosColBindingDescription();
-        std::array < vk::VertexInputAttributeDescription, 2> attributeDescriptions = vkMesh::getPosColorAttributeDescriptions();
+        std::vector <vk::VertexInputAttributeDescription> attributeDescriptions = vkMesh::getPosColorAttributeDescriptions();
         vk::PipelineVertexInputStateCreateInfo vertexInputInfo = make_vertex_input_info(bindingDescription, attributeDescriptions);
         pipelineInfo.pVertexInputState = &vertexInputInfo;
 
@@ -254,7 +248,7 @@ namespace vkInit {
 
         //Pipeline Layout
         if (debugMode) std::cout << "Creating PipelineLayout " << std::endl;
-        vk::PipelineLayout pipelineLayout = create_pipeline_layout(specyfication.device, specyfication.descriptorSetLayout,debugMode);
+        vk::PipelineLayout pipelineLayout = create_pipeline_layout(specyfication.device, specyfication.descriptorSetLayouts,debugMode);
         pipelineInfo.layout = pipelineLayout;
         //Render Pass
         if (debugMode) std::cout << "Creating RenderPass " << std::endl;
@@ -285,18 +279,7 @@ namespace vkInit {
         return output;
     }
 
-    vk::PipelineVertexInputStateCreateInfo make_vertex_input_info(
-        const vk::VertexInputBindingDescription& bindingDescription,
-        const std::array<vk::VertexInputAttributeDescription, 2>& attributeDescriptions) {
-
-        vk::PipelineVertexInputStateCreateInfo vertexInputInfo = {};
-        vertexInputInfo.flags = vk::PipelineVertexInputStateCreateFlags();
-        vertexInputInfo.vertexBindingDescriptionCount = 1;
-        vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
-        vertexInputInfo.vertexAttributeDescriptionCount = 2;
-        vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
-        return vertexInputInfo;
-    }
+   
 
     vk::PipelineInputAssemblyStateCreateInfo make_input_assembly_info() {
 
@@ -315,6 +298,19 @@ namespace vkInit {
         shaderInfo.pName = "main";
         return shaderInfo;
     }
+
+    vk::PipelineVertexInputStateCreateInfo make_vertex_input_info(const vk::VertexInputBindingDescription& bindingDescription, const std::vector<vk::VertexInputAttributeDescription>& attributeDescriptions)
+    {
+        vk::PipelineVertexInputStateCreateInfo vertexInputInfo = {};
+        vertexInputInfo.flags = vk::PipelineVertexInputStateCreateFlags();
+        vertexInputInfo.vertexBindingDescriptionCount = 1;
+        vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+        vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+        return vertexInputInfo;
+    }
+
+   
 
     vk::Viewport make_viewport(const GraphicsPipelineInBundle& specification) {
 

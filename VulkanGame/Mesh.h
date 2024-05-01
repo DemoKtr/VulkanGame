@@ -14,14 +14,15 @@ namespace vkMesh {
 
 		vk::VertexInputBindingDescription bindingDescription;
 		bindingDescription.binding = 0;
-		bindingDescription.stride = 5 * sizeof(float);
+		// xy rgb uv
+		bindingDescription.stride = 7 * sizeof(float);
 		bindingDescription.inputRate = vk::VertexInputRate::eVertex; // einstance do instancjonowania
 
 		return bindingDescription;
 	}
 
 
-	std::array<vk::VertexInputAttributeDescription, 2> getPosColorAttributeDescriptions() {
+	std::vector<vk::VertexInputAttributeDescription> getPosColorAttributeDescriptions() {
 
 		/* Provided by VK_VERSION_1_0
 		typedef struct VkVertexInputAttributeDescription {
@@ -32,7 +33,11 @@ namespace vkMesh {
 		} VkVertexInputAttributeDescription;
 		*/
 
-		std::array<vk::VertexInputAttributeDescription, 2> attributes;
+		std::vector<vk::VertexInputAttributeDescription> attributes;
+		vk::VertexInputAttributeDescription dummy;
+		attributes.push_back(dummy);
+		attributes.push_back(dummy);
+		attributes.push_back(dummy);
 
 		//Pos
 		attributes[0].binding = 0;
@@ -46,6 +51,11 @@ namespace vkMesh {
 		attributes[1].format = vk::Format::eR32G32B32Sfloat;
 		attributes[1].offset = 2 * sizeof(float);
 
+		//TexCoord
+		attributes[2].binding = 0;
+		attributes[2].location = 2;
+		attributes[2].format = vk::Format::eR32G32Sfloat;
+		attributes[2].offset = 5 * sizeof(float);
 		return attributes;
 	}
 }

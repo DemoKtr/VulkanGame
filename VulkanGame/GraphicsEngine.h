@@ -5,6 +5,7 @@
 #include "Transform.h"
 #include "VertexMenagerie.h"
 #include "Scene.h"
+#include "Image.h"
 
 
 class GraphicsEngine
@@ -46,11 +47,14 @@ class GraphicsEngine
 	int maxFramesInFlight, frameNumber;
 
 	VertexMenagerie* meshes;
+	std::unordered_map<meshTypes, vkImage::Texture*>  materials;
 
 	//Descriptor objects
 
-	vk::DescriptorSetLayout descriptorSetLayout;
-	vk::DescriptorPool descriptorPool;
+	vk::DescriptorSetLayout frameSetLayout;
+	vk::DescriptorPool frameDescriptorPool;
+	vk::DescriptorSetLayout meshSetLayout;
+	vk::DescriptorPool meshDescriptorPool;
 
 
 
@@ -68,7 +72,7 @@ class GraphicsEngine
 	void choice_device();
 	void create_swapchain();
 	void recreate_swapchain();
-	void create_descriptor_set_layout();
+	void create_descriptor_set_layouts();
 	void create_pipeline();
 	void finalize_setup();
 	void create_frame_resources();
@@ -76,6 +80,7 @@ class GraphicsEngine
 	void cleanup_swapchain();
 
 	void record_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex,Scene *scene);
+	void render_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& starInstance, uint32_t instanceCount);
 public:
 	GraphicsEngine(ivec2 screenSize, GLFWwindow* window, bool debugMode);
 	void render(Scene *scene);

@@ -15,49 +15,49 @@ void GraphicsEngine::make_assets()
 	meshes = new VertexMenagerie();
 
 	std::vector<float> vertices = { {
-		 0.0f, -0.05f, 0.0f, 1.0f, 0.0f,
-		 0.05f, 0.05f, 0.0f, 1.0f, 0.0f,
-		-0.05f, 0.05f, 0.0f, 1.0f, 0.0f
+		 0.0f, -0.1f, 0.0f, 1.0f, 0.0f, 0.5f, 0.0f,
+		 0.1f, 0.1f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+		-0.1f, 0.1f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
 	} };
 	meshTypes type = meshTypes::TRIANGLE;
 	meshes->consume(type, vertices);
 
 	vertices = { {
-		-0.05f,  0.05f, 1.0f, 0.0f, 0.0f,
-		-0.05f, -0.05f, 1.0f, 0.0f, 0.0f,
-		 0.05f, -0.05f, 1.0f, 0.0f, 0.0f,
-		 0.05f, -0.05f, 1.0f, 0.0f, 0.0f,
-		 0.05f,  0.05f, 1.0f, 0.0f, 0.0f,
-		-0.05f,  0.05f, 1.0f, 0.0f, 0.0f
+		-0.1f,  0.1f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+		-0.1f, -0.1f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		 0.1f, -0.1f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		 0.1f, -0.1f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		 0.1f,  0.1f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+		-0.1f,  0.1f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f
 	} };
 	type = meshTypes::SQUARE;
 	meshes->consume(type, vertices);
 
 	vertices = { {
-		-0.05f, -0.025f, 0.0f, 0.0f, 1.0f,
-		-0.02f, -0.025f, 0.0f, 0.0f, 1.0f,
-		-0.03f,    0.0f, 0.0f, 0.0f, 1.0f,
-		-0.02f, -0.025f, 0.0f, 0.0f, 1.0f,
-		  0.0f,  -0.05f, 0.0f, 0.0f, 1.0f,
-		 0.02f, -0.025f, 0.0f, 0.0f, 1.0f,
-		-0.03f,    0.0f, 0.0f, 0.0f, 1.0f,
-		-0.02f, -0.025f, 0.0f, 0.0f, 1.0f,
-		 0.02f, -0.025f, 0.0f, 0.0f, 1.0f,
-		 0.02f, -0.025f, 0.0f, 0.0f, 1.0f,
-		 0.05f, -0.025f, 0.0f, 0.0f, 1.0f,
-		 0.03f,    0.0f, 0.0f, 0.0f, 1.0f,
-		-0.03f,    0.0f, 0.0f, 0.0f, 1.0f,
-		 0.02f, -0.025f, 0.0f, 0.0f, 1.0f,
-		 0.03f,    0.0f, 0.0f, 0.0f, 1.0f,
-		 0.03f,    0.0f, 0.0f, 0.0f, 1.0f,
-		 0.04f,   0.05f, 0.0f, 0.0f, 1.0f,
-		  0.0f,   0.01f, 0.0f, 0.0f, 1.0f,
-		-0.03f,    0.0f, 0.0f, 0.0f, 1.0f,
-		 0.03f,    0.0f, 0.0f, 0.0f, 1.0f,
-		  0.0f,   0.01f, 0.0f, 0.0f, 1.0f,
-		-0.03f,    0.0f, 0.0f, 0.0f, 1.0f,
-		  0.0f,   0.01f, 0.0f, 0.0f, 1.0f,
-		-0.04f,   0.05f, 0.0f, 0.0f, 1.0f
+		 -0.1f, -0.05f, 0.0f, 0.0f, 1.0f, 0.0f, 0.25f,
+		-0.04f, -0.05f, 0.0f, 0.0f, 1.0f, 0.3f, 0.25f,
+		-0.06f,   0.0f, 0.0f, 0.0f, 1.0f, 0.2f,  0.5f,
+		-0.04f, -0.05f, 0.0f, 0.0f, 1.0f, 0.3f, 0.25f,
+		  0.0f,  -0.1f, 0.0f, 0.0f, 1.0f, 0.5f,  0.0f,
+		 0.04f, -0.05f, 0.0f, 0.0f, 1.0f, 0.7f, 0.25f,
+		-0.06f,   0.0f, 0.0f, 0.0f, 1.0f, 0.2f,  0.5f,
+		-0.04f, -0.05f, 0.0f, 0.0f, 1.0f, 0.3f, 0.25f,
+		 0.04f, -0.05f, 0.0f, 0.0f, 1.0f, 0.7f, 0.25f,
+		 0.04f, -0.05f, 0.0f, 0.0f, 1.0f, 0.7f, 0.25f,
+		  0.1f, -0.05f, 0.0f, 0.0f, 1.0f, 1.0f, 0.25f,
+		 0.06f,   0.0f, 0.0f, 0.0f, 1.0f, 0.8f,  0.5f,
+		-0.06f,   0.0f, 0.0f, 0.0f, 1.0f, 0.2f,  0.5f,
+		 0.04f, -0.05f, 0.0f, 0.0f, 1.0f, 0.7f, 0.25f,
+		 0.06f,   0.0f, 0.0f, 0.0f, 1.0f, 0.8f,  0.5f,
+		 0.06f,   0.0f, 0.0f, 0.0f, 1.0f, 0.8f,  0.5f,
+		 0.08f,   0.1f, 0.0f, 0.0f, 1.0f, 0.9f,  1.0f,
+		  0.0f,  0.02f, 0.0f, 0.0f, 1.0f, 0.5f,  0.6f,
+		-0.06f,   0.0f, 0.0f, 0.0f, 1.0f, 0.2f,  0.5f,
+		 0.06f,   0.0f, 0.0f, 0.0f, 1.0f, 0.8f,  0.5f,
+		  0.0f,  0.02f, 0.0f, 0.0f, 1.0f, 0.5f,  0.6f,
+		-0.06f,   0.0f, 0.0f, 0.0f, 1.0f, 0.2f,  0.5f,
+		  0.0f,  0.02f, 0.0f, 0.0f, 1.0f, 0.5f,  0.6f,
+		-0.08f,   0.1f, 0.0f, 0.0f, 1.0f, 0.1f,  1.0f
 	} };
 	type = meshTypes::STAR;
 	meshes->consume(type, vertices);
@@ -68,6 +68,35 @@ void GraphicsEngine::make_assets()
 	finalizationChunk.queue =graphicsQueue;
 	finalizationChunk.commandBuffer = maincommandBuffer;
 	meshes->finalize(finalizationChunk);
+
+	//Materials
+	std::unordered_map<meshTypes, const char*> filenames = {
+		{meshTypes::TRIANGLE, "tex/rick.jpg"},
+		{meshTypes::SQUARE, "tex/rick.jpg"},
+		{meshTypes::STAR, "tex/rick.jpg"}
+	};
+
+	//make Descriptor pool
+	vkInit::descriptorSetLayoutData bindings;
+	bindings.count = 1;
+	bindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
+	meshDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(filenames.size()), bindings);
+
+
+	vkImage::TextureInputChunk textureInfo;
+
+	textureInfo.commandBuffer = maincommandBuffer;
+	textureInfo.queue = graphicsQueue;
+	textureInfo.logicalDevice = device;
+	textureInfo.physicalDevice = physicalDevice;
+	textureInfo.layout = meshSetLayout;
+	textureInfo.descriptorPool = meshDescriptorPool;
+
+	for (const auto& [obj, filename] : filenames) {
+		textureInfo.filename = filename;
+		
+		materials[obj] = new vkImage::Texture(textureInfo);
+	}
 }
 
 void GraphicsEngine::prepare_scene(vk::CommandBuffer commandBuffer)
@@ -117,7 +146,7 @@ void GraphicsEngine::create_pipeline()
 	specification.fragmentFilePath = "shaders/frag.spv";
 	specification.swapchainExtent = swapchainExtent;
 	specification.swapchainImageFormat = swapchainFormat;
-	specification.descriptorSetLayout = descriptorSetLayout;
+	specification.descriptorSetLayouts = { frameSetLayout,meshSetLayout };
 	vkInit::GraphicsPipelineOutBundle output = vkInit::create_graphic_pipeline(specification,debugMode);
 	layout = output.layout;
 	renderpass = output.renderpass;
@@ -148,7 +177,7 @@ GraphicsEngine::GraphicsEngine(ivec2 screenSize, GLFWwindow* window, bool debugM
 	
 	make_instance();
 	choice_device();
-	create_descriptor_set_layout();
+	create_descriptor_set_layouts();
 	create_pipeline();
 	finalize_setup();
 	make_assets();
@@ -170,8 +199,12 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyRenderPass(renderpass);
 	device.destroyPipelineLayout(layout);
 	this->cleanup_swapchain();
-	device.destroyDescriptorSetLayout(descriptorSetLayout);
+	device.destroyDescriptorSetLayout(frameSetLayout);
 	delete meshes;
+	for (const auto& [key, texture] : materials) delete texture;
+	device.destroyDescriptorSetLayout(meshSetLayout);
+	device.destroyDescriptorPool(meshDescriptorPool);
+
 	device.destroy();
 
 	instance.destroySurfaceKHR(surface);
@@ -204,10 +237,10 @@ void GraphicsEngine::cleanup_swapchain()
 
 	}
 	device.destroySwapchainKHR(swapchain);
-	device.destroyDescriptorPool(descriptorPool);
+	device.destroyDescriptorPool(frameDescriptorPool);
 }
 
-void GraphicsEngine::create_descriptor_set_layout()
+void GraphicsEngine::create_descriptor_set_layouts()
 {
 	vkInit::descriptorSetLayoutData bindings;
 	bindings.count = 2;
@@ -221,7 +254,16 @@ void GraphicsEngine::create_descriptor_set_layout()
 	bindings.counts.push_back(1);
 	bindings.stages.push_back(vk::ShaderStageFlagBits::eVertex);
 
-	descriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+	frameSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+
+	bindings.count = 1;
+	bindings.indices[0] = 0;
+	bindings.types[0] =vk::DescriptorType::eCombinedImageSampler;
+	bindings.counts[0] = 1;;
+	bindings.stages[0]=vk::ShaderStageFlagBits::eFragment;
+
+
+	meshSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 }
 
 void GraphicsEngine::finalize_setup()
@@ -287,29 +329,23 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint3
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, graphicsPipeline);
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, swapchainFrames[imageIndex].descriptorSet, nullptr);
 	prepare_scene(commandBuffer);
-
-	//Triangles
-	int vertexCount = meshes->sizes.find(meshTypes::TRIANGLE)->second;
-	int firstVertex = meshes->offsets.find(meshTypes::TRIANGLE)->second;
 	uint32_t startInstance = 0;
+	//Triangles
+
 	uint32_t instanceCount = static_cast<uint32_t>(scene->triangles.size());
 	std::cout << scene->triangles[0]->getTransform().getGlobalPosition().x;
-	commandBuffer.draw(vertexCount, instanceCount, firstVertex, startInstance);
-	startInstance += instanceCount;
+	render_objects(commandBuffer, meshTypes::TRIANGLE, startInstance, instanceCount);
 
 	//Squares
-	vertexCount = meshes->sizes.find(meshTypes::SQUARE)->second;
-	firstVertex = meshes->offsets.find(meshTypes::SQUARE)->second;
+
 	instanceCount = static_cast<uint32_t>(scene->squares.size());
-	commandBuffer.draw(vertexCount, instanceCount, firstVertex, startInstance);
-	startInstance += instanceCount;
+	render_objects(commandBuffer, meshTypes::SQUARE, startInstance, instanceCount);
+
 
 	//Stars
-	vertexCount = meshes->sizes.find(meshTypes::STAR)->second;
-	firstVertex = meshes->offsets.find(meshTypes::STAR)->second;
 	instanceCount = static_cast<uint32_t>(scene->stars.size());
-	commandBuffer.draw(vertexCount, instanceCount, firstVertex, startInstance);
-	startInstance += instanceCount;
+	render_objects(commandBuffer, meshTypes::STAR, startInstance, instanceCount);
+
 
 
 	commandBuffer.endRenderPass();
@@ -324,7 +360,14 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint3
 		}
 	}
 }
-
+void GraphicsEngine::render_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& startInstance, uint32_t instanceCount) {
+	//Triangles
+	int vertexCount = meshes->sizes.find(objectType)->second;
+	int firstVertex = meshes->offsets.find(objectType)->second;
+	materials[objectType]->useTexture(commandBuffer, layout);
+	commandBuffer.draw(vertexCount, instanceCount, firstVertex, startInstance);
+	startInstance += instanceCount;
+}
 
 void GraphicsEngine::render(Scene *scene)
 {
@@ -425,7 +468,7 @@ void GraphicsEngine::create_frame_resources()
 	bindings.count = 2;
 	bindings.types.push_back(vk::DescriptorType::eUniformBuffer);
 	bindings.types.push_back(vk::DescriptorType::eStorageBuffer);
-	descriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);
+	frameDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);
 	for (vkUtil::SwapChainFrame& frame : swapchainFrames) //referencja 
 	{
 		frame.imageAvailable = vkInit::make_semaphore(device, debugMode);
@@ -434,7 +477,7 @@ void GraphicsEngine::create_frame_resources()
 
 		frame.make_descriptor_resources(device, physicalDevice);
 
-		frame.descriptorSet = vkInit::allocate_descriptor_set(device, descriptorPool, descriptorSetLayout);
+		frame.descriptorSet = vkInit::allocate_descriptor_set(device, frameDescriptorPool, frameSetLayout);
 	}
 
 }
