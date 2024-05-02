@@ -3,7 +3,6 @@
 #include "Frame.h"
 namespace vkInit
 {
-
 	struct SwapChainSupportDetails {
 		vk::SurfaceCapabilitiesKHR capabilities; ///ile obrazow w swapchain
 		std::vector<vk::SurfaceFormatKHR> formats; //pixelformat

@@ -9,7 +9,7 @@ namespace vkInit {
 		std::string vertexFilePath;
 		std::string fragmentFilePath;
         vk::Extent2D swapchainExtent;
-        vk::Format swapchainImageFormat;
+        vk::Format swapchainImageFormat, depthFormat;
         std::vector<vk::DescriptorSetLayout> descriptorSetLayouts;
 	};
 	struct GraphicsPipelineOutBundle {
@@ -18,7 +18,7 @@ namespace vkInit {
         vk::Pipeline graphicsPipeline;
 	};
     vk::PipelineLayout create_pipeline_layout(vk::Device device, std::vector<vk::DescriptorSetLayout> descriptorSetLayouts ,bool debugMode);
-    vk::RenderPass create_renderpass(vk::Device device, vk::Format swapchainImageFormat, bool debugMode);
+    vk::RenderPass create_renderpass(vk::Device device, vk::Format swapchainImageFormat, vk::Format depthFormat, bool debugMode);
     GraphicsPipelineOutBundle create_graphic_pipeline(GraphicsPipelineInBundle specyfication, bool debugMode);
     vk::PipelineInputAssemblyStateCreateInfo make_input_assembly_info();
     vk::PipelineShaderStageCreateInfo make_shader_info(
@@ -112,13 +112,19 @@ namespace vkInit {
     */
     vk::AttachmentReference make_color_attachment_reference();
 
+
+    vk::AttachmentDescription make_depth_attachment(const vk::Format& depthFormat);
+
+
+    vk::AttachmentReference make_depth_attachment_reference();
+
     /**
         Make a simple subpass.
 
         \param colorAttachmentRef a reference to a color attachment for the color buffer
         \returns a description of the subpass
     */
-    vk::SubpassDescription make_subpass(const vk::AttachmentReference& colorAttachmentRef);
+    vk::SubpassDescription make_subpass(const std::vector<vk::AttachmentReference>& attachments);
 
     /**
         Make a simple renderpass.
@@ -127,7 +133,7 @@ namespace vkInit {
         \param subpass a description of the subpass
         \returns creation info for the renderpass
     */
-    vk::RenderPassCreateInfo make_renderpass_info(const vk::AttachmentDescription& colorAttachment, const vk::SubpassDescription& subpass);
+    vk::RenderPassCreateInfo make_renderpass_info(const std::vector<vk::AttachmentDescription>& attachemnts, const vk::SubpassDescription& subpass);
 
     
 
@@ -161,18 +167,28 @@ namespace vkInit {
             if (debugMode) std::cout << "Failed Create pipeline Layout" << std::endl;
         }
     }
-    vk::RenderPass create_renderpass(vk::Device device, vk::Format swapchainImageFormat, bool debugMode) {
+    vk::RenderPass create_renderpass(vk::Device device, vk::Format swapchainImageFormat,vk::Format depthFormat ,bool debugMode) {
+        std::vector<vk::AttachmentDescription> attachments;
+        std::vector<vk::AttachmentReference> attachmentRefertences;
+        
         //Define a general attachment, with its load/store operations
-        vk::AttachmentDescription colorAttachment = make_color_attachment(swapchainImageFormat);
+        attachments.push_back(make_color_attachment(swapchainImageFormat));
 
         //Declare that attachment to be color buffer 0 of the framebuffer
-        vk::AttachmentReference colorAttachmentRef = make_color_attachment_reference();
+         attachmentRefertences.push_back(make_color_attachment_reference());
+
+
+         attachments.push_back(make_depth_attachment(depthFormat));
+
+         //Declare that attachment to be color buffer 0 of the framebuffer
+         attachmentRefertences.push_back(make_depth_attachment_reference());
+
 
         //Renderpasses are broken down into subpasses, there's always at least one.
-        vk::SubpassDescription subpass = make_subpass(colorAttachmentRef);
+        vk::SubpassDescription subpass = make_subpass(attachmentRefertences);
 
         //Now create the renderpass
-        vk::RenderPassCreateInfo renderpassInfo = make_renderpass_info(colorAttachment, subpass);
+        vk::RenderPassCreateInfo renderpassInfo = make_renderpass_info(attachments, subpass);
         try {
             return device.createRenderPass(renderpassInfo);
         }
@@ -237,6 +253,16 @@ namespace vkInit {
         pipelineInfo.stageCount = shaderStages.size();
         pipelineInfo.pStages = shaderStages.data();
 
+        //Depth Stencil Stage
+        vk::PipelineDepthStencilStateCreateInfo depthStageInfo;
+        depthStageInfo.flags = vk::PipelineDepthStencilStateCreateFlags();
+        depthStageInfo.depthTestEnable = true;
+        depthStageInfo.depthWriteEnable = true;
+        depthStageInfo.depthCompareOp = vk::CompareOp::eLess;
+        depthStageInfo.depthBoundsTestEnable = false;
+        depthStageInfo.stencilTestEnable = false;
+        pipelineInfo.pDepthStencilState = &depthStageInfo;
+
         //Multisampling
         vk::PipelineMultisampleStateCreateInfo multisampling = make_multisampling_info();
         pipelineInfo.pMultisampleState = &multisampling;
@@ -252,7 +278,7 @@ namespace vkInit {
         pipelineInfo.layout = pipelineLayout;
         //Render Pass
         if (debugMode) std::cout << "Creating RenderPass " << std::endl;
-        vk::RenderPass renderpass = create_renderpass(specyfication.device, specyfication.swapchainImageFormat,debugMode);
+        vk::RenderPass renderpass = create_renderpass(specyfication.device, specyfication.swapchainImageFormat,specyfication.depthFormat,debugMode);
         pipelineInfo.renderPass = renderpass;
         pipelineInfo.subpass = 0;
 
@@ -422,23 +448,50 @@ namespace vkInit {
         return colorAttachmentRef;
     }
 
-    vk::SubpassDescription make_subpass(const vk::AttachmentReference& colorAttachmentRef) {
+
+    vk::AttachmentDescription make_depth_attachment(const vk::Format& depth) {
+
+        vk::AttachmentDescription colorAttachment = {};
+        colorAttachment.flags = vk::AttachmentDescriptionFlags();
+        colorAttachment.format = depth;
+        colorAttachment.samples = vk::SampleCountFlagBits::e1;
+        colorAttachment.loadOp = vk::AttachmentLoadOp::eClear;
+        colorAttachment.storeOp = vk::AttachmentStoreOp::eStore;
+        colorAttachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+        colorAttachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+        colorAttachment.initialLayout = vk::ImageLayout::eUndefined;
+        colorAttachment.finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+
+        return colorAttachment;
+    }
+
+    vk::AttachmentReference make_depth_attachment_reference() {
+
+        vk::AttachmentReference colorAttachmentRef = {};
+        colorAttachmentRef.attachment = 1;
+        colorAttachmentRef.layout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+
+        return colorAttachmentRef;
+    }
+
+    vk::SubpassDescription make_subpass(const std::vector<vk::AttachmentReference>& attachments) {
 
         vk::SubpassDescription subpass = {};
         subpass.flags = vk::SubpassDescriptionFlags();
         subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
         subpass.colorAttachmentCount = 1;
-        subpass.pColorAttachments = &colorAttachmentRef;
+        subpass.pColorAttachments = &attachments[0];
+        subpass.pDepthStencilAttachment = &attachments[1];
 
         return subpass;
     }
 
-    vk::RenderPassCreateInfo make_renderpass_info(const vk::AttachmentDescription& colorAttachment, const vk::SubpassDescription& subpass) {
+    vk::RenderPassCreateInfo make_renderpass_info(const  std::vector<vk::AttachmentDescription>& attachments, const vk::SubpassDescription& subpass) {
 
         vk::RenderPassCreateInfo renderpassInfo = {};
         renderpassInfo.flags = vk::RenderPassCreateFlags();
-        renderpassInfo.attachmentCount = 1;
-        renderpassInfo.pAttachments = &colorAttachment;
+        renderpassInfo.attachmentCount = attachments.size();
+        renderpassInfo.pAttachments = attachments.data();
         renderpassInfo.subpassCount = 1;
         renderpassInfo.pSubpasses = &subpass;
 

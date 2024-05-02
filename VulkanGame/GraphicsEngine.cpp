@@ -150,6 +150,7 @@ void GraphicsEngine::create_pipeline()
 	specification.fragmentFilePath = "shaders/frag.spv";
 	specification.swapchainExtent = swapchainExtent;
 	specification.swapchainImageFormat = swapchainFormat;
+	specification.depthFormat = swapchainFrames[0].depthFormat;
 	specification.descriptorSetLayouts = { frameSetLayout,meshSetLayout };
 	vkInit::GraphicsPipelineOutBundle output = vkInit::create_graphic_pipeline(specification,debugMode);
 	layout = output.layout;
@@ -167,6 +168,14 @@ void GraphicsEngine::create_swapchain()
 	this->swapchainExtent = bundle.extent;
 	//vkInit::query_swapchain_support(physicalDevice, surface, debugMode);
 	maxFramesInFlight = static_cast<int>(swapchainFrames.size());
+
+	for (vkUtil::SwapChainFrame& frame : swapchainFrames) {
+		frame.logicalDevice = device;
+		frame.physicalDevice = physicalDevice;
+		frame.width = swapchainExtent.width;
+		frame.height = swapchainExtent.height;
+		frame.make_depth_resources();
+	}
 }
 ////////////////////////////////////
 GraphicsEngine::GraphicsEngine(ivec2 screenSize, GLFWwindow* window, bool debugMode)
@@ -224,20 +233,8 @@ GraphicsEngine::~GraphicsEngine()
 
 void GraphicsEngine::cleanup_swapchain()
 {
-	for (vkUtil::SwapChainFrame frame : swapchainFrames) {
-		device.destroyImageView(frame.imageView);
-		device.destroyFramebuffer(frame.framebuffer);
-		device.destroyFence(frame.inFlight);
-		device.destroySemaphore(frame.imageAvailable);
-		device.destroySemaphore(frame.renderFinished);
-
-		device.unmapMemory(frame.cameraDataBuffer.bufferMemory);
-		device.freeMemory(frame.cameraDataBuffer.bufferMemory);
-		device.destroyBuffer(frame.cameraDataBuffer.buffer);
-
-		device.unmapMemory(frame.modelBuffer.bufferMemory);
-		device.freeMemory(frame.modelBuffer.bufferMemory);
-		device.destroyBuffer(frame.modelBuffer.buffer);
+	for (vkUtil::SwapChainFrame& frame : swapchainFrames) {
+		frame.destroy();
 
 	}
 	device.destroySwapchainKHR(swapchain);
@@ -324,9 +321,16 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint3
 	renderPassInfo.renderArea.offset.y = 0;
 	renderPassInfo.renderArea.extent = swapchainExtent;
 
-	vk::ClearValue clearColor = { std::array<float, 4>{1.0f, 0.5f, 0.25f, 1.0f} };
-	renderPassInfo.clearValueCount = 1;
-	renderPassInfo.pClearValues = &clearColor;
+	vk::ClearValue colorClear;
+	std::array<float, 4> colors = { 1.0f, 0.5f, 0.25f, 1.0f };
+	colorClear.color = vk::ClearColorValue(colors);
+	vk::ClearValue depthClear;
+
+	depthClear.depthStencil = vk::ClearDepthStencilValue({ 1.0f, 0 });
+	std::vector<vk::ClearValue> clearValues = { {colorClear, depthClear} };
+
+	renderPassInfo.clearValueCount = clearValues.size();
+	renderPassInfo.pClearValues = clearValues.data();
 
 	commandBuffer.beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
 	
@@ -479,7 +483,7 @@ void GraphicsEngine::create_frame_resources()
 		frame.renderFinished = vkInit::make_semaphore(device, debugMode);
 		frame.inFlight = vkInit::make_fence(device, debugMode);
 
-		frame.make_descriptor_resources(device, physicalDevice);
+		frame.make_descriptor_resources();
 
 		frame.descriptorSet = vkInit::allocate_descriptor_set(device, frameDescriptorPool, frameSetLayout);
 	}
@@ -542,5 +546,5 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 
 	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), i * sizeof(glm::mat4));
 
-	_frame.write_descriptor_set(device);
+	_frame.write_descriptor_set();
 }

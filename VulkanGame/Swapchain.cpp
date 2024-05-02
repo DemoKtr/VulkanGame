@@ -1,6 +1,7 @@
 #include "Swapchain.h"
 #include "Logging.h"
 #include "Queues.h"
+#include "Image.h"
 vkInit::SwapChainSupportDetails vkInit::query_swapchain_support(vk::PhysicalDevice device, vk::SurfaceKHR surface, bool debugMode)
 {
 	SwapChainSupportDetails support;
@@ -176,22 +177,10 @@ vkInit::SwapChainBundle vkInit::create_swapchain(vk::PhysicalDevice physicalDevi
 	bundle.frames.resize(images.size());
 	for (size_t i = 0; i < images.size();  i++) {
 		
-		vk::ImageViewCreateInfo createInfo = {};
-		createInfo.image = images[i];
-		createInfo.viewType = vk::ImageViewType::e2D;
-		createInfo.components.r = vk::ComponentSwizzle::eIdentity;
-		createInfo.components.g = vk::ComponentSwizzle::eIdentity;
-		createInfo.components.b = vk::ComponentSwizzle::eIdentity;
-		createInfo.components.a = vk::ComponentSwizzle::eIdentity;
-		createInfo.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
-		createInfo.subresourceRange.baseMipLevel = 0;
-		createInfo.subresourceRange.levelCount = 1;
-		createInfo.subresourceRange.baseArrayLayer = 0;
-		createInfo.subresourceRange.layerCount = 1;
-		createInfo.format = format.format;
+		
 
 		bundle.frames[i].image = images[i];
-		bundle.frames[i].imageView = logicalDevice.createImageView(createInfo);
+		bundle.frames[i].imageView = vkImage::make_image_view(logicalDevice, images[i], format.format, vk::ImageAspectFlagBits::eColor);
 
 	}
 	bundle.format = format.format;

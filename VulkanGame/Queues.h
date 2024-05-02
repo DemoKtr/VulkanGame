@@ -3,7 +3,6 @@
 #include <optional>
 
 namespace vkUtil {
-
 	struct QueueFamilyIndices {
 		std::optional<uint32_t> graphicsFamily; //moze nie musi zawierac warttosci .has_value sprawdza
 		std::optional<uint32_t> presentFamily;

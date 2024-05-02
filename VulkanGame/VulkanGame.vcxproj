@@ -154,6 +154,7 @@
     <ClCompile Include="app.cpp" />
     <ClCompile Include="Descriptors.cpp" />
     <ClCompile Include="Device.cpp" />
+    <ClCompile Include="Frame.cpp" />
     <ClCompile Include="GraphicsEngine.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="Instance.cpp" />

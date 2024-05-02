@@ -22,7 +22,7 @@ namespace vkImage {
 		vk::ImageTiling tiling;
 		vk::ImageUsageFlags usage;
 		vk::MemoryPropertyFlags memoryProperties;
-
+		vk::Format format;
 	};
 
 	struct BufferImageCopyJob {
@@ -86,7 +86,11 @@ namespace vkImage {
 	vk::DeviceMemory make_image_memory(ImageInputChunk input, vk::Image image);
 	void transition_image_layout(ImageLayoutTransitionJob job);
 	void copy_buffer_to_image(BufferImageCopyJob job);
-	vk::ImageView make_image_view(vk::Device logicalDevice,vk::Image image,vk::Format format);
+	vk::ImageView make_image_view(vk::Device logicalDevice,vk::Image image,vk::Format format, vk::ImageAspectFlags aspect);
+
+	vk::Format find_supported_format(
+		vk::PhysicalDevice physicalDevice, const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features
+	);
 }
 
 
