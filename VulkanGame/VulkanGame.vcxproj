@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="app.cpp" />
+    <ClCompile Include="config.cpp" />
     <ClCompile Include="Descriptors.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="Frame.cpp" />

@@ -23,3 +23,5 @@ enum class meshTypes {
 	SQUARE,
 	STAR
 };
+
+std::vector<std::string> split(std::string line, std::string delimiter);

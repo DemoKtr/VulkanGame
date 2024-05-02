@@ -11,8 +11,8 @@ Scene::Scene()
 	squares.push_back(square);
 
 	triangles[0]->getTransform().setLocalPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-	stars[0]->getTransform().setLocalPosition(glm::vec3(0.0f,0.2f, 0.3f));
-	squares[0]->getTransform().setLocalPosition(glm::vec3(0.0f, 0.2f, 0.6f));
+	stars[0]->getTransform().setLocalPosition(glm::vec3(0.0f,0.2f, 0.0f));
+	squares[0]->getTransform().setLocalPosition(glm::vec3(0.0f, 0.4f, 0.0f));
 
 	triangles[0]->getTransform().computeModelMatrix();
 	stars[0]->getTransform().computeModelMatrix();
