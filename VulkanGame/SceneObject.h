@@ -14,27 +14,12 @@ public:
 
 
 
-class Triangle : public SceneObject {
+class Box : public SceneObject {
 	// Inherited via StaticSceneObject
 public:
 	void draw() override;
 	void update() override;
 
-	Triangle();
-};
-class Star : public SceneObject {
-	// Inherited via StaticSceneObject
-public:
-	void draw() override;
-	void update() override;
-
-	Star();
-};
-class Square : public SceneObject {
-	// Inherited via StaticSceneObject
-public:
-	void draw() override;
-	void update() override;
-
-	Square();
+	Box();
+	~Box();
 };

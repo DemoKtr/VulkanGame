@@ -2,6 +2,7 @@
 #include <vector>
 #include <deque>
 #include "SceneObject.h"
+#include <unordered_map>
 class Scene
 {
 
@@ -9,9 +10,7 @@ class Scene
 public:
 	Scene();
 	~Scene();
-	std::vector<Triangle*> triangles;
-	std::vector<Star*> stars;
-	std::vector<Square*> squares;
+	std::unordered_map <meshTypes, std::vector<SceneObject*>> positions;
 
 };
 

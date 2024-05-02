@@ -1,0 +1,13 @@
+# Blender 3.6.5 MTL File: 'None'
+# www.blender.org
+
+newmtl Material
+Ns 250.000000
+Ka 0.440909 0.440909 0.440909
+Kd 1.000000 1.000000 1.000000
+Ks 0.381818 0.381818 0.381818
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Bump rock.png

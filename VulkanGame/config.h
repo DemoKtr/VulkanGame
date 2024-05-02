@@ -19,9 +19,8 @@ struct BufferInputChunk {
 };
 
 enum class meshTypes {
-	TRIANGLE,	
-	SQUARE,
-	STAR
+	KITTY,
+	DOG
 };
 
 std::vector<std::string> split(std::string line, std::string delimiter);

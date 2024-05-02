@@ -162,6 +162,7 @@
     <ClCompile Include="Logging.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Memory.cpp" />
+    <ClCompile Include="Obj_Mesh.cpp" />
     <ClCompile Include="Queues.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneObject.cpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="Logging.h" />
     <ClInclude Include="Memory.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Obj_Mesh.h" />
     <ClInclude Include="Pipeline.h" />
     <ClInclude Include="Queues.h" />
     <ClInclude Include="RenderStruct.h" />

@@ -8,62 +8,20 @@
 #include "Commands.h"
 #include "Synchronizer.h"
 #include "Descrpitors.h"
+#include "Obj_Mesh.h"
 
 
 void GraphicsEngine::make_assets()
 {
 	meshes = new VertexMenagerie();
+	std::unordered_map<meshTypes, std::vector<const char*>> model_filenames = { {meshTypes::KITTY, {"box.obj","box.mtl"}} ,{ meshTypes::DOG, {"box.obj","box.mtl"} } };
 
-	std::vector<float> vertices = { {
-		 0.0f, -0.1f,0f, 1.0f, 0.0f, 0.5f, 0.0f,
-		 0.1f, 0.1f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-		-0.1f, 0.1f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
-	} };
-	meshTypes type = meshTypes::TRIANGLE;
-	std::vector<uint32_t> indices = { {
-			0, 1, 2
-	} };
-	meshes->consume(type, vertices, indices);
+	for (std::pair<meshTypes, std::vector<const char*>> pair : model_filenames) {
+		vkMesh::ObjMesh model(pair.second[0], pair.second[1], glm::mat4(1.0f));
+		meshes->consume(pair.first, model.vertices, model.indices);
+	}
 
-	vertices = { {
-		-0.1f,  0.1f, 0.0f,1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		-0.1f, -0.1f,0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-		 0.1f, -0.1f, 0.0f,1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		 0.1f, -0.1f,0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		 0.1f,  0.1f,0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-		-0.1f,  0.1f,0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f
-	} };
-	indices = { {
-			0, 1, 2,
-			2, 3, 0
-	} };
-	type = meshTypes::SQUARE;
-	meshes->consume(type, vertices, indices);
 
-	vertices = { {
-		 -0.1f, -0.05f,0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.25f, //0
-		-0.04f, -0.05f,0.0f, 1.0f, 1.0f, 1.0f, 0.3f, 0.25f, //1
-		-0.06f,   0.0f,0.0f, 1.0f, 1.0f, 1.0f, 0.2f,  0.5f, //2
-		  0.0f,  -0.1f,0.0f, 1.0f, 1.0f, 1.0f, 0.5f,  0.0f, //3
-		 0.04f, -0.05f, 0.0f,1.0f, 1.0f, 1.0f, 0.7f, 0.25f, //4
-		  0.1f, -0.05f, 0.0f,1.0f, 1.0f, 1.0f, 1.0f, 0.25f, //5
-		 0.06f,   0.0f, 0.0f,1.0f, 1.0f, 1.0f, 0.8f,  0.5f, //6
-		 0.08f,   0.1f,0.0f, 1.0f, 1.0f, 1.0f, 0.9f,  1.0f, //7
-		  0.0f,  0.02f, 0.0f,1.0f, 1.0f, 1.0f, 0.5f,  0.6f, //8
-		-0.08f,   0.1f,0.0f, 1.0f, 1.0f, 1.0f, 0.1f,  1.0f  //9
-	} };
-	indices = { {
-			0, 1, 2,
-			1, 3, 4,
-			2, 1, 4,
-			4, 5, 6,
-			2, 4, 6,
-			6, 7, 8,
-			2, 6, 8,
-			2, 8, 9
-	} };
-	type = meshTypes::STAR;
-	meshes->consume(type, vertices, indices);
 
 	FinalizationChunk finalizationChunk;
 	finalizationChunk.logicalDevice = device;
@@ -74,9 +32,8 @@ void GraphicsEngine::make_assets()
 
 	//Materials
 	std::unordered_map<meshTypes, const char*> filenames = {
-		{meshTypes::TRIANGLE, "tex/rick.jpg"},
-		{meshTypes::SQUARE, "tex/rick.jpg"},
-		{meshTypes::STAR, "tex/rick.jpg"}
+		{meshTypes::KITTY, "tex/brick.jpg"},
+		{meshTypes::DOG, "tex/rick.jpg"},
 	};
 
 	//make Descriptor pool
@@ -339,20 +296,12 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint3
 	prepare_scene(commandBuffer);
 	uint32_t startInstance = 0;
 	//Triangles
-
-	uint32_t instanceCount = static_cast<uint32_t>(scene->triangles.size());
-	std::cout << scene->triangles[0]->getTransform().getGlobalPosition().x;
-	render_objects(commandBuffer, meshTypes::TRIANGLE, startInstance, instanceCount);
-
-	//Squares
-
-	instanceCount = static_cast<uint32_t>(scene->squares.size());
-	render_objects(commandBuffer, meshTypes::SQUARE, startInstance, instanceCount);
+	for (std::pair<meshTypes, std::vector<SceneObject*>> pair : scene->positions) {
+		render_objects(commandBuffer,pair.first, startInstance, static_cast<uint32_t>(pair.second.size()));
+	}
 
 
-	//Stars
-	instanceCount = static_cast<uint32_t>(scene->stars.size());
-	render_objects(commandBuffer, meshTypes::STAR, startInstance, instanceCount);
+
 
 
 
@@ -505,13 +454,13 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 
 	vkUtil::SwapChainFrame& _frame = swapchainFrames[imageIndex];
 
-	glm::vec3 eye = { 1.0f, 0.0f, -1.0f };
+	glm::vec3 eye = { 0.0f, 0.0f, -1.0f };
 	glm::vec3 center = { 0.0f, 0.0f, 0.0f };
-	glm::vec3 up = { 0.0f, 0.0f, -1.0f };
+	glm::vec3 up = { 0.0f, 1.0f, 0.0f };
 	glm::mat4 view = glm::lookAt(eye, center, up);
 
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), static_cast<float>(swapchainExtent.width) / static_cast<float>(swapchainExtent.height), 0.1f, 10.0f);
-	projection[1][1] *= -1;
+	projection[1][1] *= 1;
 
 	_frame.cameraData.view = view;
 	_frame.cameraData.projection = projection;
@@ -522,25 +471,15 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 
 
 	size_t i= 0;
-	for (Triangle* obj : scene->triangles) {
+
+	for(std::pair<meshTypes,std::vector<SceneObject*>> pair: scene->positions)
+ {
+		for (SceneObject* obj : pair.second) {
+			obj->getTransform().rotate(glm::vec3(1, 1, 0), 0.001f);
+			obj->getTransform().computeModelMatrix();
+			_frame.modelTransforms[i++] = obj->getTransform().getModelMatrix();
+		}
 		
-		obj->getTransform().rotate(glm::vec3(0, 0, 1), 0.01f);
-		obj->getTransform().computeModelMatrix();
-		_frame.modelTransforms[i++] = obj->getTransform().getModelMatrix();
-
-	}
-	for (Square* obj : scene->squares) {
-
-		obj->getTransform().rotate(glm::vec3(0, 0, 1), 0.01f);
-		obj->getTransform().computeModelMatrix();
-		_frame.modelTransforms[i++] = obj->getTransform().getModelMatrix();
-
-	}
-	for (Star* obj : scene->stars) {
-
-		obj->getTransform().rotate(glm::vec3(0, 0, 1), 0.01f);
-		obj->getTransform().computeModelMatrix();
-		_frame.modelTransforms[i++] = obj->getTransform().getModelMatrix();
 
 	}
 
