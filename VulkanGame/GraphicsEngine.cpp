@@ -201,13 +201,18 @@ void GraphicsEngine::cleanup_swapchain()
 void GraphicsEngine::create_descriptor_set_layouts()
 {
 	vkInit::descriptorSetLayoutData bindings;
-	bindings.count = 2;
+	bindings.count = 3;
 	bindings.indices.push_back(0);
 	bindings.types.push_back(vk::DescriptorType::eUniformBuffer);
 	bindings.counts.push_back(1);
 	bindings.stages.push_back(vk::ShaderStageFlagBits::eVertex);
 
 	bindings.indices.push_back(1);
+	bindings.types.push_back(vk::DescriptorType::eUniformBuffer);
+	bindings.counts.push_back(1);
+	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
+
+	bindings.indices.push_back(2);
 	bindings.types.push_back(vk::DescriptorType::eStorageBuffer);
 	bindings.counts.push_back(1);
 	bindings.stages.push_back(vk::ShaderStageFlagBits::eVertex);
@@ -422,7 +427,8 @@ void GraphicsEngine::render(Scene *scene)
 void GraphicsEngine::create_frame_resources()
 {
 	vkInit::descriptorSetLayoutData bindings;
-	bindings.count = 2;
+	bindings.count = 3;
+	bindings.types.push_back(vk::DescriptorType::eUniformBuffer);
 	bindings.types.push_back(vk::DescriptorType::eUniformBuffer);
 	bindings.types.push_back(vk::DescriptorType::eStorageBuffer);
 	frameDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);
@@ -468,7 +474,25 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	
 	memcpy(_frame.cameraDataWriteLocation, &(_frame.cameraData), sizeof(vkUtil::UBO));
 
+	glm::vec3 position(0.0f,2.0f,0.0f);
 
+	float constant= 0.7f;
+	float linear = 0.09f;
+	float quadratic = 0.032;
+
+	glm::vec3 ambient =glm::vec3(0.05f);
+	glm::vec3 diffuse = glm::vec3(0.8f);
+	glm::vec3 specular = glm::vec3(1.0f);
+
+	_frame.lightData.position = position;
+	_frame.lightData.constant = constant;
+	_frame.lightData.linear = linear;
+	_frame.lightData.quadratic = quadratic;
+	_frame.lightData.ambient = ambient;
+	_frame.lightData.diffuse = diffuse;
+	_frame.lightData.specular = specular;
+
+	memcpy(_frame.lightDataWriteLocation, &(_frame.lightData), sizeof(vkUtil::PointLight));
 
 	size_t i= 0;
 

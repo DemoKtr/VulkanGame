@@ -10,8 +10,11 @@
 			input.size = sizeof(UBO);
 			input.usage = vk::BufferUsageFlagBits::eUniformBuffer;
 			cameraDataBuffer = createBuffer(input);
+			input.size = sizeof(PointLight);
+			lightDataBuffer = createBuffer(input);
 
 			cameraDataWriteLocation = logicalDevice.mapMemory(cameraDataBuffer.bufferMemory, 0, sizeof(UBO));
+			lightDataWriteLocation = logicalDevice.mapMemory(lightDataBuffer.bufferMemory, 0, sizeof(PointLight));
 			////////////
 
 
@@ -37,6 +40,10 @@
 			uniformBufferDescriptor.buffer = cameraDataBuffer.buffer;
 			uniformBufferDescriptor.offset = 0;
 			uniformBufferDescriptor.range = sizeof(UBO);
+
+			uniformlightBufferDescriptor.buffer = lightDataBuffer.buffer;
+			uniformlightBufferDescriptor.offset = 0;
+			uniformlightBufferDescriptor.range = sizeof(PointLight);
 
 			modelBufferDescriptor.buffer = modelBuffer.buffer;
 			modelBufferDescriptor.offset = 0;
@@ -80,6 +87,16 @@
 			writeInfo2.pBufferInfo = &modelBufferDescriptor;
 
 			logicalDevice.updateDescriptorSets(writeInfo2, nullptr);
+
+			vk::WriteDescriptorSet writeInfo3;
+			writeInfo3.dstSet = descriptorSet;
+			writeInfo3.dstBinding = 2;
+			writeInfo3.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+			writeInfo3.descriptorCount = 1;
+			writeInfo3.descriptorType = vk::DescriptorType::eUniformBuffer;
+			writeInfo3.pBufferInfo = &uniformlightBufferDescriptor;
+
+			logicalDevice.updateDescriptorSets(writeInfo3, nullptr);
 		}
 		void vkUtil::SwapChainFrame::make_depth_resources()
 		{

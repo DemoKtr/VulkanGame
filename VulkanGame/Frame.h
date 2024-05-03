@@ -11,6 +11,17 @@ namespace vkUtil {
 		glm::mat4 projection;
 		glm::mat4 viewProjection;
 	};
+	struct PointLight {
+		glm::vec3 position;
+
+		float constant;
+		float linear;
+		float quadratic;
+
+		glm::vec3 ambient;
+		glm::vec3 diffuse;
+		glm::vec3 specular;
+	};
 
 	/**
 		Holds the data structures associated with a "Frame"
@@ -42,8 +53,11 @@ namespace vkUtil {
 
 		//Resources
 		UBO cameraData;
+		PointLight lightData;
 		Buffer cameraDataBuffer;
+		Buffer lightDataBuffer;
 		void* cameraDataWriteLocation;
+		void* lightDataWriteLocation;
 
 
 		std::vector<glm::mat4> modelTransforms;
@@ -52,6 +66,7 @@ namespace vkUtil {
 
 		//Resource Descriptors
 		vk::DescriptorBufferInfo uniformBufferDescriptor;
+		vk::DescriptorBufferInfo uniformlightBufferDescriptor;
 		vk::DescriptorBufferInfo modelBufferDescriptor;
 
 		vk::DescriptorSet descriptorSet;
