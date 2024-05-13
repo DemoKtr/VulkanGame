@@ -1,6 +1,7 @@
 #pragma once
 #include "config.h"
 #include "Memory.h"
+#include "RenderStruct.h"
 namespace vkUtil {
 
 	/**
@@ -43,6 +44,9 @@ namespace vkUtil {
 		vk::ImageView depthBufferView;
 		vk::Format depthFormat;
 		int width, height;
+
+		//Gbuffer
+		GbufferAttachments gbuffer;
 
 
 		vk::CommandBuffer commandBuffer;

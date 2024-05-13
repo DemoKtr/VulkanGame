@@ -156,6 +156,7 @@
     <ClCompile Include="Descriptors.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="Frame.cpp" />
+    <ClCompile Include="Gbuffer.cpp" />
     <ClCompile Include="GraphicsEngine.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="Instance.cpp" />
@@ -179,6 +180,7 @@
     <ClInclude Include="Device.h" />
     <ClInclude Include="Frame.h" />
     <ClInclude Include="FrameBuffer.h" />
+    <ClInclude Include="Gbuffer.h" />
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="Instance.h" />
