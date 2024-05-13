@@ -22,5 +22,5 @@ layout(set=1,binding=0) uniform sampler2D material;
 void main() {
 	
 	outColor = vec4(fragColor, 1.0) * texture(material,fragTexCoord);
-	if(light.constant <0.9f) outColor = vec4(0.0f);
+
 }
