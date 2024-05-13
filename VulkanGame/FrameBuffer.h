@@ -28,6 +28,7 @@ namespace vkInit {
 
 			std::vector<vk::ImageView> attachments = {
 				frames[i].imageView, frames[i].depthBufferView
+				//, frames[i].gbuffer.position.view, frames[i].gbuffer.normal.view, frames[i].gbuffer.albedo.view
 			};
 
 			vk::FramebufferCreateInfo framebufferInfo;

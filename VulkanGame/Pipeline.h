@@ -3,6 +3,7 @@
 #include "Shaders.h"
 #include "RenderStruct.h"
 #include "Mesh.h"
+#include "RenderStruct.h"
 namespace vkInit {
 	struct GraphicsPipelineInBundle {
 		vk::Device device;
@@ -67,7 +68,7 @@ namespace vkInit {
         \returns the viewport state creation info
     */
     vk::PipelineViewportStateCreateInfo make_viewport_state(const vk::Viewport& viewport, const vk::Rect2D& scissor);
-
+    vk::RenderPassCreateInfo makeDeferedRenderpassInfo(const vk::Format& swapchainImageFormat, vkUtil::GbufferAttachments gAttachments, const vk::Format& depth);
     /**
         \returns the creation info for the configured rasterizer stage
     */
@@ -168,6 +169,7 @@ namespace vkInit {
         }
     }
     vk::RenderPass create_renderpass(vk::Device device, vk::Format swapchainImageFormat,vk::Format depthFormat ,bool debugMode) {
+        
         std::vector<vk::AttachmentDescription> attachments;
         std::vector<vk::AttachmentReference> attachmentRefertences;
         
@@ -189,6 +191,7 @@ namespace vkInit {
 
         //Now create the renderpass
         vk::RenderPassCreateInfo renderpassInfo = make_renderpass_info(attachments, subpass);
+        //vk::RenderPassCreateInfo deferedrenderpassInfo = makeDeferedRenderpassInfo(swapchainImageFormat);
         try {
             return device.createRenderPass(renderpassInfo);
         }
@@ -496,6 +499,180 @@ namespace vkInit {
         renderpassInfo.pSubpasses = &subpass;
 
         return renderpassInfo;
+    }
+
+    
+    vk::RenderPassCreateInfo makeDeferedRenderpassInfo(const vk::Format& swapchainImageFormat, vkUtil::GbufferAttachments gAttachments, const vk::Format& depth) {
+
+        std::array<vk::AttachmentDescription, 5> attachments{};
+        // Color attachment
+        vk::AttachmentDescription colorAttachment = {};
+        attachments[0].flags = vk::AttachmentDescriptionFlags();
+        attachments[0].format = swapchainImageFormat;
+        attachments[0].samples = vk::SampleCountFlagBits::e1;
+        attachments[0].loadOp = vk::AttachmentLoadOp::eClear;
+        attachments[0].storeOp = vk::AttachmentStoreOp::eStore;
+        attachments[0].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+        attachments[0].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+        attachments[0].initialLayout = vk::ImageLayout::eUndefined;
+        attachments[0].finalLayout = vk::ImageLayout::ePresentSrcKHR;
+
+        // Deferred attachments
+        // Position
+        attachments[1].format = gAttachments.position.format;
+        attachments[1].samples = vk::SampleCountFlagBits::e1;
+        attachments[1].loadOp = vk::AttachmentLoadOp::eClear;
+        attachments[1].storeOp = vk::AttachmentStoreOp::eDontCare;
+        attachments[1].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+        attachments[1].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+        attachments[1].initialLayout = vk::ImageLayout::eUndefined;
+        attachments[1].finalLayout = vk::ImageLayout::eColorAttachmentOptimal;
+        // Normals
+        attachments[2].format = gAttachments.normal.format;
+        attachments[2].samples = vk::SampleCountFlagBits::e1;
+        attachments[2].loadOp = vk::AttachmentLoadOp::eClear;
+        attachments[2].storeOp = vk::AttachmentStoreOp::eDontCare;
+        attachments[2].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+        attachments[2].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+        attachments[2].initialLayout = vk::ImageLayout::eUndefined;
+        attachments[2].finalLayout = vk::ImageLayout::eColorAttachmentOptimal;
+        // Albedo
+        attachments[3].format = gAttachments.albedo.format;
+        attachments[3].samples = vk::SampleCountFlagBits::e1;
+        attachments[3].loadOp = vk::AttachmentLoadOp::eClear;
+        attachments[3].storeOp = vk::AttachmentStoreOp::eDontCare;
+        attachments[3].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+        attachments[3].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+        attachments[3].initialLayout = vk::ImageLayout::eUndefined;
+        attachments[3].finalLayout = vk::ImageLayout::eColorAttachmentOptimal;
+        // Depth attachment
+        attachments[4].format = depth;
+        attachments[4].samples = vk::SampleCountFlagBits::e1;
+        attachments[4].loadOp = vk::AttachmentLoadOp::eClear;
+        attachments[4].storeOp = vk::AttachmentStoreOp::eStore;
+        attachments[4].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+        attachments[4].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+        attachments[4].initialLayout = vk::ImageLayout::eUndefined;
+        attachments[4].finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+
+        // Three subpasses
+        std::array<vk::SubpassDescription, 3> subpassDescriptions{};
+
+        // First subpass: Fill G-Buffer components
+        // ----------------------------------------------------------------------------------------
+
+        vk::AttachmentReference colorAttachmentReferences[4];
+        colorAttachmentReferences[0].layout = vk::ImageLayout::eColorAttachmentOptimal;
+        colorAttachmentReferences[0].attachment = 0;
+        colorAttachmentReferences[1].layout = vk::ImageLayout::eColorAttachmentOptimal;
+        colorAttachmentReferences[1].attachment = 1;
+        colorAttachmentReferences[2].layout = vk::ImageLayout::eColorAttachmentOptimal;
+        colorAttachmentReferences[2].attachment = 2;
+        colorAttachmentReferences[3].layout = vk::ImageLayout::eColorAttachmentOptimal;
+        colorAttachmentReferences[3].attachment = 3;
+
+   
+        vk::AttachmentReference depthAttachmentRef = {};
+        depthAttachmentRef.attachment = 4;
+        depthAttachmentRef.layout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+
+        subpassDescriptions[0].pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
+        subpassDescriptions[0].colorAttachmentCount = 4;
+        subpassDescriptions[0].pColorAttachments = colorAttachmentReferences;
+        subpassDescriptions[0].pDepthStencilAttachment = &depthAttachmentRef;
+
+        // Second subpass: Final composition (using G-Buffer components)
+        // ----------------------------------------------------------------------------------------
+
+        vk::AttachmentReference colorReference = { };
+        colorReference.attachment = 0;
+        colorReference.layout = vk::ImageLayout::eColorAttachmentOptimal;
+        vk::AttachmentReference inputReferences[3];
+        inputReferences[0].attachment = 1;
+        inputReferences[0].layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+        inputReferences[1].attachment = 2;
+        inputReferences[1].layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+        inputReferences[2].attachment = 3;
+        inputReferences[2].layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+
+        subpassDescriptions[1].pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
+        subpassDescriptions[1].colorAttachmentCount = 1;
+        subpassDescriptions[1].pColorAttachments = &colorReference;
+        subpassDescriptions[1].pDepthStencilAttachment = &depthAttachmentRef;
+        // Use the color attachments filled in the first pass as input attachments
+        subpassDescriptions[1].inputAttachmentCount = 3;
+        subpassDescriptions[1].pInputAttachments = inputReferences;
+
+        // Third subpass: Forward transparency
+        // ----------------------------------------------------------------------------------------
+        colorReference.attachment = 0;
+        colorReference.layout = vk::ImageLayout::eColorAttachmentOptimal;
+
+        inputReferences[0].layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+        inputReferences[0].attachment = 1;
+        subpassDescriptions[2].pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
+        subpassDescriptions[2].colorAttachmentCount = 1;
+        subpassDescriptions[2].pColorAttachments = &colorReference;
+        subpassDescriptions[2].pDepthStencilAttachment = &depthAttachmentRef;
+        // Use the color/depth attachments filled in the first pass as input attachments
+        subpassDescriptions[2].inputAttachmentCount = 1;
+        subpassDescriptions[2].pInputAttachments = inputReferences;
+
+        // Subpass dependencies for layout transitions
+        std::array<vk::SubpassDependency, 5> dependencies;
+
+        // This makes sure that writes to the depth image are done before we try to write to it again
+        dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+        dependencies[0].dstSubpass = 0;
+        dependencies[0].srcStageMask =  vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;;
+        dependencies[0].dstStageMask = vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;;
+        dependencies[0].srcAccessMask = vk::AccessFlagBits(0);
+        dependencies[0].dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+        dependencies[0].dependencyFlags = vk::DependencyFlagBits(0);
+
+        dependencies[1].srcSubpass = VK_SUBPASS_EXTERNAL;
+        dependencies[1].dstSubpass = 0;
+        dependencies[1].srcStageMask =  vk::PipelineStageFlagBits::eColorAttachmentOutput;
+        dependencies[1].dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+        dependencies[1].srcAccessMask = vk::AccessFlagBits(0);
+        dependencies[1].dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+        dependencies[1].dependencyFlags = vk::DependencyFlagBits(0);
+
+        // This dependency transitions the input attachment from color attachment to input attachment read
+        dependencies[2].srcSubpass = 0;
+        dependencies[2].dstSubpass = 1;
+        dependencies[2].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+        dependencies[2].dstStageMask =  vk::PipelineStageFlagBits::eFragmentShader;
+        dependencies[2].srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+        dependencies[2].dstAccessMask =  vk::AccessFlagBits::eInputAttachmentRead;
+        dependencies[2].dependencyFlags = vk::DependencyFlagBits::eByRegion;
+
+        dependencies[3].srcSubpass = 1;
+        dependencies[3].dstSubpass = 2;
+        dependencies[3].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+        dependencies[3].dstStageMask = vk::PipelineStageFlagBits::eFragmentShader;
+        dependencies[3].srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+        dependencies[3].dstAccessMask = vk::AccessFlagBits::eInputAttachmentRead;
+        dependencies[3].dependencyFlags = vk::DependencyFlagBits::eByRegion;
+
+        dependencies[4].srcSubpass = 2;
+        dependencies[4].dstSubpass = VK_SUBPASS_EXTERNAL;
+        dependencies[4].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+        dependencies[4].dstStageMask =  vk::PipelineStageFlagBits::eBottomOfPipe;
+        dependencies[4].srcAccessMask =  vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite;
+        dependencies[4].dstAccessMask =  vk::AccessFlagBits::eMemoryRead;
+        dependencies[4].dependencyFlags = vk::DependencyFlagBits::eByRegion;
+
+        vk::RenderPassCreateInfo renderPassInfo = {};
+        renderPassInfo.sType = vk::StructureType::eRenderPassCreateInfo;
+        renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        renderPassInfo.pAttachments = attachments.data();
+        renderPassInfo.subpassCount = static_cast<uint32_t>(subpassDescriptions.size());
+        renderPassInfo.pSubpasses = subpassDescriptions.data();
+        renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
+        renderPassInfo.pDependencies = dependencies.data();
+
+        return renderPassInfo;
     }
 
 }
