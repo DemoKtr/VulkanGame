@@ -38,8 +38,9 @@ void GraphicsEngine::make_assets()
 
 	//make Descriptor pool
 	vkInit::descriptorSetLayoutData bindings;
-	bindings.count = 1;
+	bindings.count = 2;
 	bindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
+	bindings.types.push_back(vk::DescriptorType::eSampledImage);
 	meshDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(filenames.size()), bindings);
 
 
@@ -219,11 +220,15 @@ void GraphicsEngine::create_descriptor_set_layouts()
 
 	frameSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
-	bindings.count = 1;
+	bindings.count = 2;
 	bindings.indices[0] = 0;
+	bindings.indices[1] = 1;
 	bindings.types[0] =vk::DescriptorType::eCombinedImageSampler;
-	bindings.counts[0] = 1;;
+	bindings.types[1] =vk::DescriptorType::eSampledImage;
+	bindings.counts[0] = 1;
+	bindings.counts[1] = 1;
 	bindings.stages[0]=vk::ShaderStageFlagBits::eFragment;
+	bindings.stages[1]=vk::ShaderStageFlagBits::eFragment;
 
 
 	meshSetLayout = vkInit::make_descriptor_set_layout(device, bindings);

@@ -42,11 +42,12 @@ namespace vkImage {
 
 	class Texture
 	{
-		int width, height, channels;
+		int width, height, channels, normalchannels, normalwidth, normalheight;
 		vk::Device logicalDevice;
 		vk::PhysicalDevice physicalDevice;
 		const char* filename;
 		stbi_uc* pixels;
+		stbi_uc* normalpixels;
 
 		//res
 		vk::Image image;
@@ -54,6 +55,13 @@ namespace vkImage {
 		vk::ImageView imageView;
 		vk::Sampler sampler;
 		
+
+		//res normalMap
+		vk::Image normalImage;
+		vk::DeviceMemory normalImageMemory;
+		vk::ImageView normalImageView;
+		vk::Sampler normalSampler;
+
 
 		//Resource Descriptors
 		vk::DescriptorSetLayout layout;

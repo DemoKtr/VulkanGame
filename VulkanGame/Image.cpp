@@ -13,10 +13,15 @@ void vkImage::Texture::load()
 	if (!pixels) {
 		std::cout << "Unable to load: " << filename << std::endl;
 	}
+	normalpixels = stbi_load("tex/normal.jpg", &normalwidth, &normalheight, &normalchannels, STBI_rgb);
+	if (!normalpixels) {
+		std::cout << "Unable to load: " << "tex / normal.jpg" << std::endl;
+	}
 }
 
 void vkImage::Texture::populate()
 {
+	///color texture
 	//First create a CPU-visible buffer...
 	BufferInputChunk input;
 	input.logicalDevice = logicalDevice;
@@ -57,11 +62,63 @@ void vkImage::Texture::populate()
 	//Now the staging buffer can be destroyed
 	logicalDevice.freeMemory(stagingBuffer.bufferMemory);
 	logicalDevice.destroyBuffer(stagingBuffer.buffer);
+
+
+	//normal map
+	BufferInputChunk normalInput;
+	normalInput.logicalDevice = logicalDevice;
+	normalInput.physicalDevice = physicalDevice;
+	normalInput.memoryProperties = vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible;
+	normalInput.usage = vk::BufferUsageFlagBits::eTransferSrc;
+	normalInput.size = normalwidth * normalheight * 3;
+
+	/*//...then fill it,
+	void* writeLocation = logicalDevice.mapMemory(stagingBuffer.bufferMemory, 0, input.size);
+	memcpy(writeLocation, pixels, input.size);
+	logicalDevice.unmapMemory(stagingBuffer.bufferMemory);
+	*/
+
+	Buffer normalBuffer = vkUtil::createBuffer(normalInput);
+
+	void* normalWriteLocation = logicalDevice.mapMemory(normalBuffer.bufferMemory, 0, normalInput.size);
+
+	memcpy(normalWriteLocation, normalpixels, normalInput.size);
+
+	logicalDevice.unmapMemory(normalBuffer.bufferMemory);
+	
+	//then transfer it to image memory
+	
+	ImageLayoutTransitionJob normalTransitionJob;
+	normalTransitionJob.commandBuffer = commandBuffer;
+	normalTransitionJob.queue = queue;
+	normalTransitionJob.image = normalImage;
+	normalTransitionJob.oldLayout = vk::ImageLayout::eUndefined;
+	normalTransitionJob.newLayout = vk::ImageLayout::eTransferDstOptimal;
+	transition_image_layout(normalTransitionJob);
+	
+	BufferImageCopyJob normalcopyJob;
+	normalcopyJob.commandBuffer = commandBuffer;
+	normalcopyJob.queue = queue;
+	normalcopyJob.srcBuffer = normalBuffer.buffer;
+	normalcopyJob.dstImage = normalImage;
+	normalcopyJob.width = normalwidth;
+	normalcopyJob.height = normalheight;
+	copy_buffer_to_image(normalcopyJob);
+
+	normalTransitionJob.oldLayout = vk::ImageLayout::eTransferDstOptimal;
+	normalTransitionJob.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	transition_image_layout(normalTransitionJob);
+
+	//Now the staging buffer can be destroyed
+	logicalDevice.freeMemory(normalBuffer.bufferMemory);
+	logicalDevice.destroyBuffer(normalBuffer.buffer);
 }
 
 void vkImage::Texture::make_view()
 {
+	
 	imageView = make_image_view(logicalDevice, image, vk::Format::eR8G8B8A8Unorm, vk::ImageAspectFlagBits::eColor);
+	normalImageView = make_image_view(logicalDevice, normalImage, vk::Format::eR8G8B8Unorm, vk::ImageAspectFlagBits::eColor);
 }
 
 void vkImage::Texture::make_sampler()
@@ -111,6 +168,7 @@ void vkImage::Texture::make_sampler()
 
 	try {
 		sampler = logicalDevice.createSampler(samplerInfo);
+		normalSampler = logicalDevice.createSampler(samplerInfo);
 	}
 	catch (vk::SystemError err) {
 		std::cout<<"Failed to make sampler."<<std::endl;
@@ -136,6 +194,20 @@ void vkImage::Texture::make_descriptor_set()
 	descriptorWrite.pImageInfo = &imageDescriptor;
 
 	logicalDevice.updateDescriptorSets(descriptorWrite, nullptr);
+	vk::DescriptorImageInfo normalimageDescriptor;
+	normalimageDescriptor.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	normalimageDescriptor.imageView = normalImageView;
+	normalimageDescriptor.sampler = normalSampler;
+
+	vk::WriteDescriptorSet normaldescriptorWrite;
+	normaldescriptorWrite.dstSet = descriptorSet;
+	normaldescriptorWrite.dstBinding = 1;
+	normaldescriptorWrite.dstArrayElement = 0;
+	normaldescriptorWrite.descriptorType = vk::DescriptorType::eSampledImage;
+	normaldescriptorWrite.descriptorCount = 1;
+	normaldescriptorWrite.pImageInfo = &normalimageDescriptor;
+
+	logicalDevice.updateDescriptorSets(normaldescriptorWrite, nullptr);
 }
 
 vkImage::Texture::Texture(TextureInputChunk info)
@@ -163,14 +235,29 @@ vkImage::Texture::Texture(TextureInputChunk info)
 	image = make_image(imageInput);
 	imageMemory = make_image_memory(imageInput, image);
 
+	ImageInputChunk normalImageInput;
+	normalImageInput.logicalDevice = logicalDevice;
+	normalImageInput.physicalDevice = physicalDevice;
+	normalImageInput.width = normalwidth;
+	normalImageInput.height = normalheight;
+	normalImageInput.format = vk::Format::eR8G8B8Unorm;
+	normalImageInput.tiling = vk::ImageTiling::eOptimal;
+	normalImageInput.usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled;
+	normalImageInput.memoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal;
+	normalImage = make_image(normalImageInput);
+	
+	normalImageMemory = make_image_memory(normalImageInput, normalImage);
+
+	
 	populate();
-
+	
 	free(pixels);
-
+	free(normalpixels);
+	
 	make_view();
-
+	
 	make_sampler();
-
+	
 	make_descriptor_set();
 }
 
@@ -222,7 +309,7 @@ vk::Image vkImage::make_image(ImageInputChunk input)
 	imageInfo.usage = input.usage;
 	imageInfo.sharingMode = vk::SharingMode::eExclusive;
 	imageInfo.samples = vk::SampleCountFlagBits::e1;
-
+	
 	try {
 		return input.logicalDevice.createImage(imageInfo);
 	}
