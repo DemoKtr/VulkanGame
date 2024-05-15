@@ -556,7 +556,7 @@ namespace vkInit {
         attachments[4].finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
 
         // Three subpasses
-        std::array<vk::SubpassDescription, 3> subpassDescriptions{};
+        std::array<vk::SubpassDescription, 2> subpassDescriptions{};
 
         // First subpass: Fill G-Buffer components
         // ----------------------------------------------------------------------------------------
@@ -605,21 +605,10 @@ namespace vkInit {
 
         // Third subpass: Forward transparency
         // ----------------------------------------------------------------------------------------
-        colorReference.attachment = 0;
-        colorReference.layout = vk::ImageLayout::eColorAttachmentOptimal;
-
-        inputReferences[0].layout = vk::ImageLayout::eShaderReadOnlyOptimal;
-        inputReferences[0].attachment = 1;
-        subpassDescriptions[2].pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
-        subpassDescriptions[2].colorAttachmentCount = 1;
-        subpassDescriptions[2].pColorAttachments = &colorReference;
-        subpassDescriptions[2].pDepthStencilAttachment = &depthAttachmentRef;
-        // Use the color/depth attachments filled in the first pass as input attachments
-        subpassDescriptions[2].inputAttachmentCount = 1;
-        subpassDescriptions[2].pInputAttachments = inputReferences;
+    
 
         // Subpass dependencies for layout transitions
-        std::array<vk::SubpassDependency, 5> dependencies;
+        std::array<vk::SubpassDependency, 3> dependencies;
 
         // This makes sure that writes to the depth image are done before we try to write to it again
         dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -647,22 +636,6 @@ namespace vkInit {
         dependencies[2].dstAccessMask =  vk::AccessFlagBits::eInputAttachmentRead;
         dependencies[2].dependencyFlags = vk::DependencyFlagBits::eByRegion;
 
-        dependencies[3].srcSubpass = 1;
-        dependencies[3].dstSubpass = 2;
-        dependencies[3].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-        dependencies[3].dstStageMask = vk::PipelineStageFlagBits::eFragmentShader;
-        dependencies[3].srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
-        dependencies[3].dstAccessMask = vk::AccessFlagBits::eInputAttachmentRead;
-        dependencies[3].dependencyFlags = vk::DependencyFlagBits::eByRegion;
-
-        dependencies[4].srcSubpass = 2;
-        dependencies[4].dstSubpass = VK_SUBPASS_EXTERNAL;
-        dependencies[4].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-        dependencies[4].dstStageMask =  vk::PipelineStageFlagBits::eBottomOfPipe;
-        dependencies[4].srcAccessMask =  vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite;
-        dependencies[4].dstAccessMask =  vk::AccessFlagBits::eMemoryRead;
-        dependencies[4].dependencyFlags = vk::DependencyFlagBits::eByRegion;
-
         vk::RenderPassCreateInfo renderPassInfo = {};
         renderPassInfo.sType = vk::StructureType::eRenderPassCreateInfo;
         renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
@@ -676,7 +649,7 @@ namespace vkInit {
     }
 
 
-    void createPipeline(vk::Device logicalDevice, const GraphicsPipelineInBundle& specification, vk::RenderPass renderPass, std::vector<vk::DescriptorSetLayout> geometryDescriptorSetLayouts) {
+    void createPipeline(vk::Device logicalDevice, const GraphicsPipelineInBundle& specification, vk::RenderPass renderPass, std::vector<vk::DescriptorSetLayout> geometryDescriptorSetLayouts, std::vector<vk::DescriptorSetLayout> deferedDescriptorSetLayouts, std::vector<vk::DescriptorSetLayout>  transparentDescriptorSetLayouts) {
         // Layout
         vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
         pipelineLayoutCreateInfo.setLayoutCount = static_cast<uint32_t>(geometryDescriptorSetLayouts.size());
@@ -734,6 +707,88 @@ namespace vkInit {
         colorBlendState.attachmentCount = static_cast<uint32_t>(blendAttachmentStates.size());
         colorBlendState.pAttachments = blendAttachmentStates.data();
         vk::Pipeline geometryPipeline = logicalDevice.createGraphicsPipeline(nullptr,pipelineInfo).value;
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Descriptor set layout
+
+        /*
+        VkDescriptorSetLayoutCreateInfo descriptorLayout =
+            vks::initializers::descriptorSetLayoutCreateInfo(
+                setLayoutBindings.data(),
+                static_cast<uint32_t>(setLayoutBindings.size()));
+
+        VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorLayout, nullptr, &descriptorSetLayouts.composition));  //nie musze tak tego robic
+
+        */
+
+        // Pipeline layout
+        vk::PipelineLayoutCreateInfo deferedPipelineLayoutCreateInfo = {};
+        pipelineLayoutCreateInfo.setLayoutCount = static_cast<uint32_t>(deferedDescriptorSetLayouts.size());
+        pipelineLayoutCreateInfo.pSetLayouts = deferedDescriptorSetLayouts.data();
+        pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
+        vk::PipelineLayout deferedPipelineLayout = logicalDevice.createPipelineLayout(deferedPipelineLayoutCreateInfo);
+        /*
+        // Descriptor sets
+        VkDescriptorSetAllocateInfo allocInfo = vks::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayouts.composition, 1);
+        VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets.composition));
+
+        // Image descriptors for the offscreen color attachments
+        VkDescriptorImageInfo texDescriptorPosition = vks::initializers::descriptorImageInfo(VK_NULL_HANDLE, attachments.position.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        VkDescriptorImageInfo texDescriptorNormal = vks::initializers::descriptorImageInfo(VK_NULL_HANDLE, attachments.normal.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        VkDescriptorImageInfo texDescriptorAlbedo = vks::initializers::descriptorImageInfo(VK_NULL_HANDLE, attachments.albedo.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+        std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
+            // Binding 0: Position texture target
+            vks::initializers::writeDescriptorSet(descriptorSets.composition, VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 0, &texDescriptorPosition),
+            // Binding 1: Normals texture target
+            vks::initializers::writeDescriptorSet(descriptorSets.composition, VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1, &texDescriptorNormal),
+            // Binding 2: Albedo texture target
+            vks::initializers::writeDescriptorSet(descriptorSets.composition, VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 2, &texDescriptorAlbedo),
+            // Binding 4: Fragment shader lights
+            vks::initializers::writeDescriptorSet(descriptorSets.composition, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 3, &buffers.lights.descriptor),
+        };
+        
+        vkUpdateDescriptorSets(logical, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, NULL);
+        */
+        // Pipeline
+        vk::PipelineInputAssemblyStateCreateInfo deferedInputAssemblyState = make_input_assembly_info(); 
+        vk::PipelineRasterizationStateCreateInfo deferedRasterizationState = make_rasterizer_info(); 
+        vk::PipelineColorBlendAttachmentState deferedBlendAttachmentState = make_color_blend_attachment_state(); 
+        vk::PipelineColorBlendStateCreateInfo deferedColorBlendState = make_color_blend_attachment_stage(deferedBlendAttachmentState);
+        vk::PipelineDepthStencilStateCreateInfo deferedDepthStencilState = makePipelineDepthStencilStageCreateInfo();
+        vk::PipelineViewportStateCreateInfo deferedViewportState = make_viewport_state(viewport, scissor);
+        vk::PipelineMultisampleStateCreateInfo deferedMultisampleState = make_multisampling_info();
+        std::array<vk::PipelineShaderStageCreateInfo, 2> deferedShaderStages;
+
+        // Offscreen scene rendering pipeline
+        vk::ShaderModule deferedVertexShader = vkUtil::createModule(specification.vertexFilePath, specification.device, true); ////////////////////////////////////////////////////
+        vk::PipelineShaderStageCreateInfo deferedVertexShaderInfo = make_shader_info(deferedVertexShader, vk::ShaderStageFlagBits::eVertex);
+        deferedShaderStages[0] = deferedVertexShaderInfo;
+
+        vk::ShaderModule deferedFragmentShader = vkUtil::createModule(specification.fragmentFilePath, specification.device, true);
+        vk::PipelineShaderStageCreateInfo deferedFragmentShaderInfo = make_shader_info(deferedFragmentShader, vk::ShaderStageFlagBits::eFragment);
+        deferedShaderStages[1] = deferedFragmentShaderInfo;
+
+        vk::GraphicsPipelineCreateInfo deferedPipelineCI = {};
+
+        vk::PipelineVertexInputStateCreateInfo emptyInputState{};
+        emptyInputState.sType = vk::StructureType::ePipelineVertexInputStateCreateInfo;
+        deferedPipelineCI.flags = vk::PipelineCreateFlags();
+        deferedPipelineCI.renderPass = renderPass;
+        deferedPipelineCI.pVertexInputState = &emptyInputState;
+        deferedPipelineCI.pInputAssemblyState = &deferedInputAssemblyState;
+        deferedPipelineCI.pRasterizationState = &deferedRasterizationState;
+        deferedPipelineCI.pColorBlendState = &deferedColorBlendState;
+        deferedPipelineCI.pMultisampleState = &deferedMultisampleState;
+        deferedPipelineCI.pViewportState = &deferedViewportState;
+        deferedPipelineCI.pDepthStencilState = &deferedDepthStencilState;
+        deferedPipelineCI.stageCount = static_cast<uint32_t>(deferedShaderStages.size());
+        deferedPipelineCI.pStages = deferedShaderStages.data();
+        // Index of the subpass that this pipeline will be used in
+        deferedPipelineCI.subpass = 1;
+        depthStencilState.depthWriteEnable = VK_FALSE;
+
+        vk::Pipeline deferedPipeline = logicalDevice.createGraphicsPipeline(nullptr, deferedPipelineCI).value;
 
 
 
