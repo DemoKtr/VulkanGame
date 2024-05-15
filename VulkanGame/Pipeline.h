@@ -675,5 +675,89 @@ namespace vkInit {
         return renderPassInfo;
     }
 
+
+    void createPipeline(vk::Device logicalDevice, const GraphicsPipelineInBundle& specification, vk::RenderPass renderPass, std::vector<vk::DescriptorSetLayout> geometryDescriptorSetLayouts) {
+        // Layout
+        vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
+        pipelineLayoutCreateInfo.setLayoutCount = static_cast<uint32_t>(geometryDescriptorSetLayouts.size());
+        pipelineLayoutCreateInfo.pSetLayouts = descriptorSetLayouts.data();
+        pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
+        vk::PipelineLayout geometryPipelineLayout = logicalDevice.createPipelineLayout(pipelineLayoutCreateInfo);
+       
+
+        // Pipeline
+        vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState = make_input_assembly_info();
+        vk::PipelineRasterizationStateCreateInfo rasterizationState = make_rasterizer_info();
+
+        vk::PipelineColorBlendAttachmentState blendAttachmentState = make_color_blend_attachment_state();
+        vk::PipelineColorBlendStateCreateInfo colorBlendState = make_color_blend_attachment_stage(blendAttachmentState);
+        vk::PipelineDepthStencilStateCreateInfo depthStencilState = makePipelineDepthStencilStageCreateInfo();
+        vk::Viewport viewport = make_viewport(specification);
+        vk::Rect2D scissor = make_scissor(specification);
+        vk::PipelineViewportStateCreateInfo viewportState = make_viewport_state(viewport,scissor);
+        vk::PipelineMultisampleStateCreateInfo multisampleState = make_multisampling_info();
+        //std::vector<vk::DynamicState> dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR }; Maybe useful
+        //vk::PipelineDynamicStateCreateInfo dynamicState = vks::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables);
+        std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
+        vk::VertexInputBindingDescription bindingDescription = vkMesh::getPosColBindingDescription();
+        std::vector <vk::VertexInputAttributeDescription> attributeDescriptions = vkMesh::getPosColorAttributeDescriptions();
+        vk::PipelineVertexInputStateCreateInfo vertexInputInfo = make_vertex_input_info(bindingDescription, attributeDescriptions);
+        // Final fullscreen pass pipeline
+
+
+          // Offscreen scene rendering pipeline
+        vk::ShaderModule vertexShader = vkUtil::createModule(specification.vertexFilePath, specification.device, true); ////////////////////////////////////////////////////
+        vk::PipelineShaderStageCreateInfo vertexShaderInfo = make_shader_info(vertexShader, vk::ShaderStageFlagBits::eVertex);
+        shaderStages[0] = vertexShaderInfo;
+
+        vk::ShaderModule fragmentShader = vkUtil::createModule(specification.fragmentFilePath, specification.device, true);
+        vk::PipelineShaderStageCreateInfo fragmentShaderInfo = make_shader_info(fragmentShader, vk::ShaderStageFlagBits::eFragment);
+        shaderStages[1] = fragmentShaderInfo;
+
+        vk::GraphicsPipelineCreateInfo pipelineInfo = {};
+        pipelineInfo.flags = vk::PipelineCreateFlags();
+        pipelineInfo.layout = geometryPipelineLayout;
+        pipelineInfo.renderPass = renderPass;
+        pipelineInfo.pInputAssemblyState = &inputAssemblyState;
+        pipelineInfo.pRasterizationState = &rasterizationState;
+        pipelineInfo.pColorBlendState = &colorBlendState;
+        pipelineInfo.pMultisampleState = &multisampleState;
+        pipelineInfo.pViewportState = &viewportState;
+        pipelineInfo.pDepthStencilState = &depthStencilState;
+        pipelineInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
+        pipelineInfo.pStages = shaderStages.data();
+        pipelineInfo.subpass = 0;
+        pipelineInfo.pVertexInputState = &vertexInputInfo;
+
+        std::array<vk::PipelineColorBlendAttachmentState, 4> blendAttachmentStates = makeDeferedAttachmentState();
+
+        colorBlendState.attachmentCount = static_cast<uint32_t>(blendAttachmentStates.size());
+        colorBlendState.pAttachments = blendAttachmentStates.data();
+        vk::Pipeline geometryPipeline = logicalDevice.createGraphicsPipeline(nullptr,pipelineInfo).value;
+
+
+
+    }
+
+    vk::PipelineDepthStencilStateCreateInfo makePipelineDepthStencilStageCreateInfo() {
+        vk::PipelineDepthStencilStateCreateInfo depthStageInfo;
+        depthStageInfo.flags = vk::PipelineDepthStencilStateCreateFlags();
+        depthStageInfo.depthTestEnable = true;
+        depthStageInfo.depthWriteEnable = true;
+        depthStageInfo.depthCompareOp = vk::CompareOp::eLess;
+        depthStageInfo.depthBoundsTestEnable = false;
+        depthStageInfo.stencilTestEnable = false;
+        return depthStageInfo;
+    }
+    std::array<vk::PipelineColorBlendAttachmentState,4> makeDeferedAttachmentState() {
+
+        std::array<vk::PipelineColorBlendAttachmentState, 4> blendAttachmentStates = {};
+        blendAttachmentStates[0] = make_color_blend_attachment_state();
+        blendAttachmentStates[1] = make_color_blend_attachment_state();
+        blendAttachmentStates[2] = make_color_blend_attachment_state();
+        blendAttachmentStates[3] = make_color_blend_attachment_state();
+        return blendAttachmentStates;
+
+    }
 }
 
