@@ -51,7 +51,7 @@ namespace vkInit {
         \returns the created viewport
     */
     vk::Viewport make_viewport(const GraphicsPipelineInBundle& specification);
-
+    vk::PipelineDepthStencilStateCreateInfo makePipelineDepthStencilStageCreateInfo();
     /**
         Create a scissor rectangle.
 
@@ -98,7 +98,7 @@ namespace vkInit {
         \returns the created pipeline layout
     */
 
-
+    std::array<vk::PipelineColorBlendAttachmentState, 4> makeDeferedAttachmentState();
 
     /**
         Make a color attachment description
