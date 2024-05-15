@@ -680,7 +680,7 @@ namespace vkInit {
         // Layout
         vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
         pipelineLayoutCreateInfo.setLayoutCount = static_cast<uint32_t>(geometryDescriptorSetLayouts.size());
-        pipelineLayoutCreateInfo.pSetLayouts = descriptorSetLayouts.data();
+        pipelineLayoutCreateInfo.pSetLayouts = geometryDescriptorSetLayouts.data();
         pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
         vk::PipelineLayout geometryPipelineLayout = logicalDevice.createPipelineLayout(pipelineLayoutCreateInfo);
        
