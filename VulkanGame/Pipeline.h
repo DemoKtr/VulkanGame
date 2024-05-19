@@ -12,6 +12,7 @@ namespace vkInit {
         vk::Extent2D swapchainExtent;
         vk::Format swapchainImageFormat, depthFormat;
         std::vector<vk::DescriptorSetLayout> descriptorSetLayouts;
+        vkUtil::GbufferAttachments attachments;
 	};
 	struct GraphicsPipelineOutBundle {
         vk::PipelineLayout layout;
@@ -21,6 +22,7 @@ namespace vkInit {
     vk::PipelineLayout create_pipeline_layout(vk::Device device, std::vector<vk::DescriptorSetLayout> descriptorSetLayouts ,bool debugMode);
     vk::RenderPass create_renderpass(vk::Device device, vk::Format swapchainImageFormat, vk::Format depthFormat, bool debugMode);
     GraphicsPipelineOutBundle create_graphic_pipeline(GraphicsPipelineInBundle specyfication, bool debugMode);
+    void createPipeline(vk::Device logicalDevice, const GraphicsPipelineInBundle& specification, std::vector<vk::DescriptorSetLayout> geometryDescriptorSetLayouts, std::vector<vk::DescriptorSetLayout> deferedDescriptorSetLayouts, bool debugMode);
     vk::PipelineInputAssemblyStateCreateInfo make_input_assembly_info();
     vk::PipelineShaderStageCreateInfo make_shader_info(
         const vk::ShaderModule& shaderModule, const vk::ShaderStageFlagBits& stage);
@@ -68,7 +70,7 @@ namespace vkInit {
         \returns the viewport state creation info
     */
     vk::PipelineViewportStateCreateInfo make_viewport_state(const vk::Viewport& viewport, const vk::Rect2D& scissor);
-    vk::RenderPassCreateInfo makeDeferedRenderpassInfo(const vk::Format& swapchainImageFormat, vkUtil::GbufferAttachments gAttachments, const vk::Format& depth);
+    vk::RenderPass makeDeferedRenderpass(vk::Device logicalDevice, const vk::Format& swapchainImageFormat, vkUtil::GbufferAttachments gAttachments, const vk::Format& depth, bool debugMode);
     /**
         \returns the creation info for the configured rasterizer stage
     */
@@ -502,7 +504,7 @@ namespace vkInit {
     }
 
     
-    vk::RenderPassCreateInfo makeDeferedRenderpassInfo(const vk::Format& swapchainImageFormat, vkUtil::GbufferAttachments gAttachments, const vk::Format& depth) {
+    vk::RenderPass makeDeferedRenderpass(vk::Device logicalDevice, const vk::Format& swapchainImageFormat, vkUtil::GbufferAttachments gAttachments, const vk::Format& depth,bool debugMode) {
 
         std::array<vk::AttachmentDescription, 5> attachments{};
         // Color attachment
@@ -645,11 +647,22 @@ namespace vkInit {
         renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
         renderPassInfo.pDependencies = dependencies.data();
 
-        return renderPassInfo;
+        
+        try {
+            return logicalDevice.createRenderPass(renderPassInfo);
+        }
+        catch (vk::SystemError err) {
+            if (debugMode) {
+                std::cout << "Failed to create renderpass!" << std::endl;
+            }
+        }
     }
 
 
-    void createPipeline(vk::Device logicalDevice, const GraphicsPipelineInBundle& specification, vk::RenderPass renderPass, std::vector<vk::DescriptorSetLayout> geometryDescriptorSetLayouts, std::vector<vk::DescriptorSetLayout> deferedDescriptorSetLayouts, std::vector<vk::DescriptorSetLayout>  transparentDescriptorSetLayouts) {
+    void createPipeline(vk::Device logicalDevice, const GraphicsPipelineInBundle& specification, std::vector<vk::DescriptorSetLayout> geometryDescriptorSetLayouts, std::vector<vk::DescriptorSetLayout> deferedDescriptorSetLayouts,bool debugMode) {
+       
+        vk::RenderPass renderPass = makeDeferedRenderpass(logicalDevice, specification.swapchainImageFormat, specification.attachments ,specification.depthFormat, debugMode);
+        
         // Layout
         vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
         pipelineLayoutCreateInfo.setLayoutCount = static_cast<uint32_t>(geometryDescriptorSetLayouts.size());
@@ -711,45 +724,17 @@ namespace vkInit {
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Descriptor set layout
 
-        /*
-        VkDescriptorSetLayoutCreateInfo descriptorLayout =
-            vks::initializers::descriptorSetLayoutCreateInfo(
-                setLayoutBindings.data(),
-                static_cast<uint32_t>(setLayoutBindings.size()));
-
-        VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorLayout, nullptr, &descriptorSetLayouts.composition));  //nie musze tak tego robic
-
-        */
-
+       
         // Pipeline layout
         vk::PipelineLayoutCreateInfo deferedPipelineLayoutCreateInfo = {};
         pipelineLayoutCreateInfo.setLayoutCount = static_cast<uint32_t>(deferedDescriptorSetLayouts.size());
         pipelineLayoutCreateInfo.pSetLayouts = deferedDescriptorSetLayouts.data();
         pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
         vk::PipelineLayout deferedPipelineLayout = logicalDevice.createPipelineLayout(deferedPipelineLayoutCreateInfo);
-        /*
-        // Descriptor sets
-        VkDescriptorSetAllocateInfo allocInfo = vks::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayouts.composition, 1);
-        VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets.composition));
-
-        // Image descriptors for the offscreen color attachments
-        VkDescriptorImageInfo texDescriptorPosition = vks::initializers::descriptorImageInfo(VK_NULL_HANDLE, attachments.position.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-        VkDescriptorImageInfo texDescriptorNormal = vks::initializers::descriptorImageInfo(VK_NULL_HANDLE, attachments.normal.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-        VkDescriptorImageInfo texDescriptorAlbedo = vks::initializers::descriptorImageInfo(VK_NULL_HANDLE, attachments.albedo.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-        std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
-            // Binding 0: Position texture target
-            vks::initializers::writeDescriptorSet(descriptorSets.composition, VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 0, &texDescriptorPosition),
-            // Binding 1: Normals texture target
-            vks::initializers::writeDescriptorSet(descriptorSets.composition, VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1, &texDescriptorNormal),
-            // Binding 2: Albedo texture target
-            vks::initializers::writeDescriptorSet(descriptorSets.composition, VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 2, &texDescriptorAlbedo),
-            // Binding 4: Fragment shader lights
-            vks::initializers::writeDescriptorSet(descriptorSets.composition, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 3, &buffers.lights.descriptor),
-        };
         
-        vkUpdateDescriptorSets(logical, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, NULL);
-        */
+
+       
+        
         // Pipeline
         vk::PipelineInputAssemblyStateCreateInfo deferedInputAssemblyState = make_input_assembly_info(); 
         vk::PipelineRasterizationStateCreateInfo deferedRasterizationState = make_rasterizer_info(); 

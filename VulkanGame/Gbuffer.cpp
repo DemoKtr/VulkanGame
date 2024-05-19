@@ -74,55 +74,6 @@ void vkGbuffer::createAttachment(vk::PhysicalDevice physicalDevice, vk::Device l
 
 
 
-void vkGbuffer::make_descriptor_set(vk::Device logicalDevice, vk::DescriptorSet descriptorSet, vk::DescriptorPool descriptorPool, vk::DescriptorSetLayout layout, vkUtil::GbufferAttachments gbuffer)
-{
-	descriptorSet = vkInit::allocate_descriptor_set(logicalDevice, descriptorPool, layout);
 
-	vk::DescriptorImageInfo posImageDescriptor;
-	posImageDescriptor.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-	posImageDescriptor.imageView = gbuffer.position.view;
-	posImageDescriptor.sampler = {nullptr};
-
-	vk::WriteDescriptorSet posDescriptorWrite;
-	posDescriptorWrite.dstSet = descriptorSet;
-	posDescriptorWrite.dstBinding = 0;
-	posDescriptorWrite.dstArrayElement = 0;
-	posDescriptorWrite.descriptorType = vk::DescriptorType::eInputAttachment;
-	posDescriptorWrite.descriptorCount = 1;
-	posDescriptorWrite.pImageInfo = &posImageDescriptor;
-
-	logicalDevice.updateDescriptorSets(posDescriptorWrite, nullptr);
-
-
-	vk::DescriptorImageInfo normalImageDescriptor;
-	normalImageDescriptor.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-	normalImageDescriptor.imageView = gbuffer.normal.view;
-	normalImageDescriptor.sampler = { nullptr };
-
-	vk::WriteDescriptorSet normalDescriptorWrite;
-	normalDescriptorWrite.dstSet = descriptorSet;
-	normalDescriptorWrite.dstBinding = 1;
-	normalDescriptorWrite.dstArrayElement = 0;
-	normalDescriptorWrite.descriptorType = vk::DescriptorType::eInputAttachment;
-	normalDescriptorWrite.descriptorCount = 1;
-	normalDescriptorWrite.pImageInfo = &normalImageDescriptor;
-
-	logicalDevice.updateDescriptorSets(normalDescriptorWrite, nullptr);
-
-	vk::DescriptorImageInfo albedoImageDescriptor;
-	albedoImageDescriptor.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-	albedoImageDescriptor.imageView = gbuffer.albedo.view;
-	albedoImageDescriptor.sampler = { nullptr };
-
-	vk::WriteDescriptorSet albedoDescriptorWrite;
-	albedoDescriptorWrite.dstSet = descriptorSet;
-	albedoDescriptorWrite.dstBinding = 2;
-	albedoDescriptorWrite.dstArrayElement = 0;
-	albedoDescriptorWrite.descriptorType = vk::DescriptorType::eInputAttachment;
-	albedoDescriptorWrite.descriptorCount = 1;
-	albedoDescriptorWrite.pImageInfo = &albedoImageDescriptor;
-
-	logicalDevice.updateDescriptorSets(normalDescriptorWrite, nullptr);
-}
 
 

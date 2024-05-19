@@ -74,10 +74,12 @@ namespace vkUtil {
 		vk::DescriptorBufferInfo modelBufferDescriptor;
 
 		vk::DescriptorSet descriptorSet;
+		vk::DescriptorSet deferedDescriptorSet;
 
 		void make_descriptor_resources();
 		void make_depth_resources();
 		void write_descriptor_set();
+		void write_defered_descriptor_set();
 		void destroy();
 
 	};

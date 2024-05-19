@@ -232,6 +232,26 @@ void GraphicsEngine::create_descriptor_set_layouts()
 
 
 	meshSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+
+
+	bindings.count = 3;
+	bindings.indices[0] = 0;
+	bindings.indices[1] = 1;
+	bindings.indices[2] = 2;
+	bindings.types[0] = vk::DescriptorType::eInputAttachment;
+	bindings.types[1] = vk::DescriptorType::eInputAttachment;
+	bindings.types[2] = vk::DescriptorType::eInputAttachment;
+	bindings.counts[0] = 1;
+	bindings.counts[1] = 1;
+	bindings.counts[2] = 1;
+	bindings.stages[0] = vk::ShaderStageFlagBits::eFragment;
+	bindings.stages[1] = vk::ShaderStageFlagBits::eFragment;
+	bindings.stages[2] = vk::ShaderStageFlagBits::eFragment;
+	deferedSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+
+
+
+
 }
 
 void GraphicsEngine::finalize_setup()
@@ -437,6 +457,12 @@ void GraphicsEngine::create_frame_resources()
 	bindings.types.push_back(vk::DescriptorType::eUniformBuffer);
 	bindings.types.push_back(vk::DescriptorType::eStorageBuffer);
 	frameDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);
+	vkInit::descriptorSetLayoutData gbindings;
+	gbindings.count = 3;
+	gbindings.types.push_back(vk::DescriptorType::eInputAttachment);
+	gbindings.types.push_back(vk::DescriptorType::eInputAttachment);
+	gbindings.types.push_back(vk::DescriptorType::eInputAttachment);
+	deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
 	for (vkUtil::SwapChainFrame& frame : swapchainFrames) //referencja 
 	{
 		frame.imageAvailable = vkInit::make_semaphore(device, debugMode);
@@ -446,6 +472,7 @@ void GraphicsEngine::create_frame_resources()
 		frame.make_descriptor_resources();
 
 		frame.descriptorSet = vkInit::allocate_descriptor_set(device, frameDescriptorPool, frameSetLayout);
+		frame.deferedDescriptorSet = vkInit::allocate_descriptor_set(device, deferedDescriptorPool, deferedSetLayout);
 	}
 
 }
