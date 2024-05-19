@@ -106,10 +106,13 @@ void GraphicsEngine::create_pipeline()
 	specification.device = device;
 	specification.vertexFilePath = "shaders/vert.spv";
 	specification.fragmentFilePath = "shaders/frag.spv";
+	specification.deferedFragmentFilePath = "shaders/deferedFrag.spv";
 	specification.swapchainExtent = swapchainExtent;
 	specification.swapchainImageFormat = swapchainFormat;
 	specification.depthFormat = swapchainFrames[0].depthFormat;
-	specification.descriptorSetLayouts = { frameSetLayout,meshSetLayout };
+	specification.geometryDescriptorSetLayouts = { frameSetLayout,meshSetLayout };
+	specification.deferedDescriptorSetLayouts = { deferedSetLayout };
+	specification.attachments = swapchainFrames[0].gbuffer;
 	vkInit::GraphicsPipelineOutBundle output = vkInit::create_graphic_pipeline(specification,debugMode);
 	layout = output.layout;
 	renderpass = output.renderpass;

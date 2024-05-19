@@ -9,9 +9,11 @@ namespace vkInit {
 		vk::Device device;
 		std::string vertexFilePath;
 		std::string fragmentFilePath;
+		std::string deferedFragmentFilePath;
         vk::Extent2D swapchainExtent;
         vk::Format swapchainImageFormat, depthFormat;
-        std::vector<vk::DescriptorSetLayout> descriptorSetLayouts;
+        std::vector<vk::DescriptorSetLayout> geometryDescriptorSetLayouts;
+        std::vector<vk::DescriptorSetLayout> deferedDescriptorSetLayouts;
         vkUtil::GbufferAttachments attachments;
 	};
 	struct GraphicsPipelineOutBundle {
@@ -279,7 +281,7 @@ namespace vkInit {
 
         //Pipeline Layout
         if (debugMode) std::cout << "Creating PipelineLayout " << std::endl;
-        vk::PipelineLayout pipelineLayout = create_pipeline_layout(specyfication.device, specyfication.descriptorSetLayouts,debugMode);
+        vk::PipelineLayout pipelineLayout = create_pipeline_layout(specyfication.device, specyfication.geometryDescriptorSetLayouts,debugMode);
         pipelineInfo.layout = pipelineLayout;
         //Render Pass
         if (debugMode) std::cout << "Creating RenderPass " << std::endl;
