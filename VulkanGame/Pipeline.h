@@ -10,6 +10,7 @@ namespace vkInit {
 		std::string vertexFilePath;
 		std::string fragmentFilePath;
 		std::string deferedFragmentFilePath;
+		std::string deferedVertexFilePath;
         vk::Extent2D swapchainExtent;
         vk::Format swapchainImageFormat, depthFormat;
         std::vector<vk::DescriptorSetLayout> geometryDescriptorSetLayouts;
@@ -26,7 +27,7 @@ namespace vkInit {
     vk::PipelineLayout create_pipeline_layout(vk::Device device, std::vector<vk::DescriptorSetLayout> descriptorSetLayouts ,bool debugMode);
     vk::RenderPass create_renderpass(vk::Device device, vk::Format swapchainImageFormat, vk::Format depthFormat, bool debugMode);
     GraphicsPipelineOutBundle create_graphic_pipeline(GraphicsPipelineInBundle specyfication, bool debugMode);
-    void createPipeline(vk::Device logicalDevice, const GraphicsPipelineInBundle& specification, std::vector<vk::DescriptorSetLayout> geometryDescriptorSetLayouts, std::vector<vk::DescriptorSetLayout> deferedDescriptorSetLayouts, bool debugMode);
+    GraphicsPipelineOutBundle createPipeline(const GraphicsPipelineInBundle& specification, bool debugMode);
     vk::PipelineInputAssemblyStateCreateInfo make_input_assembly_info();
     vk::PipelineShaderStageCreateInfo make_shader_info(
         const vk::ShaderModule& shaderModule, const vk::ShaderStageFlagBits& stage);
@@ -663,16 +664,16 @@ namespace vkInit {
     }
 
 
-    void createPipeline(vk::Device logicalDevice, const GraphicsPipelineInBundle& specification, std::vector<vk::DescriptorSetLayout> geometryDescriptorSetLayouts, std::vector<vk::DescriptorSetLayout> deferedDescriptorSetLayouts,bool debugMode) {
+    GraphicsPipelineOutBundle createPipeline(const GraphicsPipelineInBundle& specification,bool debugMode) {
        
-        vk::RenderPass renderPass = makeDeferedRenderpass(logicalDevice, specification.swapchainImageFormat, specification.attachments ,specification.depthFormat, debugMode);
+        vk::RenderPass renderPass = makeDeferedRenderpass(specification.device, specification.swapchainImageFormat, specification.attachments ,specification.depthFormat, debugMode);
         
         // Layout
         vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
-        pipelineLayoutCreateInfo.setLayoutCount = static_cast<uint32_t>(geometryDescriptorSetLayouts.size());
-        pipelineLayoutCreateInfo.pSetLayouts = geometryDescriptorSetLayouts.data();
+        pipelineLayoutCreateInfo.setLayoutCount = static_cast<uint32_t>(specification.geometryDescriptorSetLayouts.size());
+        pipelineLayoutCreateInfo.pSetLayouts = specification.geometryDescriptorSetLayouts.data();
         pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
-        vk::PipelineLayout geometryPipelineLayout = logicalDevice.createPipelineLayout(pipelineLayoutCreateInfo);
+        vk::PipelineLayout geometryPipelineLayout = specification.device.createPipelineLayout(pipelineLayoutCreateInfo);
        
 
         // Pipeline
@@ -723,7 +724,7 @@ namespace vkInit {
 
         colorBlendState.attachmentCount = static_cast<uint32_t>(blendAttachmentStates.size());
         colorBlendState.pAttachments = blendAttachmentStates.data();
-        vk::Pipeline geometryPipeline = logicalDevice.createGraphicsPipeline(nullptr,pipelineInfo).value;
+        vk::Pipeline geometryPipeline = specification.device.createGraphicsPipeline(nullptr,pipelineInfo).value;
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Descriptor set layout
@@ -731,10 +732,10 @@ namespace vkInit {
        
         // Pipeline layout
         vk::PipelineLayoutCreateInfo deferedPipelineLayoutCreateInfo = {};
-        pipelineLayoutCreateInfo.setLayoutCount = static_cast<uint32_t>(deferedDescriptorSetLayouts.size());
-        pipelineLayoutCreateInfo.pSetLayouts = deferedDescriptorSetLayouts.data();
+        pipelineLayoutCreateInfo.setLayoutCount = static_cast<uint32_t>(specification.deferedDescriptorSetLayouts.size());
+        pipelineLayoutCreateInfo.pSetLayouts = specification.deferedDescriptorSetLayouts.data();
         pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
-        vk::PipelineLayout deferedPipelineLayout = logicalDevice.createPipelineLayout(deferedPipelineLayoutCreateInfo);
+        vk::PipelineLayout deferedPipelineLayout = specification.device.createPipelineLayout(deferedPipelineLayoutCreateInfo);
         
 
        
@@ -777,10 +778,17 @@ namespace vkInit {
         deferedPipelineCI.subpass = 1;
         depthStencilState.depthWriteEnable = VK_FALSE;
 
-        vk::Pipeline deferedPipeline = logicalDevice.createGraphicsPipeline(nullptr, deferedPipelineCI).value;
+        vk::Pipeline deferedPipeline = specification.device.createGraphicsPipeline(nullptr, deferedPipelineCI).value;
 
 
+        GraphicsPipelineOutBundle output;
+        output.layout = geometryPipelineLayout;
+        output.renderpass = renderPass;
+        output.graphicsPipeline = geometryPipeline;
+        output.deferedGraphicsPipeline = deferedPipeline;
+        output.deferedLayout = deferedPipelineLayout;
 
+        return output;
     }
 
     vk::PipelineDepthStencilStateCreateInfo makePipelineDepthStencilStageCreateInfo() {

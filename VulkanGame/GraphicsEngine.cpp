@@ -55,7 +55,6 @@ void GraphicsEngine::make_assets()
 
 	for (const auto& [obj, filename] : filenames) {
 		textureInfo.filename = filename;
-		
 		materials[obj] = new vkImage::Texture(textureInfo);
 	}
 }
