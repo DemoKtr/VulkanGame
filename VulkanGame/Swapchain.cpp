@@ -2,6 +2,7 @@
 #include "Logging.h"
 #include "Queues.h"
 #include "Image.h"
+#include "Gbuffer.h"
 vkInit::SwapChainSupportDetails vkInit::query_swapchain_support(vk::PhysicalDevice device, vk::SurfaceKHR surface, bool debugMode)
 {
 	SwapChainSupportDetails support;
@@ -178,9 +179,11 @@ vkInit::SwapChainBundle vkInit::create_swapchain(vk::PhysicalDevice physicalDevi
 	for (size_t i = 0; i < images.size();  i++) {
 		
 		
-
+		vkGbuffer::createGBufferAttachments(physicalDevice,logicalDevice, &bundle.frames[i].gbuffer);
 		bundle.frames[i].image = images[i];
 		bundle.frames[i].imageView = vkImage::make_image_view(logicalDevice, images[i], format.format, vk::ImageAspectFlagBits::eColor);
+		//bundle.frames[i].write_defered_descriptor_set();
+		
 
 	}
 	bundle.format = format.format;
