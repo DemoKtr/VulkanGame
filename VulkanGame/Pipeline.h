@@ -18,8 +18,10 @@ namespace vkInit {
 	};
 	struct GraphicsPipelineOutBundle {
         vk::PipelineLayout layout;
+        vk::PipelineLayout deferedLayout;
         vk::RenderPass renderpass;
         vk::Pipeline graphicsPipeline;
+        vk::Pipeline deferedGraphicsPipeline;
 	};
     vk::PipelineLayout create_pipeline_layout(vk::Device device, std::vector<vk::DescriptorSetLayout> descriptorSetLayouts ,bool debugMode);
     vk::RenderPass create_renderpass(vk::Device device, vk::Format swapchainImageFormat, vk::Format depthFormat, bool debugMode);
