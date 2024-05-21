@@ -15,7 +15,6 @@ namespace vkInit {
         vk::Format swapchainImageFormat, depthFormat;
         std::vector<vk::DescriptorSetLayout> geometryDescriptorSetLayouts;
         std::vector<vk::DescriptorSetLayout> deferedDescriptorSetLayouts;
-        vkUtil::GbufferAttachments attachments;
 	};
 	struct GraphicsPipelineOutBundle {
         vk::PipelineLayout layout;

@@ -45,8 +45,7 @@ namespace vkUtil {
 		vk::Format depthFormat;
 		int width, height;
 
-		//Gbuffer
-		GbufferAttachments gbuffer;
+		
 
 
 		vk::CommandBuffer commandBuffer;
@@ -79,7 +78,7 @@ namespace vkUtil {
 		void make_descriptor_resources();
 		void make_depth_resources();
 		void write_descriptor_set();
-		void write_defered_descriptor_set();
+
 		void destroy();
 
 	};

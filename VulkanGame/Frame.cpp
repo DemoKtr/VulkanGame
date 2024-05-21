@@ -98,53 +98,7 @@
 
 			logicalDevice.updateDescriptorSets(writeInfo3, nullptr);
 		}
-		void vkUtil::SwapChainFrame::write_defered_descriptor_set()
-		{
-			// Image descriptors for the offscreen color attachments
-			vk::DescriptorImageInfo texDescriptorPosition = {};
-			texDescriptorPosition.imageLayout = vk::ImageLayout::eReadOnlyOptimal;
-			texDescriptorPosition.imageView = gbuffer.position.view;
-			texDescriptorPosition.sampler = VK_NULL_HANDLE;
-			vk::DescriptorImageInfo texDescriptorNormal = {};
-			texDescriptorNormal.imageLayout = vk::ImageLayout::eReadOnlyOptimal;
-			texDescriptorNormal.imageView = gbuffer.normal.view;
-			texDescriptorNormal.sampler = VK_NULL_HANDLE;
-			vk::DescriptorImageInfo texDescriptorAlbedo = {};
-			texDescriptorAlbedo.imageLayout = vk::ImageLayout::eReadOnlyOptimal;
-			texDescriptorAlbedo.imageView = gbuffer.albedo.view;
-			texDescriptorAlbedo.sampler = VK_NULL_HANDLE;
-
-
-			vk::WriteDescriptorSet descriptorWritePos;
-			descriptorWritePos.dstSet = deferedDescriptorSet;
-			descriptorWritePos.dstBinding = 0;
-			descriptorWritePos.dstArrayElement = 0;
-			descriptorWritePos.descriptorType = vk::DescriptorType::eCombinedImageSampler;
-			descriptorWritePos.descriptorCount = 1;
-			descriptorWritePos.pImageInfo = &texDescriptorPosition;
-
-			logicalDevice.updateDescriptorSets(descriptorWritePos,nullptr);
-			
-			vk::WriteDescriptorSet descriptorWriteNormal;
-			descriptorWriteNormal.dstSet = deferedDescriptorSet;
-			descriptorWriteNormal.dstBinding = 0;
-			descriptorWriteNormal.dstArrayElement = 0;
-			descriptorWriteNormal.descriptorType = vk::DescriptorType::eCombinedImageSampler;
-			descriptorWriteNormal.descriptorCount = 1;
-			descriptorWriteNormal.pImageInfo = &texDescriptorNormal;
-
-			logicalDevice.updateDescriptorSets(descriptorWriteNormal, nullptr);
-			vk::WriteDescriptorSet descriptorWriteAlbedo;
-			descriptorWriteAlbedo.dstSet = deferedDescriptorSet;
-			descriptorWriteAlbedo.dstBinding = 0;
-			descriptorWriteAlbedo.dstArrayElement = 0;
-			descriptorWriteAlbedo.descriptorType = vk::DescriptorType::eCombinedImageSampler;
-			descriptorWriteAlbedo.descriptorCount = 1;
-			descriptorWriteAlbedo.pImageInfo = &texDescriptorAlbedo;
-
-			logicalDevice.updateDescriptorSets(descriptorWriteAlbedo, nullptr);
-
-		}
+	
 		void vkUtil::SwapChainFrame::make_depth_resources()
 		{
 			depthFormat = vkImage::find_supported_format(physicalDevice, { vk::Format::eD32Sfloat,vk::Format::eD24UnormS8Uint }, vk::ImageTiling::eOptimal, vk::FormatFeatureFlagBits::eDepthStencilAttachment);
@@ -167,9 +121,6 @@
 		void vkUtil::SwapChainFrame::destroy()
 		{
 			logicalDevice.destroyImageView(imageView);
-			logicalDevice.destroyImageView(gbuffer.albedo.view);
-			logicalDevice.destroyImageView(gbuffer.position.view);
-			logicalDevice.destroyImageView(gbuffer.normal.view);
 			logicalDevice.destroyFramebuffer(framebuffer);
 			logicalDevice.destroyFence(inFlight);
 			logicalDevice.destroySemaphore(imageAvailable);

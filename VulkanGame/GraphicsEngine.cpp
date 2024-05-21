@@ -110,7 +110,6 @@ void GraphicsEngine::create_pipeline()
 	specification.swapchainImageFormat = swapchainFormat;
 	specification.depthFormat = swapchainFrames[0].depthFormat;
 	specification.geometryDescriptorSetLayouts = { frameSetLayout,meshSetLayout };
-	specification.attachments = swapchainFrames[0].gbuffer;
 	vkInit::GraphicsPipelineOutBundle output = vkInit::create_graphic_pipeline(specification,debugMode);
 	layout = output.layout;
 	renderpass = output.renderpass;
