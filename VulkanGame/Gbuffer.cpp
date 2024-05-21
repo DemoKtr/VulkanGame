@@ -70,3 +70,55 @@ void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::De
 	attachmentDescription.format = vk::Format::eR8G8B8A8Unorm;
 	createAttachment(attachmentDescription);
 }
+
+void vkGbuffer::writeGbufferDescriptor(vk::DescriptorSet descriptorSet, vk::Device logicalDevice, vkUtil::Gbuffer gBuffer)
+{
+	vk::DescriptorImageInfo imageDescriptorPos;
+	imageDescriptorPos.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	imageDescriptorPos.imageView = gBuffer.position.view;
+	imageDescriptorPos.sampler = VK_NULL_HANDLE;
+
+	vk::WriteDescriptorSet descriptorWritePos;
+	descriptorWritePos.dstSet = descriptorSet;
+	descriptorWritePos.dstBinding = 0;
+	descriptorWritePos.dstArrayElement = 0;
+	descriptorWritePos.descriptorType = vk::DescriptorType::eInputAttachment;
+	descriptorWritePos.descriptorCount = 1;
+	descriptorWritePos.pImageInfo = &imageDescriptorPos;
+
+	//logicalDevice.updateDescriptorSets(descriptorWritePos, nullptr);
+
+	vk::DescriptorImageInfo imageDescriptorNormal;
+	imageDescriptorNormal.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	imageDescriptorNormal.imageView = gBuffer.normal.view;
+	imageDescriptorNormal.sampler = VK_NULL_HANDLE;
+
+	vk::WriteDescriptorSet descriptorWriteNormal;
+	descriptorWriteNormal.dstSet = descriptorSet;
+	descriptorWriteNormal.dstBinding = 1;
+	descriptorWriteNormal.dstArrayElement = 0;
+	descriptorWriteNormal.descriptorType = vk::DescriptorType::eInputAttachment;
+	descriptorWriteNormal.descriptorCount = 1;
+	descriptorWriteNormal.pImageInfo = &imageDescriptorNormal;
+
+	//logicalDevice.updateDescriptorSets(descriptorWriteNormal, nullptr);
+
+	vk::DescriptorImageInfo imageDescriptoralbedo;
+	imageDescriptoralbedo.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	imageDescriptoralbedo.imageView = gBuffer.albedo.view;
+	imageDescriptoralbedo.sampler = VK_NULL_HANDLE;
+
+	vk::WriteDescriptorSet descriptorWriteAlbedo;
+	descriptorWriteAlbedo.dstSet = descriptorSet;
+	descriptorWriteAlbedo.dstBinding = 2;
+	descriptorWriteAlbedo.dstArrayElement = 0;
+	descriptorWriteAlbedo.descriptorType = vk::DescriptorType::eInputAttachment;
+	descriptorWriteAlbedo.descriptorCount = 1;
+	descriptorWriteAlbedo.pImageInfo = &imageDescriptoralbedo;
+	std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {
+		descriptorWritePos,descriptorWriteNormal,descriptorWriteAlbedo
+	};
+
+	logicalDevice.updateDescriptorSets(writeDescriptorSets, nullptr);
+
+}
