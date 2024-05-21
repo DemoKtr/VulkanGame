@@ -13,9 +13,10 @@ namespace vkUtil {
 		vk::ImageView view = VK_NULL_HANDLE;
 		vk::Format format;
 	};
-	struct GbufferAttachments {
+	struct Gbuffer{
 		FrameBufferAttachment position, normal, albedo;
 		int32_t width;
 		int32_t height;
+		
 	};
 }
