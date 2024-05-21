@@ -56,8 +56,7 @@ class GraphicsEngine
 	vk::DescriptorSetLayout meshSetLayout;
 	vk::DescriptorPool meshDescriptorPool;
 
-	vk::DescriptorSetLayout deferedSetLayout;
-	vk::DescriptorPool deferedDescriptorPool;
+
 
 
 
