@@ -165,6 +165,7 @@
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="Obj_Mesh.cpp" />
     <ClCompile Include="Queues.cpp" />
+    <ClCompile Include="RenderPass.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="single_time_commands.cpp" />
@@ -190,6 +191,7 @@
     <ClInclude Include="Obj_Mesh.h" />
     <ClInclude Include="Pipeline.h" />
     <ClInclude Include="Queues.h" />
+    <ClInclude Include="RenderPass.h" />
     <ClInclude Include="RenderStruct.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneObject.h" />

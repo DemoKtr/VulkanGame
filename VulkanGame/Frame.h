@@ -45,7 +45,8 @@ namespace vkUtil {
 		vk::Format depthFormat;
 		int width, height;
 
-		
+		//gBuffer
+		vkUtil::Gbuffer gbuffer;
 
 
 		vk::CommandBuffer commandBuffer;

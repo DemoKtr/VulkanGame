@@ -74,7 +74,7 @@ namespace vkInit {
         \returns the viewport state creation info
     */
     vk::PipelineViewportStateCreateInfo make_viewport_state(const vk::Viewport& viewport, const vk::Rect2D& scissor);
-    vk::RenderPass makeDeferedRenderpass(vk::Device logicalDevice, const vk::Format& swapchainImageFormat, vkUtil::GbufferAttachments gAttachments, const vk::Format& depth, bool debugMode);
+    
     /**
         \returns the creation info for the configured rasterizer stage
     */

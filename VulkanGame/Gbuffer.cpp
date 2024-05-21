@@ -53,20 +53,20 @@ void vkGbuffer::createAttachment(attachmentBundle attachmentDescription)
 
 }
 
-void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::Device logicalDevice,vkUtil::Gbuffer gbuffer)
+void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::Device logicalDevice,vkUtil::Gbuffer* gbuffer)
 {
 	attachmentBundle attachmentDescription;
 	attachmentDescription.logicalDevice = logicalDevice;
 	attachmentDescription.physicalDevice = physicalDevice;
-	attachmentDescription.width = gbuffer.width;
-	attachmentDescription.height = gbuffer.height;
-	attachmentDescription.attachment = &gbuffer.position;
+	attachmentDescription.width = gbuffer->width;
+	attachmentDescription.height = gbuffer->height;
+	attachmentDescription.attachment = &gbuffer->position;
 	attachmentDescription.format = vk::Format::eR16G16B16A16Sfloat;
 	attachmentDescription.usage = vk::ImageUsageFlagBits::eColorAttachment;
 	createAttachment(attachmentDescription);
-	attachmentDescription.attachment = &gbuffer.normal;
+	attachmentDescription.attachment = &gbuffer->normal;
 	createAttachment(attachmentDescription);
-	attachmentDescription.attachment = &gbuffer.albedo;
+	attachmentDescription.attachment = &gbuffer->albedo;
 	attachmentDescription.format = vk::Format::eR8G8B8A8Unorm;
 	createAttachment(attachmentDescription);
 }
