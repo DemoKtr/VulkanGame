@@ -57,8 +57,8 @@ class GraphicsEngine
 	vk::DescriptorPool meshDescriptorPool;
 
 
-	vk::DescriptorSetLayout deferedSetLayout;
-	vk::DescriptorPool deferedDescriptorPool;
+	//vk::DescriptorSetLayout deferedSetLayout;
+	//vk::DescriptorPool deferedDescriptorPool;
 
 
 	void make_assets();

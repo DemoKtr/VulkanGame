@@ -134,9 +134,24 @@
 			logicalDevice.freeMemory(modelBuffer.bufferMemory);
 			logicalDevice.destroyBuffer(modelBuffer.buffer);
 
+			logicalDevice.unmapMemory(lightDataBuffer.bufferMemory);
+			logicalDevice.freeMemory(lightDataBuffer.bufferMemory);
+			logicalDevice.destroyBuffer(lightDataBuffer.buffer);
+
+
+
 			logicalDevice.destroyImage(depthBuffer);
+			logicalDevice.destroyImage(gbuffer.position.image);
+			logicalDevice.destroyImage(gbuffer.normal.image);
+			logicalDevice.destroyImage(gbuffer.albedo.image);
 			logicalDevice.freeMemory(depthBufferMemory);
+			logicalDevice.freeMemory(gbuffer.position.mem);
+			logicalDevice.freeMemory(gbuffer.normal.mem);
+			logicalDevice.freeMemory(gbuffer.albedo.mem);
 			logicalDevice.destroyImageView(depthBufferView);
+			logicalDevice.destroyImageView(gbuffer.position.view);
+			logicalDevice.destroyImageView(gbuffer.normal.view);
+			logicalDevice.destroyImageView(gbuffer.albedo.view);
 			
 		}
 

@@ -209,7 +209,7 @@ namespace vkInit {
     }
     GraphicsPipelineOutBundle create_graphic_pipeline(GraphicsPipelineInBundle specyfication, bool debugMode) {
         
-        
+
         vk::GraphicsPipelineCreateInfo pipelineInfo = {  };
         pipelineInfo.flags = vk::PipelineCreateFlags();
 

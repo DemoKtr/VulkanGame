@@ -24,13 +24,14 @@ namespace vkInit {
 	*/
 	void make_framebuffers(framebufferInput inputChunk, std::vector<vkUtil::SwapChainFrame>& frames, bool debug) {
 
+	
 		for (int i = 0; i < frames.size(); ++i) {
 
 			std::vector<vk::ImageView> attachments = {
 				frames[i].imageView, frames[i].depthBufferView
 				//, frames[i].gbuffer.position.view, frames[i].gbuffer.normal.view, frames[i].gbuffer.albedo.view
 			};
-
+			
 			vk::FramebufferCreateInfo framebufferInfo;
 			framebufferInfo.flags = vk::FramebufferCreateFlags();
 			framebufferInfo.renderPass = inputChunk.renderpass;

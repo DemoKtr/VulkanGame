@@ -40,7 +40,7 @@ void GraphicsEngine::make_assets()
 	vkInit::descriptorSetLayoutData bindings;
 	bindings.count = 2;
 	bindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
-	bindings.types.push_back(vk::DescriptorType::eSampledImage);
+	bindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
 	meshDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(filenames.size()), bindings);
 
 
@@ -52,7 +52,6 @@ void GraphicsEngine::make_assets()
 	textureInfo.physicalDevice = physicalDevice;
 	textureInfo.layout = meshSetLayout;
 	textureInfo.descriptorPool = meshDescriptorPool;
-
 	for (const auto& [obj, filename] : filenames) {
 		textureInfo.filename = filename;
 		materials[obj] = new vkImage::Texture(textureInfo);
@@ -166,18 +165,23 @@ GraphicsEngine::~GraphicsEngine()
 	
 	device.destroyCommandPool(commandPool);
 	device.destroyPipeline(graphicsPipeline);
-	
-	device.destroyRenderPass(renderpass);
 	device.destroyPipelineLayout(layout);
+	device.destroyRenderPass(renderpass);
+	
 	this->cleanup_swapchain();
+	
 	device.destroyDescriptorSetLayout(frameSetLayout);
+	device.destroyDescriptorSetLayout(meshSetLayout);
+	device.destroyDescriptorPool(meshDescriptorPool);
+	
 	delete meshes;
 	for (const auto& [key, texture] : materials) delete texture;
-	device.destroyDescriptorSetLayout(meshSetLayout);
-	device.destroyDescriptorSetLayout(deferedSetLayout);
-	device.destroyDescriptorPool(meshDescriptorPool);
-	device.destroyDescriptorPool(deferedDescriptorPool);
-
+	
+	
+	//device.destroyDescriptorSetLayout(deferedSetLayout);
+	//device.destroyDescriptorPool(meshDescriptorPool);
+	//device.destroyDescriptorPool(deferedDescriptorPool);
+	
 	device.destroy();
 
 	instance.destroySurfaceKHR(surface);
@@ -226,7 +230,7 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	bindings.indices[0] = 0;
 	bindings.indices[1] = 1;
 	bindings.types[0] =vk::DescriptorType::eCombinedImageSampler;
-	bindings.types[1] =vk::DescriptorType::eSampledImage;
+	bindings.types[1] =vk::DescriptorType::eCombinedImageSampler;
 	bindings.counts[0] = 1;
 	bindings.counts[1] = 1;
 	bindings.stages[0]=vk::ShaderStageFlagBits::eFragment;
@@ -249,7 +253,7 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	bindings.stages[1] = vk::ShaderStageFlagBits::eFragment;
 	bindings.stages[2] = vk::ShaderStageFlagBits::eFragment;
 
-	deferedSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+	//deferedSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
 
 
@@ -270,6 +274,7 @@ void GraphicsEngine::finalize_setup()
 	vkInit::make_frame_command_buffers(commandBufferInput, debugMode);
 
 	create_frame_resources();
+	
 
 }
 
@@ -454,8 +459,9 @@ void GraphicsEngine::create_frame_resources()
 	vkInit::descriptorSetLayoutData bindings;
 	bindings.count = 3;
 	bindings.types.push_back(vk::DescriptorType::eUniformBuffer);
-	bindings.types.push_back(vk::DescriptorType::eUniformBuffer);
 	bindings.types.push_back(vk::DescriptorType::eStorageBuffer);
+	bindings.types.push_back(vk::DescriptorType::eUniformBuffer);
+	
 
 	vkInit::descriptorSetLayoutData gbindings;
 	gbindings.count = 3;
@@ -463,7 +469,7 @@ void GraphicsEngine::create_frame_resources()
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment);
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment);
 	frameDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);
-	deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
+	//deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
 	
 	for (vkUtil::SwapChainFrame& frame : swapchainFrames) //referencja 
 	{
@@ -474,7 +480,7 @@ void GraphicsEngine::create_frame_resources()
 		frame.make_descriptor_resources();
 
 		frame.descriptorSet = vkInit::allocate_descriptor_set(device, frameDescriptorPool, frameSetLayout);
-		frame.deferedDescriptorSet = vkInit::allocate_descriptor_set(device, deferedDescriptorPool, deferedSetLayout);
+		//frame.deferedDescriptorSet = vkInit::allocate_descriptor_set(device, deferedDescriptorPool, deferedSetLayout);
 		
 
 	}
@@ -547,5 +553,5 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), i * sizeof(glm::mat4));
 
 	_frame.write_descriptor_set();
-	vkGbuffer::writeGbufferDescriptor(_frame.deferedDescriptorSet,device,_frame.gbuffer);
+	//vkGbuffer::writeGbufferDescriptor(_frame.deferedDescriptorSet,device,_frame.gbuffer);
 }
