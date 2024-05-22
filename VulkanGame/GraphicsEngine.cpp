@@ -93,9 +93,13 @@ void GraphicsEngine::choice_device()
 	this->physicalDevice = vkInit::choose_physical_device(instance, debugMode);
 	this->device = vkInit::create_logical_device(physicalDevice, surface,debugMode);
 	std::array<vk::Queue, 2> queues = vkInit::get_Queues(physicalDevice, device, surface, debugMode);
+	
 	this->graphicsQueue = queues[0];
+	
 	this->presentQueue = queues[1];
+	
 	this->create_swapchain();
+	
 	frameNumber = 0;
 }
 void GraphicsEngine::create_pipeline()
@@ -118,11 +122,13 @@ void GraphicsEngine::create_pipeline()
 }
 void GraphicsEngine::create_swapchain()
 {
+	
 	vkInit::SwapChainBundle bundle = vkInit::create_swapchain(physicalDevice, device, surface, screenSize, debugMode);
 	this->swapchain = bundle.swapchain;
 	this->swapchainFrames = bundle.frames;
 	this->swapchainFormat = bundle.format;
 	this->swapchainExtent = bundle.extent;
+
 	//vkInit::query_swapchain_support(physicalDevice, surface, debugMode);
 	maxFramesInFlight = static_cast<int>(swapchainFrames.size());
 
@@ -147,7 +153,9 @@ GraphicsEngine::GraphicsEngine(ivec2 screenSize, GLFWwindow* window, bool debugM
 	
 	make_instance();
 	choice_device();
+	std::cout << ":)" << std::endl;
 	create_descriptor_set_layouts();
+	std::cout << ":(" << std::endl;
 	create_pipeline();
 	finalize_setup();
 	make_assets();
@@ -215,14 +223,14 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	bindings.stages.push_back(vk::ShaderStageFlagBits::eVertex);
 
 	bindings.indices.push_back(1);
-	bindings.types.push_back(vk::DescriptorType::eUniformBuffer);
-	bindings.counts.push_back(1);
-	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
-
-	bindings.indices.push_back(2);
 	bindings.types.push_back(vk::DescriptorType::eStorageBuffer);
 	bindings.counts.push_back(1);
 	bindings.stages.push_back(vk::ShaderStageFlagBits::eVertex);
+
+	bindings.indices.push_back(2);
+	bindings.types.push_back(vk::DescriptorType::eUniformBuffer);
+	bindings.counts.push_back(1);
+	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
 
 	frameSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 

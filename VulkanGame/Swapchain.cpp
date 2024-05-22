@@ -138,18 +138,19 @@ vkInit::SwapChainBundle vkInit::create_swapchain(vk::PhysicalDevice physicalDevi
 	SwapChainSupportDetails support = query_swapchain_support(physicalDevice, surface, debugMode);
 	vk::SurfaceFormatKHR format = choose_swapchain_surface_format(support.formats);
 	vk::PresentModeKHR presentMode = choose_swapchain_present_mode(support.presentModes);
+	
 	vk::Extent2D extent = choose_swapchain_exten(screenSize.x, screenSize.y, support.capabilities);
 	uint32_t imageCount = std::min(
 		support.capabilities.maxImageCount,
 		support.capabilities.minImageCount + 1
-	);
+	);	
 	vk::SwapchainCreateInfoKHR createInfo = vk::SwapchainCreateInfoKHR(
 		vk::SwapchainCreateFlagsKHR(), surface, imageCount, format.format, format.colorSpace,
 		extent, 1, vk::ImageUsageFlagBits::eColorAttachment
 	);
 	vkUtil::QueueFamilyIndices indices = vkUtil::findQueueFamilies(physicalDevice, surface, debugMode);
 	uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
-
+	
 	if (indices.graphicsFamily != indices.presentFamily) {
 		createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
 		createInfo.queueFamilyIndexCount = 2;
@@ -158,14 +159,13 @@ vkInit::SwapChainBundle vkInit::create_swapchain(vk::PhysicalDevice physicalDevi
 	else {
 		createInfo.imageSharingMode = vk::SharingMode::eExclusive;
 	}
-
 	createInfo.preTransform = support.capabilities.currentTransform;
 	createInfo.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
 	createInfo.presentMode = presentMode;
 	createInfo.clipped = VK_TRUE;
 
 	createInfo.oldSwapchain = vk::SwapchainKHR(nullptr);
-
+	
 	SwapChainBundle bundle{};
 	try {
 		bundle.swapchain = logicalDevice.createSwapchainKHR(createInfo);
@@ -176,6 +176,7 @@ vkInit::SwapChainBundle vkInit::create_swapchain(vk::PhysicalDevice physicalDevi
 
 	std::vector<vk::Image> images = logicalDevice.getSwapchainImagesKHR(bundle.swapchain);
 	bundle.frames.resize(images.size());
+
 	for (size_t i = 0; i < images.size();  i++) {
 		
 		
