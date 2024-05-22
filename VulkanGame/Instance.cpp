@@ -104,14 +104,14 @@ vk::Instance vkInit::make_instance(bool debugMode, const char* appName) {
 	}
 
 	std::vector<const char*> layers;
-
+	layers.push_back("VK_LAYER_KHRONOS_validation");
 	if (!supported(extensions, layers, debugMode)) {
 		
 
 		
 		return nullptr;
 	}
-
+	std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << layers.size() << std::endl;
 	vk::InstanceCreateInfo createInfo = vk::InstanceCreateInfo(
 		vk::InstanceCreateFlags(),
 		&appInfo,
