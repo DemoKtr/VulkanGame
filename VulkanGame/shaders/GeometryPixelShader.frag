@@ -42,9 +42,9 @@ void main() {
 	gPosition.a = linearDepth(gl_FragCoord.z);
 	vec3 N = normalize(outNormalMatrix*normal);
 	
-	gAlbedoSpec.rgb = texture(material,fragTexCoord).rgb;
+	gAlbedoSpec.rgb = 2.0f *(texture(material,fragTexCoord).rgb);
 	gAlbedoSpec.a = 1.0f;
 	gNormal = vec4(N,1.0f);
-    //gColor = gAlbedoSpec;
+  // gColor = vec4(1.0);
 	
 }

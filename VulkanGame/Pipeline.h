@@ -630,7 +630,7 @@ namespace vkInit {
         vk::PipelineVertexInputStateCreateInfo emptyInputState = {};
         pipelineInfo.pVertexInputState = &emptyInputState;
 
-        rasterizationState.cullMode = vk::CullModeFlagBits::eFront;
+        rasterizationState.cullMode = vk::CullModeFlagBits::eBack;
         vk::ShaderModule dvertexShader = vkUtil::createModule(specyfication.deferedVertexFilePath, specyfication.device, debugMode);
         vk::PipelineShaderStageCreateInfo dvertexShaderInfo = make_shader_info(dvertexShader, vk::ShaderStageFlagBits::eVertex);
         shaderStages[0] = (dvertexShaderInfo);

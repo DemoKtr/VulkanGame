@@ -333,7 +333,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint3
 
 	vk::ClearValue colorClear;
 	std::array<float, 4> colors = { 1.0f, 0.5f, 0.25f, 1.0f };
-	std::array<float, 4> colorsd = { 0.0f, 0.0f, 0.0f, 0.0f };
+	std::array<float, 4> colorsd = { 1.0f, 0.0f, 0.0f, 0.0f };
 	colorClear.color = vk::ClearColorValue(colors);
 	vk::ClearValue depthClear;
 
@@ -361,7 +361,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint3
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, deferedLayout, 0, swapchainFrames[imageIndex].deferedDescriptorSet, nullptr);
 
 
-	commandBuffer.draw(9, 1, 0, 0);
+	commandBuffer.draw(3, 1, 0, 0);
 	commandBuffer.endRenderPass();
 
 	try {
