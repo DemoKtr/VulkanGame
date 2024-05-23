@@ -360,7 +360,8 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint3
 
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, deferedLayout, 0, swapchainFrames[imageIndex].deferedDescriptorSet, nullptr);
 
-	commandBuffer.draw(3, 1, 0, 0);
+
+	commandBuffer.draw(9, 1, 0, 0);
 	commandBuffer.endRenderPass();
 
 	try {

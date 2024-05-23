@@ -41,10 +41,10 @@ void main() {
 	gPosition = vec4(outPos,1.0f);
 	gPosition.a = linearDepth(gl_FragCoord.z);
 	vec3 N = normalize(outNormalMatrix*normal);
-	N.y = -N.y;
+	
 	gAlbedoSpec.rgb = texture(material,fragTexCoord).rgb;
 	gAlbedoSpec.a = 1.0f;
 	gNormal = vec4(N,1.0f);
-
+    //gColor = gAlbedoSpec;
 	
 }
