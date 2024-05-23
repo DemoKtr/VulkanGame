@@ -22,9 +22,11 @@ layout(location = 3) out mat3 outNormalMatrix;
 
 
 void main() {
-	gl_Position = cameraData.viewProjection * ObjectData.model[gl_InstanceIndex] * vec4(vertexPosition, 1.0);
+	
 	fragColor = vertexColor;
 	fragTexCoord = vertTexCoord;
-	outPos = (ObjectData.model[gl_InstanceIndex] * vec4(vertexPosition, 1.0)).xyz;
+	outPos = vec3(ObjectData.model[gl_InstanceIndex] * vec4(vertexPosition, 1.0));
+	outPos.y = -outPos.y;
 	outNormalMatrix = transpose(inverse(mat3(ObjectData.model[gl_InstanceIndex])));
+	gl_Position = cameraData.viewProjection * ObjectData.model[gl_InstanceIndex] * vec4(vertexPosition, 1.0);
 }

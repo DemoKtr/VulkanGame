@@ -24,7 +24,7 @@ class GraphicsEngine
 
 	//physical device
 	vk::PhysicalDevice physicalDevice{ nullptr };
-	vk::Device device{ nullptr };
+	vk::Device device {};
 	vk::Queue graphicsQueue{ nullptr };
 	vk::Queue presentQueue{ nullptr };
 
@@ -36,8 +36,10 @@ class GraphicsEngine
 
 	//pipeline
 	vk::PipelineLayout layout;
+	vk::PipelineLayout deferedLayout;
 	vk::RenderPass renderpass;
 	vk::Pipeline graphicsPipeline;
+	vk::Pipeline deferedGraphicsPipeline;
 
 	//command
 	vk::CommandPool commandPool;
@@ -56,6 +58,8 @@ class GraphicsEngine
 	vk::DescriptorSetLayout meshSetLayout;
 	vk::DescriptorPool meshDescriptorPool;
 
+	vk::DescriptorSetLayout deferedSetLayout;
+	vk::DescriptorPool deferedDescriptorPool;
 
 	//vk::DescriptorSetLayout deferedSetLayout;
 	//vk::DescriptorPool deferedDescriptorPool;

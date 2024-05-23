@@ -106,18 +106,23 @@ void GraphicsEngine::create_pipeline()
 {
 	vkInit::GraphicsPipelineInBundle specification = {};
 	specification.device = device;
-	specification.vertexFilePath = "shaders/vert.spv";
-	specification.fragmentFilePath = "shaders/frag.spv";
+	specification.vertexFilePath = "shaders/geoVert.spv";
+	specification.fragmentFilePath = "shaders/geoFrag.spv";
+	specification.deferedVertexFilePath = "shaders/deferedVert.spv";
 	specification.deferedFragmentFilePath = "shaders/deferedFrag.spv";
 	specification.swapchainExtent = swapchainExtent;
 	specification.swapchainImageFormat = swapchainFormat;
 	specification.depthFormat = swapchainFrames[0].depthFormat;
 	specification.geometryDescriptorSetLayouts = { frameSetLayout,meshSetLayout };
-	vkInit::GraphicsPipelineOutBundle output = vkInit::create_graphic_pipeline(specification,debugMode);
+	specification.deferedDescriptorSetLayouts = { deferedSetLayout};
+	specification.gbuffer = swapchainFrames[0].gbuffer;
+
+	vkInit::GraphicsPipelineOutBundle output = vkInit::create_defered_pipelines(specification,debugMode);
 	layout = output.layout;
 	renderpass = output.renderpass;
 	graphicsPipeline = output.graphicsPipeline;
-	
+	deferedGraphicsPipeline = output.deferedGraphicsPipeline;
+	deferedLayout = output.deferedLayout;
 	
 }
 void GraphicsEngine::create_swapchain()
@@ -153,9 +158,9 @@ GraphicsEngine::GraphicsEngine(ivec2 screenSize, GLFWwindow* window, bool debugM
 	
 	make_instance();
 	choice_device();
-	std::cout << ":)" << std::endl;
+
 	create_descriptor_set_layouts();
-	std::cout << ":(" << std::endl;
+
 	create_pipeline();
 	finalize_setup();
 	make_assets();
@@ -173,7 +178,9 @@ GraphicsEngine::~GraphicsEngine()
 	
 	device.destroyCommandPool(commandPool);
 	device.destroyPipeline(graphicsPipeline);
+	device.destroyPipeline(deferedGraphicsPipeline);
 	device.destroyPipelineLayout(layout);
+	device.destroyPipelineLayout(deferedLayout);
 	device.destroyRenderPass(renderpass);
 	
 	this->cleanup_swapchain();
@@ -186,9 +193,8 @@ GraphicsEngine::~GraphicsEngine()
 	for (const auto& [key, texture] : materials) delete texture;
 	
 	
-	//device.destroyDescriptorSetLayout(deferedSetLayout);
-	//device.destroyDescriptorPool(meshDescriptorPool);
-	//device.destroyDescriptorPool(deferedDescriptorPool);
+	device.destroyDescriptorSetLayout(deferedSetLayout);
+	device.destroyDescriptorPool(deferedDescriptorPool);
 	
 	device.destroy();
 
@@ -261,7 +267,7 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	bindings.stages[1] = vk::ShaderStageFlagBits::eFragment;
 	bindings.stages[2] = vk::ShaderStageFlagBits::eFragment;
 
-	//deferedSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+	deferedSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
 
 
@@ -327,27 +333,34 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint3
 
 	vk::ClearValue colorClear;
 	std::array<float, 4> colors = { 1.0f, 0.5f, 0.25f, 1.0f };
+	std::array<float, 4> colorsd = { 0.0f, 0.0f, 0.0f, 0.0f };
 	colorClear.color = vk::ClearColorValue(colors);
 	vk::ClearValue depthClear;
 
 	depthClear.depthStencil = vk::ClearDepthStencilValue({ 1.0f, 0 });
-	std::vector<vk::ClearValue> clearValues = { {colorClear, depthClear} };
+	std::vector<vk::ClearValue> clearValues = { {colorClear,vk::ClearColorValue(colorsd),vk::ClearColorValue(colorsd),vk::ClearColorValue(colorsd) ,depthClear}};
 
 	renderPassInfo.clearValueCount = clearValues.size();
 	renderPassInfo.pClearValues = clearValues.data();
 
 	commandBuffer.beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
-	
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, graphicsPipeline);
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, swapchainFrames[imageIndex].descriptorSet, nullptr);
 	prepare_scene(commandBuffer);
 	uint32_t startInstance = 0;
 	//Triangles
+
 	for (std::pair<meshTypes, std::vector<SceneObject*>> pair : scene->positions) {
 		render_objects(commandBuffer,pair.first, startInstance, static_cast<uint32_t>(pair.second.size()));
 	}
 
+	commandBuffer.nextSubpass(vk::SubpassContents::eInline);
 
+	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, deferedGraphicsPipeline);
+
+	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, deferedLayout, 0, swapchainFrames[imageIndex].deferedDescriptorSet, nullptr);
+
+	commandBuffer.draw(3, 1, 0, 0);
 	commandBuffer.endRenderPass();
 
 	try {
@@ -477,6 +490,7 @@ void GraphicsEngine::create_frame_resources()
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment);
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment);
 	frameDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);
+	deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
 	//deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
 	
 	for (vkUtil::SwapChainFrame& frame : swapchainFrames) //referencja 
@@ -488,7 +502,7 @@ void GraphicsEngine::create_frame_resources()
 		frame.make_descriptor_resources();
 
 		frame.descriptorSet = vkInit::allocate_descriptor_set(device, frameDescriptorPool, frameSetLayout);
-		//frame.deferedDescriptorSet = vkInit::allocate_descriptor_set(device, deferedDescriptorPool, deferedSetLayout);
+		frame.deferedDescriptorSet = vkInit::allocate_descriptor_set(device, deferedDescriptorPool, deferedSetLayout);
 		
 
 	}
@@ -502,7 +516,7 @@ void GraphicsEngine::create_framebuffers()
 	frameBufferInput.device = device;
 	frameBufferInput.renderpass = renderpass;
 	frameBufferInput.swapchainExtent = swapchainExtent;
-	vkInit::make_framebuffers(frameBufferInput, swapchainFrames, debugMode);
+	vkInit::make_framebuffers_withGbuffer(frameBufferInput, swapchainFrames, debugMode);
 }
 
 
@@ -561,5 +575,8 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), i * sizeof(glm::mat4));
 
 	_frame.write_descriptor_set();
+
+
+	vkGbuffer::writeGbufferDescriptor(_frame.deferedDescriptorSet, device,_frame.gbuffer);
 	//vkGbuffer::writeGbufferDescriptor(_frame.deferedDescriptorSet,device,_frame.gbuffer);
 }

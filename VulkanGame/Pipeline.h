@@ -4,6 +4,7 @@
 #include "RenderStruct.h"
 #include "Mesh.h"
 #include "RenderStruct.h"
+#include "RenderPass.h"
 namespace vkInit {
 	struct GraphicsPipelineInBundle {
 		vk::Device device;
@@ -15,6 +16,7 @@ namespace vkInit {
         vk::Format swapchainImageFormat, depthFormat;
         std::vector<vk::DescriptorSetLayout> geometryDescriptorSetLayouts;
         std::vector<vk::DescriptorSetLayout> deferedDescriptorSetLayouts;
+        vkUtil::Gbuffer gbuffer;
 	};
 	struct GraphicsPipelineOutBundle {
         vk::PipelineLayout layout;
@@ -57,7 +59,7 @@ namespace vkInit {
         \returns the created viewport
     */
     vk::Viewport make_viewport(const GraphicsPipelineInBundle& specification);
-    vk::PipelineDepthStencilStateCreateInfo makePipelineDepthStencilStageCreateInfo();
+
     /**
         Create a scissor rectangle.
 
@@ -142,7 +144,7 @@ namespace vkInit {
     */
     vk::RenderPassCreateInfo make_renderpass_info(const std::vector<vk::AttachmentDescription>& attachemnts, const vk::SubpassDescription& subpass);
 
-    
+    GraphicsPipelineOutBundle create_defered_pipelines();
 
 
 
@@ -254,6 +256,8 @@ namespace vkInit {
         if (debugMode) {
             std::cout << "Create Fragment Shader " << std::endl;
         }
+
+
         vk::ShaderModule fragmentShader = vkUtil::createModule(specyfication.fragmentFilePath, specyfication.device, debugMode);
         vk::PipelineShaderStageCreateInfo fragmentShaderInfo = make_shader_info(fragmentShader, vk::ShaderStageFlagBits::eFragment);
         shaderStages.push_back(fragmentShaderInfo);
@@ -505,6 +509,154 @@ namespace vkInit {
         renderpassInfo.pSubpasses = &subpass;
 
         return renderpassInfo;
+    }
+
+    GraphicsPipelineOutBundle create_defered_pipelines(GraphicsPipelineInBundle specyfication,bool debugMode)
+    {
+        GraphicsPipelineOutBundle output;
+
+        vk::PipelineLayout geometryPipelineLayout = create_pipeline_layout(specyfication.device, specyfication.geometryDescriptorSetLayouts, debugMode);
+        vk::PipelineLayout deferedPipelineLayout = create_pipeline_layout(specyfication.device, specyfication.deferedDescriptorSetLayouts, debugMode);
+        vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState = make_input_assembly_info();
+        vk::PipelineRasterizationStateCreateInfo rasterizationState = make_rasterizer_info();
+        vk::PipelineColorBlendAttachmentState blendAttachmentState = make_color_blend_attachment_state();
+        vk::PipelineColorBlendStateCreateInfo colorBlendState = make_color_blend_attachment_stage(blendAttachmentState);
+        vk::PipelineDepthStencilStateCreateInfo depthStageInfo;
+        depthStageInfo.flags = vk::PipelineDepthStencilStateCreateFlags();
+        depthStageInfo.depthTestEnable = true;
+        depthStageInfo.depthWriteEnable = true;
+        depthStageInfo.depthCompareOp = vk::CompareOp::eLess;
+        depthStageInfo.depthBoundsTestEnable = false;
+        depthStageInfo.stencilTestEnable = false;
+        //Viewport and Scissor
+        vk::Viewport viewport = make_viewport(specyfication);
+        vk::Rect2D scissor = make_scissor(specyfication);
+        vk::PipelineViewportStateCreateInfo viewportState = make_viewport_state(viewport, scissor);
+        vk::PipelineMultisampleStateCreateInfo multisampleState = make_multisampling_info();
+        std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
+
+        vk::RenderPass renderpass = vkInit::create_defered_renderpass(specyfication.device, specyfication.gbuffer, specyfication.swapchainImageFormat, specyfication.depthFormat);
+
+        vk::GraphicsPipelineCreateInfo pipelineInfo = {};
+        pipelineInfo.pInputAssemblyState = &inputAssemblyState;
+        pipelineInfo.renderPass = renderpass;
+        pipelineInfo.pRasterizationState = &rasterizationState;
+        pipelineInfo.pColorBlendState = &colorBlendState;
+        pipelineInfo.pMultisampleState = &multisampleState;
+        pipelineInfo.pViewportState = &viewportState;
+        pipelineInfo.pDepthStencilState = &depthStageInfo;
+        
+        /////////////////////////////////////////////////////////////
+        //offscreen
+        pipelineInfo.layout = geometryPipelineLayout;
+        vk::VertexInputBindingDescription bindingDescription = vkMesh::getPosColBindingDescription();
+        std::vector <vk::VertexInputAttributeDescription> attributeDescriptions = vkMesh::getPosColorAttributeDescriptions();
+        vk::PipelineVertexInputStateCreateInfo vertexInputInfo = make_vertex_input_info(bindingDescription, attributeDescriptions);
+        pipelineInfo.pVertexInputState = &vertexInputInfo;
+        rasterizationState.cullMode = vk::CullModeFlagBits::eBack;
+
+        // Offscreen pipeline
+        vk::ShaderModule vertexShader = vkUtil::createModule(specyfication.vertexFilePath, specyfication.device, debugMode);
+        vk::PipelineShaderStageCreateInfo vertexShaderInfo = make_shader_info(vertexShader, vk::ShaderStageFlagBits::eVertex);
+        shaderStages[0] =(vertexShaderInfo);
+        vk::ShaderModule fragmentShader = vkUtil::createModule(specyfication.fragmentFilePath, specyfication.device, debugMode);
+        vk::PipelineShaderStageCreateInfo fragmentShaderInfo = make_shader_info(fragmentShader, vk::ShaderStageFlagBits::eFragment);
+        shaderStages[1] = (fragmentShaderInfo);
+
+        // Blend attachment states required for all color attachments
+        // This is important, as color write mask will otherwise be 0x0 and you
+        // won't see anything rendered to the attachment
+        std::array<vk::PipelineColorBlendAttachmentState, 4> blendAttachmentStates = {
+    vk::PipelineColorBlendAttachmentState(
+        VK_FALSE,                                  // blendEnable
+        vk::BlendFactor::eOne,                    // srcColorBlendFactor
+        vk::BlendFactor::eZero,                   // dstColorBlendFactor
+        vk::BlendOp::eAdd,                        // colorBlendOp
+        vk::BlendFactor::eOne,                    // srcAlphaBlendFactor
+        vk::BlendFactor::eZero,                   // dstAlphaBlendFactor
+        vk::BlendOp::eAdd,                        // alphaBlendOp
+        vk::ColorComponentFlags(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT) // colorWriteMask
+    ),
+    vk::PipelineColorBlendAttachmentState(
+        VK_FALSE,
+        vk::BlendFactor::eOne,
+        vk::BlendFactor::eZero,
+        vk::BlendOp::eAdd,
+        vk::BlendFactor::eOne,
+        vk::BlendFactor::eZero,
+        vk::BlendOp::eAdd,
+        vk::ColorComponentFlags(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT)
+    ),
+    vk::PipelineColorBlendAttachmentState(
+        VK_FALSE,
+        vk::BlendFactor::eOne,
+        vk::BlendFactor::eZero,
+        vk::BlendOp::eAdd,
+        vk::BlendFactor::eOne,
+        vk::BlendFactor::eZero,
+        vk::BlendOp::eAdd,
+        vk::ColorComponentFlags(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT)
+    ),
+            vk::PipelineColorBlendAttachmentState(
+        VK_FALSE,
+        vk::BlendFactor::eOne,
+        vk::BlendFactor::eZero,
+        vk::BlendOp::eAdd,
+        vk::BlendFactor::eOne,
+        vk::BlendFactor::eZero,
+        vk::BlendOp::eAdd,
+        vk::ColorComponentFlags(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT)
+    ),
+        };
+
+        colorBlendState.attachmentCount = static_cast<uint32_t>(blendAttachmentStates.size());
+        colorBlendState.pAttachments = blendAttachmentStates.data();
+        pipelineInfo.stageCount = shaderStages.size();
+        pipelineInfo.pStages = shaderStages.data();
+        pipelineInfo.subpass = 0;
+        vk::Pipeline geometryPipeline;
+
+        pipelineInfo.basePipelineHandle = nullptr;
+        if (debugMode) std::cout << "Creating geometry Graphics Pipeline " << std::endl;
+        try {
+            geometryPipeline = (specyfication.device.createGraphicsPipeline(nullptr, pipelineInfo)).value;
+        }
+        catch (vk::SystemError err) {
+            if (debugMode) std::cout << "Failed create geometry Graphics Pipeline!" << std::endl;
+        }
+
+        //////////////
+        //Composition
+        vk::PipelineVertexInputStateCreateInfo emptyInputState = {};
+        pipelineInfo.pVertexInputState = &emptyInputState;
+
+        rasterizationState.cullMode = vk::CullModeFlagBits::eFront;
+        vk::ShaderModule dvertexShader = vkUtil::createModule(specyfication.deferedVertexFilePath, specyfication.device, debugMode);
+        vk::PipelineShaderStageCreateInfo dvertexShaderInfo = make_shader_info(dvertexShader, vk::ShaderStageFlagBits::eVertex);
+        shaderStages[0] = (dvertexShaderInfo);
+        vk::ShaderModule dfragmentShader = vkUtil::createModule(specyfication.deferedFragmentFilePath, specyfication.device, debugMode);
+        vk::PipelineShaderStageCreateInfo dfragmentShaderInfo = make_shader_info(dfragmentShader, vk::ShaderStageFlagBits::eFragment);
+        shaderStages[1] = (dfragmentShaderInfo);
+        pipelineInfo.subpass = 1;
+        pipelineInfo.layout = deferedPipelineLayout;
+
+        vk::Pipeline deferedPipeline;
+        colorBlendState = make_color_blend_attachment_stage(blendAttachmentState);
+        pipelineInfo.basePipelineHandle = nullptr;
+        if (debugMode) std::cout << "Creating defered Graphics Pipeline " << std::endl;
+        try {
+            deferedPipeline = (specyfication.device.createGraphicsPipeline(nullptr, pipelineInfo)).value;
+        }
+        catch (vk::SystemError err) {
+            if (debugMode) std::cout << "Failed create defererd Graphics Pipeline!" << std::endl;
+        }
+
+        output.layout = geometryPipelineLayout;
+        output.deferedLayout = deferedPipelineLayout;
+        output.graphicsPipeline = geometryPipeline;
+        output.deferedGraphicsPipeline = deferedPipeline;
+        output.renderpass = renderpass;
+        return output;
     }
 
     

@@ -183,12 +183,14 @@ vkInit::SwapChainBundle vkInit::create_swapchain(vk::PhysicalDevice physicalDevi
 
 		bundle.frames[i].image = images[i];
 		bundle.frames[i].imageView = vkImage::make_image_view(logicalDevice, images[i], format.format, vk::ImageAspectFlagBits::eColor);
-		//vkGbuffer::createGbufferAttachment(physicalDevice,logicalDevice,&bundle.frames[i].gbuffer);
+		bundle.frames[i].gbuffer.height = extent.height;
+		bundle.frames[i].gbuffer.width = extent.width;
+		vkGbuffer::createGbufferAttachment(physicalDevice,logicalDevice,&bundle.frames[i].gbuffer);
 		
 
 	}
 	bundle.format = format.format;
 	bundle.extent = extent;
-
+	
 	return bundle;
 }

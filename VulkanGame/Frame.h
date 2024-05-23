@@ -74,7 +74,7 @@ namespace vkUtil {
 		vk::DescriptorBufferInfo modelBufferDescriptor;
 
 		vk::DescriptorSet descriptorSet;
-		//vk::DescriptorSet deferedDescriptorSet;
+		vk::DescriptorSet deferedDescriptorSet;
 
 		void make_descriptor_resources();
 		void make_depth_resources();

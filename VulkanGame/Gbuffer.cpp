@@ -29,7 +29,8 @@ void vkGbuffer::createAttachment(attachmentBundle attachmentDescription)
 	imageInfo.arrayLayers = 1;
 	imageInfo.samples = vk::SampleCountFlagBits::e1;
 	imageInfo.tiling = vk::ImageTiling::eOptimal;
-	imageInfo.usage = attachmentDescription.usage | vk::ImageUsageFlagBits::eSampled;
+	imageInfo.extent.depth = 1;
+	imageInfo.usage = attachmentDescription.usage | vk::ImageUsageFlagBits::eInputAttachment;
 	
 	attachmentDescription.attachment->image = attachmentDescription.logicalDevice.createImage(imageInfo);
 	vk::MemoryRequirements requirements = attachmentDescription.logicalDevice.getImageMemoryRequirements(attachmentDescription.attachment->image);

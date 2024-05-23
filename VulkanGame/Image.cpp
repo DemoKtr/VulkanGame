@@ -77,7 +77,7 @@ void vkImage::Texture::populate()
 	memcpy(writeLocation, pixels, input.size);
 	logicalDevice.unmapMemory(stagingBuffer.bufferMemory);
 	*/
-	std::cout << "kruwa1" << std::endl;
+
 	Buffer normalBuffer = vkUtil::createBuffer(normalInput);
 
 	void* normalWriteLocation = logicalDevice.mapMemory(normalBuffer.bufferMemory, 0, normalInput.size);
@@ -258,7 +258,7 @@ vkImage::Texture::Texture(TextureInputChunk info)
 	free(normalpixels);
 	
 	make_view();
-	std::cout << "kruwa2" << std::endl;
+
 	make_sampler();
 	
 	make_descriptor_set();
