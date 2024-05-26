@@ -7,6 +7,7 @@
 #include "Scene.h"
 #include "Image.h"
 #include "Texture.h"
+#include "Cubemap.h"
 
 class GraphicsEngine
 {
@@ -24,7 +25,7 @@ class GraphicsEngine
 
 	//physical device
 	vk::PhysicalDevice physicalDevice{ nullptr };
-	vk::Device device {};
+	vk::Device device {nullptr};
 	vk::Queue graphicsQueue{ nullptr };
 	vk::Queue presentQueue{ nullptr };
 
@@ -63,7 +64,7 @@ class GraphicsEngine
 
 	//vk::DescriptorSetLayout deferedSetLayout;
 	//vk::DescriptorPool deferedDescriptorPool;
-
+	vkImage::Cubemap* cubemap;
 
 	void make_assets();
 	void prepare_scene(vk::CommandBuffer commandBuffer);

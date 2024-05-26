@@ -56,6 +56,18 @@ void GraphicsEngine::make_assets()
 		textureInfo.filenames = filename;
 		materials[obj] = new vkImage::Texture(textureInfo);
 	}
+	textureInfo.layout = meshSetLayout;
+	textureInfo.descriptorPool = meshDescriptorPool;
+	textureInfo.filenames = { {
+			"tex/front.bmp",  //x+
+			"tex/back.bmp",   //x-
+			"tex/left.bmp",   //y+
+			"tex/right.bmp",  //y-
+			"tex/bottom.bmp", //z+
+			"tex/top.bmp",    //z-
+	} };
+	cubemap = new vkImage::Cubemap(textureInfo);
+
 }
 
 void GraphicsEngine::prepare_scene(vk::CommandBuffer commandBuffer)
@@ -191,7 +203,7 @@ GraphicsEngine::~GraphicsEngine()
 	
 	delete meshes;
 	for (const auto& [key, texture] : materials) delete texture;
-	
+	delete cubemap;
 	
 	device.destroyDescriptorSetLayout(deferedSetLayout);
 	device.destroyDescriptorPool(deferedDescriptorPool);
