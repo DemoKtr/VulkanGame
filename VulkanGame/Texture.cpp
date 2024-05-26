@@ -39,6 +39,7 @@ void vkImage::Texture::populate()
 	transitionJob.image = image;
 	transitionJob.oldLayout = vk::ImageLayout::eUndefined;
 	transitionJob.newLayout = vk::ImageLayout::eTransferDstOptimal;
+	transitionJob.arrayCount = 1;
 	transition_image_layout(transitionJob);
 
 	BufferImageCopyJob copyJob;
@@ -48,6 +49,7 @@ void vkImage::Texture::populate()
 	copyJob.dstImage = image;
 	copyJob.width = width;
 	copyJob.height = height;
+	copyJob.arrayCount = 1;
 	copy_buffer_to_image(copyJob);
 
 	transitionJob.oldLayout = vk::ImageLayout::eTransferDstOptimal;
@@ -89,6 +91,7 @@ void vkImage::Texture::populate()
 	normalTransitionJob.image = normalImage;
 	normalTransitionJob.oldLayout = vk::ImageLayout::eUndefined;
 	normalTransitionJob.newLayout = vk::ImageLayout::eTransferDstOptimal;
+	normalTransitionJob.arrayCount = 1;
 	transition_image_layout(normalTransitionJob);
 
 	BufferImageCopyJob normalcopyJob;
@@ -98,6 +101,7 @@ void vkImage::Texture::populate()
 	normalcopyJob.dstImage = normalImage;
 	normalcopyJob.width = normalwidth;
 	normalcopyJob.height = normalheight;
+	normalcopyJob.arrayCount = 1;
 	copy_buffer_to_image(normalcopyJob);
 
 	normalTransitionJob.oldLayout = vk::ImageLayout::eTransferDstOptimal;
@@ -112,8 +116,8 @@ void vkImage::Texture::populate()
 void vkImage::Texture::make_view()
 {
 
-	imageView = make_image_view(logicalDevice, image, vk::Format::eR8G8B8A8Unorm, vk::ImageAspectFlagBits::eColor);
-	normalImageView = make_image_view(logicalDevice, normalImage, vk::Format::eR8G8B8A8Unorm, vk::ImageAspectFlagBits::eColor);
+	imageView = make_image_view(logicalDevice, image, vk::Format::eR8G8B8A8Unorm, vk::ImageAspectFlagBits::eColor, vk::ImageViewType::e2D, 1);
+	normalImageView = make_image_view(logicalDevice, normalImage, vk::Format::eR8G8B8A8Unorm, vk::ImageAspectFlagBits::eColor,vk::ImageViewType::e2D,1);
 }
 
 void vkImage::Texture::make_sampler()
@@ -227,6 +231,7 @@ vkImage::Texture::Texture(TextureInputChunk info)
 	imageInput.width = width;
 	imageInput.height = height;
 	imageInput.format = vk::Format::eR8G8B8A8Unorm;
+	imageInput.arrayCount = 1;
 	imageInput.tiling = vk::ImageTiling::eOptimal;
 	imageInput.usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled;
 	imageInput.memoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal;
@@ -238,6 +243,7 @@ vkImage::Texture::Texture(TextureInputChunk info)
 	normalImageInput.physicalDevice = physicalDevice;
 	normalImageInput.width = normalwidth;
 	normalImageInput.height = normalheight;
+	normalImageInput.arrayCount = 1;
 	normalImageInput.format = vk::Format::eR8G8B8A8Unorm;
 	normalImageInput.tiling = vk::ImageTiling::eOptimal;
 	normalImageInput.usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled;

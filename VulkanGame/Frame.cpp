@@ -112,10 +112,11 @@
 			imageInfo.width = width;
 			imageInfo.height = height;
 			imageInfo.format = depthFormat;
+			imageInfo.arrayCount = 1;
 			depthBuffer = vkImage::make_image(imageInfo);
 			depthBufferMemory = vkImage::make_image_memory(imageInfo, depthBuffer);
 			depthBufferView = vkImage::make_image_view(
-				logicalDevice, depthBuffer, depthFormat, vk::ImageAspectFlagBits::eDepth
+				logicalDevice, depthBuffer, depthFormat, vk::ImageAspectFlagBits::eDepth, vk::ImageViewType::e2D, 1
 			);
 		}
 		void vkUtil::SwapChainFrame::destroy()

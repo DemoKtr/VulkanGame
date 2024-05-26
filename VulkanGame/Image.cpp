@@ -31,11 +31,11 @@ vk::Image vkImage::make_image(ImageInputChunk input)
 	*/
 
 	vk::ImageCreateInfo imageInfo;
-	imageInfo.flags = vk::ImageCreateFlagBits();
+	imageInfo.flags = vk::ImageCreateFlagBits() | input.flags;
 	imageInfo.imageType = vk::ImageType::e2D;
 	imageInfo.extent = vk::Extent3D(input.width, input.height, 1);
 	imageInfo.mipLevels = 1;
-	imageInfo.arrayLayers = 1;
+	imageInfo.arrayLayers = input.arrayCount;
 	imageInfo.format = input.format;
 	imageInfo.tiling = input.tiling;
 	imageInfo.initialLayout = vk::ImageLayout::eUndefined;
@@ -89,7 +89,7 @@ void vkImage::transition_image_layout(ImageLayoutTransitionJob job)
 	access.baseMipLevel = 0;
 	access.levelCount = 1;
 	access.baseArrayLayer = 0;
-	access.layerCount = 1;
+	access.layerCount = job.arrayCount;
 
 	/*
 	typedef struct VkImageMemoryBarrier {
@@ -161,7 +161,7 @@ void vkImage::copy_buffer_to_image(BufferImageCopyJob job)
 	access.aspectMask = vk::ImageAspectFlagBits::eColor;
 	access.mipLevel = 0;
 	access.baseArrayLayer = 0;
-	access.layerCount = 1;
+	access.layerCount =job.arrayCount;
 	copy.imageSubresource = access;
 
 	copy.imageOffset = vk::Offset3D(0, 0, 0);
@@ -178,7 +178,7 @@ void vkImage::copy_buffer_to_image(BufferImageCopyJob job)
 	vkUtil::end_job(job.commandBuffer, job.queue);
 }
 
-vk::ImageView vkImage::make_image_view(vk::Device logicalDevice, vk::Image image, vk::Format format, vk::ImageAspectFlags aspect)
+vk::ImageView vkImage::make_image_view(vk::Device logicalDevice, vk::Image image, vk::Format format, vk::ImageAspectFlags aspect, vk::ImageViewType type, uint32_t arrayCount)
 {
 	/*
 	* ImageViewCreateInfo( VULKAN_HPP_NAMESPACE::ImageViewCreateFlags flags_ = {},
@@ -191,7 +191,7 @@ vk::ImageView vkImage::make_image_view(vk::Device logicalDevice, vk::Image image
 
 	vk::ImageViewCreateInfo createInfo = {};
 	createInfo.image = image;
-	createInfo.viewType = vk::ImageViewType::e2D;
+	createInfo.viewType = type;
 	createInfo.format = format;
 	createInfo.components.r = vk::ComponentSwizzle::eIdentity;
 	createInfo.components.g = vk::ComponentSwizzle::eIdentity;
@@ -201,7 +201,7 @@ vk::ImageView vkImage::make_image_view(vk::Device logicalDevice, vk::Image image
 	createInfo.subresourceRange.baseMipLevel = 0;
 	createInfo.subresourceRange.levelCount = 1;
 	createInfo.subresourceRange.baseArrayLayer = 0;
-	createInfo.subresourceRange.layerCount = 1;
+	createInfo.subresourceRange.layerCount = arrayCount;
 
 	return logicalDevice.createImageView(createInfo);
 }
