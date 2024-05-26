@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClCompile Include="app.cpp" />
     <ClCompile Include="config.cpp" />
+    <ClCompile Include="Cubemap.cpp" />
     <ClCompile Include="Descriptors.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="Frame.cpp" />
@@ -170,6 +171,7 @@
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="single_time_commands.cpp" />
     <ClCompile Include="Swapchain.cpp" />
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TriangleMesh.cpp" />
     <ClCompile Include="VertexMenagerie.cpp" />
   </ItemGroup>
@@ -177,6 +179,7 @@
     <ClInclude Include="app.h" />
     <ClInclude Include="Commands.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="Cubemap.h" />
     <ClInclude Include="Descrpitors.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="Frame.h" />
@@ -199,6 +202,7 @@
     <ClInclude Include="single_time_commands.h" />
     <ClInclude Include="Swapchain.h" />
     <ClInclude Include="Synchronizer.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="TriangleMesh.h" />
     <ClInclude Include="VertexMenagerie.h" />

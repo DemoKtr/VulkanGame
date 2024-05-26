@@ -8,7 +8,7 @@ namespace vkImage {
 	struct TextureInputChunk{
 		vk::Device logicalDevice;
 		vk::PhysicalDevice physicalDevice;
-		const char* filename;
+		std::vector<const char*> filenames;
 		vk::CommandBuffer commandBuffer;
 		vk::Queue queue;
 		vk::DescriptorSetLayout layout;
@@ -23,6 +23,8 @@ namespace vkImage {
 		vk::ImageUsageFlags usage;
 		vk::MemoryPropertyFlags memoryProperties;
 		vk::Format format;
+		uint32_t arrayCount;
+		vk::ImageCreateFlags flags;
 	};
 
 	struct BufferImageCopyJob {
@@ -38,67 +40,25 @@ namespace vkImage {
 		vk::Queue queue;
 		vk::Image image;
 		vk::ImageLayout oldLayout, newLayout;
+		uint32_t arrayCount;
 	};
-
-	class Texture
-	{
-		int width, height, channels, normalchannels, normalwidth, normalheight;
-		vk::Device logicalDevice;
-		vk::PhysicalDevice physicalDevice;
-		const char* filename;
-		stbi_uc* pixels;
-		stbi_uc* normalpixels;
-
-		//res
-		vk::Image image;
-		vk::DeviceMemory imageMemory;
-		vk::ImageView imageView;
-		vk::Sampler sampler;
-		
-
-		//res normalMap
-		vk::Image normalImage;
-		vk::DeviceMemory normalImageMemory;
-		vk::ImageView normalImageView;
-		vk::Sampler normalSampler;
-
-
-		//Resource Descriptors
-		vk::DescriptorSetLayout layout;
-		vk::DescriptorSet descriptorSet;
-		vk::DescriptorPool descriptorPool;
-
-		vk::CommandBuffer commandBuffer;
-		vk::Queue queue;
-
-
-
-		void load();
-		void populate();
-		void make_view();
-		void make_sampler();
-		void make_descriptor_set();
-
-
-
-	public:
-		Texture(TextureInputChunk info);
-
-		void useTexture(vk::CommandBuffer commandBuffer, vk::PipelineLayout pipelineLayout);
-		~Texture();
-	};
-
 
 	vk::Image make_image(ImageInputChunk input);
 
 	vk::DeviceMemory make_image_memory(ImageInputChunk input, vk::Image image);
 	void transition_image_layout(ImageLayoutTransitionJob job);
 	void copy_buffer_to_image(BufferImageCopyJob job);
-	vk::ImageView make_image_view(vk::Device logicalDevice,vk::Image image,vk::Format format, vk::ImageAspectFlags aspect);
+	vk::ImageView make_image_view(vk::Device logicalDevice, vk::Image image, vk::Format format, vk::ImageAspectFlags aspect);
 
 	vk::Format find_supported_format(
 		vk::PhysicalDevice physicalDevice, const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features
 	);
+
+
+	
+
+
+	
 }
 
 

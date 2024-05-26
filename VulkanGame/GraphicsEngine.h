@@ -6,7 +6,7 @@
 #include "VertexMenagerie.h"
 #include "Scene.h"
 #include "Image.h"
-
+#include "Texture.h"
 
 class GraphicsEngine
 {

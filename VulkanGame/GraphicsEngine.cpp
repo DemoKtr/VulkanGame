@@ -31,9 +31,9 @@ void GraphicsEngine::make_assets()
 	meshes->finalize(finalizationChunk);
 
 	//Materials
-	std::unordered_map<meshTypes, const char*> filenames = {
-		{meshTypes::KITTY, "tex/brick.jpg"},
-		{meshTypes::DOG, "tex/rick.jpg"},
+	std::unordered_map<meshTypes, std::vector<const char*>> filenames = {
+		{meshTypes::KITTY, {"tex/brick.jpg"}},
+		{meshTypes::DOG, {"tex/rick.jpg"} },
 	};
 
 	//make Descriptor pool
@@ -41,7 +41,7 @@ void GraphicsEngine::make_assets()
 	bindings.count = 2;
 	bindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
 	bindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
-	meshDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(filenames.size()), bindings);
+	meshDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(filenames.size()) + 1, bindings);
 
 
 	vkImage::TextureInputChunk textureInfo;
@@ -53,7 +53,7 @@ void GraphicsEngine::make_assets()
 	textureInfo.layout = meshSetLayout;
 	textureInfo.descriptorPool = meshDescriptorPool;
 	for (const auto& [obj, filename] : filenames) {
-		textureInfo.filename = filename;
+		textureInfo.filenames = filename;
 		materials[obj] = new vkImage::Texture(textureInfo);
 	}
 }
