@@ -42,6 +42,11 @@ class GraphicsEngine
 	vk::Pipeline graphicsPipeline;
 	vk::Pipeline deferedGraphicsPipeline;
 
+	//shadows
+	vk::Pipeline shadowPipeline;
+	vk::RenderPass shadowRenderPass;
+	vk::PipelineLayout shadowLayout;
+
 	//command
 	vk::CommandPool commandPool;
 	vk::CommandBuffer maincommandBuffer;
@@ -52,6 +57,7 @@ class GraphicsEngine
 	VertexMenagerie* meshes;
 	std::unordered_map<meshTypes, vkImage::Texture*>  materials;
 
+	
 	//Descriptor objects
 
 	vk::DescriptorSetLayout frameSetLayout;
@@ -61,6 +67,10 @@ class GraphicsEngine
 
 	vk::DescriptorSetLayout deferedSetLayout;
 	vk::DescriptorPool deferedDescriptorPool;
+
+
+	vk::DescriptorSetLayout shadowSetLayout;
+	vk::DescriptorPool shadowDescriptorPool;
 
 	//vk::DescriptorSetLayout deferedSetLayout;
 	//vk::DescriptorPool deferedDescriptorPool;
@@ -88,6 +98,9 @@ class GraphicsEngine
 	void cleanup_swapchain();
 
 	void record_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex,Scene *scene);
+	void record_shadow_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex,Scene *scene);
+
+
 	void render_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& starInstance, uint32_t instanceCount);
 public:
 	GraphicsEngine(ivec2 screenSize, GLFWwindow* window, bool debugMode);

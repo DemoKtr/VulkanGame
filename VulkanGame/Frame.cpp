@@ -25,9 +25,11 @@
 			modelBufferWriteLocation = logicalDevice.mapMemory(modelBuffer.bufferMemory, 0, 1024 * sizeof(glm::mat4));
 
 			modelTransforms.reserve(1024);
+			LightTransforms.reserve(1024);
 			for (int i = 0; i < 1024; ++i)
 			{
 				modelTransforms.push_back(glm::mat4(1.0f));
+				LightTransforms.push_back(glm::mat4(1.0f));
 			}
 
 			/*

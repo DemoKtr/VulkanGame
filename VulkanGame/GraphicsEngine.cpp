@@ -386,6 +386,56 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint3
 		}
 	}
 }
+void GraphicsEngine::record_shadow_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex, Scene* scene)
+{
+	vk::CommandBufferBeginInfo beginInfo = {};
+
+	try {
+		commandBuffer.begin(beginInfo);
+	}
+	catch (vk::SystemError err) {
+		if (debugMode) {
+			std::cout << "Failed to begin recording shadow command buffer!" << std::endl;
+		}
+	}
+
+	vk::RenderPassBeginInfo renderPassInfo = {};
+	renderPassInfo.renderPass = shadowRenderPass;
+	renderPassInfo.framebuffer = swapchainFrames[imageIndex].framebuffer;
+	renderPassInfo.renderArea.offset.x = 0;
+	renderPassInfo.renderArea.offset.y = 0;
+	renderPassInfo.renderArea.extent = swapchainExtent;
+	vk::ClearValue depthClear;
+
+	depthClear.depthStencil = vk::ClearDepthStencilValue({ 1.0f, 0 });
+	std::vector<vk::ClearValue> clearValues = { {depthClear} };
+
+	renderPassInfo.clearValueCount = clearValues.size();
+	renderPassInfo.pClearValues = clearValues.data();
+
+	commandBuffer.beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
+	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, shadowPipeline);
+	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, shadowLayout, 0, swapchainFrames[imageIndex].shadowDescriptorSet, nullptr);
+	prepare_scene(commandBuffer);
+	uint32_t startInstance = 0;
+	//Triangles
+
+	for (std::pair<meshTypes, std::vector<SceneObject*>> pair : scene->positions) {
+		render_objects(commandBuffer, pair.first, startInstance, static_cast<uint32_t>(pair.second.size()));
+	}
+	commandBuffer.endRenderPass();
+
+	try {
+		commandBuffer.end();
+	}
+	catch (vk::SystemError err) {
+
+		if (debugMode) {
+			std::cout << "failed to record command buffer!" << std::endl;
+		}
+	}
+
+}
 void GraphicsEngine::render_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& startInstance, uint32_t instanceCount) {
 	//Triangles
 	int indexCount = meshes->indexCounts.find(objectType)->second;
@@ -428,12 +478,38 @@ void GraphicsEngine::render(Scene *scene)
 	
 	
 	vk::CommandBuffer commandBuffer = swapchainFrames[frameNumber].commandBuffer;
+	vk::CommandBuffer shadowCommandBuffer = swapchainFrames[frameNumber].shadowCommandBuffer;
+	vk::CommandBuffer geometryCommandBuffer = swapchainFrames[frameNumber].geometryCommandBuffer;
 
 	commandBuffer.reset();
-
+	shadowCommandBuffer.reset();
+	geometryCommandBuffer.reset();
+	
 	prepare_frame(imageIndex, scene);
 
+
 	record_draw_commands(commandBuffer, imageIndex,scene);
+
+	/*
+
+	// Set up pipeline barrier to synchronize between render passes
+	vk::ImageMemoryBarrier barrier = {};
+	barrier.srcAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+	barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+	barrier.oldLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+	barrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.image = swapchainFrames[frameNumber].shadowMapBuffer.shadowBufferDepthAttachment.image;
+	barrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eDepth;
+	barrier.subresourceRange.baseMipLevel = 0;
+	barrier.subresourceRange.levelCount = 1;
+	barrier.subresourceRange.baseArrayLayer = 0;
+	barrier.subresourceRange.layerCount = 2;
+	
+	commandBuffer.executeCommands(shadowCommandBuffer);
+	commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eLateFragmentTests, vk::PipelineStageFlagBits::eFragmentShader, vk::DependencyFlags(), nullptr, nullptr, barrier);
+	*/
 
 	vk::SubmitInfo submitInfo = {};
 
@@ -583,9 +659,25 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 		}
 		
 
-	}
+}
+	
 
 	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), i * sizeof(glm::mat4));
+
+	size_t j = 0;
+	glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), 1024.0f / 1024.0f, 1.0f, 25.0f);
+	std::array<std::vector<glm::mat4>, 2> shadowTransforms;
+	
+	
+	for (Light* light : scene->lights) {
+		std::vector<glm::mat4> shadowTransform;
+		shadowTransform.push_back(shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		shadowTransform.push_back(shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		shadowTransform.push_back(shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+		shadowTransform.push_back(shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+		shadowTransform.push_back(shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		shadowTransform.push_back(shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	}
 
 	_frame.write_descriptor_set();
 

@@ -169,6 +169,7 @@
     <ClCompile Include="RenderPass.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneObject.cpp" />
+    <ClCompile Include="Shadows.cpp" />
     <ClCompile Include="single_time_commands.cpp" />
     <ClCompile Include="Swapchain.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -199,6 +200,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="Shaders.h" />
+    <ClInclude Include="Shadows.h" />
     <ClInclude Include="single_time_commands.h" />
     <ClInclude Include="Swapchain.h" />
     <ClInclude Include="Synchronizer.h" />

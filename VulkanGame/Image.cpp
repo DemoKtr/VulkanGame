@@ -42,7 +42,6 @@ vk::Image vkImage::make_image(ImageInputChunk input)
 	imageInfo.usage = input.usage;
 	imageInfo.sharingMode = vk::SharingMode::eExclusive;
 	imageInfo.samples = vk::SampleCountFlagBits::e1;
-	
 	try {
 		return input.logicalDevice.createImage(imageInfo);
 	}

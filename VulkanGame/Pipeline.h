@@ -18,6 +18,18 @@ namespace vkInit {
         std::vector<vk::DescriptorSetLayout> deferedDescriptorSetLayouts;
         vkUtil::Gbuffer gbuffer;
 	};
+
+    struct ShadowGraphicsPipelineInBundle {
+        vk::Device device;
+        std::string vertexFilePath;
+        std::string geometryFilePath;
+        vk::Extent2D swapchainExtent;
+        vk::Format swapchainImageFormat, depthFormat;
+        std::vector<vk::DescriptorSetLayout> shadowDescriptorSetLayout;
+        std::vector<vk::DescriptorSetLayout> deferedDescriptorSetLayouts;
+        vkUtil::shadowMapBuffer shadowAttachmentBuffer;
+    };
+
 	struct GraphicsPipelineOutBundle {
         vk::PipelineLayout layout;
         vk::PipelineLayout deferedLayout;
@@ -32,7 +44,7 @@ namespace vkInit {
     vk::PipelineInputAssemblyStateCreateInfo make_input_assembly_info();
     vk::PipelineShaderStageCreateInfo make_shader_info(
         const vk::ShaderModule& shaderModule, const vk::ShaderStageFlagBits& stage);
-
+    void createShadowsPipeline(ShadowGraphicsPipelineInBundle specyfication, vk::Device logicalDevice, std::vector<vk::DescriptorSetLayout> shadowDescriptorLayout, bool debugMode);
     vk::PipelineVertexInputStateCreateInfo make_vertex_input_info(
         const vk::VertexInputBindingDescription& bindingDescription,
         const std::vector<vk::VertexInputAttributeDescription>& attributeDescriptions);
@@ -126,6 +138,11 @@ namespace vkInit {
 
 
     vk::AttachmentReference make_depth_attachment_reference();
+
+
+    vk::Viewport make_viewport(const vk::Extent2D& swapchainExtent);
+
+    vk::Rect2D make_scissor(const vk::Extent2D& swapchainExtent);
 
     /**
         Make a simple subpass.
@@ -370,6 +387,31 @@ namespace vkInit {
         scissor.offset.x = 0.0f;
         scissor.offset.y = 0.0f;
         scissor.extent = specification.swapchainExtent;
+
+        return scissor;
+    }
+
+
+
+    vk::Viewport make_viewport(const vk::Extent2D &swapchainExtent) {
+
+        vk::Viewport viewport = {};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = (float)swapchainExtent.width;
+        viewport.height = (float)swapchainExtent.height;
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+
+        return viewport;
+    }
+
+    vk::Rect2D make_scissor(const vk::Extent2D &swapchainExtent) {
+
+        vk::Rect2D scissor = {};
+        scissor.offset.x = 0.0f;
+        scissor.offset.y = 0.0f;
+        scissor.extent = swapchainExtent;
 
         return scissor;
     }
@@ -659,7 +701,87 @@ namespace vkInit {
         return output;
     }
 
-    
+    void createShadowsPipeline(ShadowGraphicsPipelineInBundle specyfication, vk::Device logicalDevice,std::vector<vk::DescriptorSetLayout> shadowDescriptorLayout, bool debugMode) {
+        
+        vk::Pipeline shadowPipeline = {};
+        vk::PipelineLayout shadowPipelineLayout = create_pipeline_layout(logicalDevice, shadowDescriptorLayout, debugMode);
+
+
+        vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState = make_input_assembly_info();
+        vk::PipelineRasterizationStateCreateInfo rasterizationState = make_rasterizer_info();
+        
+        vk::PipelineDepthStencilStateCreateInfo depthStageInfo;
+        depthStageInfo.flags = vk::PipelineDepthStencilStateCreateFlags();
+        depthStageInfo.depthTestEnable = true;
+        depthStageInfo.depthWriteEnable = true;
+        depthStageInfo.depthCompareOp = vk::CompareOp::eLess;
+        depthStageInfo.depthBoundsTestEnable = false;
+        depthStageInfo.stencilTestEnable = false;
+        //Viewport and Scissor
+        vk::Viewport viewport = make_viewport(specyfication.swapchainExtent);
+        vk::Rect2D scissor = make_scissor(specyfication.swapchainExtent);
+        vk::PipelineViewportStateCreateInfo viewportState = make_viewport_state(viewport, scissor);
+        vk::PipelineMultisampleStateCreateInfo multisampleState = make_multisampling_info();
+        std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
+        vk::PipelineColorBlendAttachmentState blendAttachmentState = {};
+        blendAttachmentState.colorWriteMask = vk::ColorComponentFlagBits::eR;
+        blendAttachmentState.blendEnable = VK_FALSE;
+        vk::PipelineColorBlendStateCreateInfo colorBlendState = make_color_blend_attachment_stage(blendAttachmentState);
+        vk::RenderPass renderpass = vkInit::create_shadows_renderpass(specyfication.device, &specyfication.shadowAttachmentBuffer, specyfication.swapchainImageFormat, specyfication.depthFormat);
+
+
+
+
+        vk::GraphicsPipelineCreateInfo pipelineInfo = {};
+        pipelineInfo.pInputAssemblyState = &inputAssemblyState;
+        pipelineInfo.renderPass = renderpass;
+        pipelineInfo.layout = shadowPipelineLayout;
+        pipelineInfo.pRasterizationState = &rasterizationState;
+        
+        pipelineInfo.pMultisampleState = &multisampleState;
+        pipelineInfo.pViewportState = &viewportState;
+        pipelineInfo.pDepthStencilState = &depthStageInfo;
+        rasterizationState.depthBiasEnable = VK_TRUE;
+        /////////////////////////////////////////////////////////////
+        //offscreen
+        pipelineInfo.layout = shadowPipelineLayout;
+        vk::VertexInputBindingDescription bindingDescription = vkMesh::getPosColBindingDescription();
+        std::vector <vk::VertexInputAttributeDescription> attributeDescriptions = vkMesh::getPosColorAttributeDescriptions();
+        vk::PipelineVertexInputStateCreateInfo vertexInputInfo = make_vertex_input_info(bindingDescription, attributeDescriptions);
+        pipelineInfo.pVertexInputState = &vertexInputInfo;
+        rasterizationState.cullMode = vk::CullModeFlagBits::eBack;
+
+        // Offscreen pipeline
+        vk::ShaderModule vertexShader = vkUtil::createModule(specyfication.vertexFilePath, specyfication.device, debugMode);
+        vk::PipelineShaderStageCreateInfo vertexShaderInfo = make_shader_info(vertexShader, vk::ShaderStageFlagBits::eVertex);
+        shaderStages[0] = (vertexShaderInfo);
+
+        vk::ShaderModule geometryShader = vkUtil::createModule(specyfication.geometryFilePath, specyfication.device, debugMode);
+        vk::PipelineShaderStageCreateInfo geometryShaderInfo = make_shader_info(geometryShader, vk::ShaderStageFlagBits::eGeometry);
+        shaderStages[1] = geometryShaderInfo;
+        
+
+        // Blend attachment states required for all color attachments
+        // This is important, as color write mask will otherwise be 0x0 and you
+        // won't see anything rendered to the attachment
+       
+
+        colorBlendState.attachmentCount = 0;
+        colorBlendState.pAttachments = nullptr;
+        pipelineInfo.stageCount = shaderStages.size();
+        pipelineInfo.pStages = shaderStages.data();
+        pipelineInfo.subpass = 0;
+        pipelineInfo.pColorBlendState = &colorBlendState;
+
+        pipelineInfo.basePipelineHandle = nullptr;
+        if (debugMode) std::cout << "Creating shadowMapping Graphics Pipeline " << std::endl;
+        try {
+            shadowPipeline = (specyfication.device.createGraphicsPipeline(nullptr, pipelineInfo)).value;
+        }
+        catch (vk::SystemError err) {
+            if (debugMode) std::cout << "Failed create shadowMapping Graphics Pipeline!" << std::endl;
+        }
+    }
 
 }
 

@@ -13,6 +13,12 @@ public:
 };
 
 
+class Light {
+public:
+	Transform transform;
+};
+
+
 
 class Box : public SceneObject {
 	// Inherited via StaticSceneObject

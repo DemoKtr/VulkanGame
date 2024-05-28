@@ -17,6 +17,11 @@ namespace vkUtil {
 		FrameBufferAttachment position, normal, albedo;
 		int32_t width;
 		int32_t height;
-		
+	};
+	struct shadowMapBuffer {
+		FrameBufferAttachment shadowBufferDepthAttachment;
+		int32_t width;
+		int32_t height;
+		vk::Sampler sampler;
 	};
 }

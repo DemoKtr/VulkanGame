@@ -27,13 +27,20 @@ Scene::Scene()
 	positions[meshTypes::DOG].push_back(box1);
 
 
+	Light* pointLight1 = new Light();
+	Light* pointLight2 = new Light();
 
+	pointLight1->transform.setLocalPosition(glm::vec3(0.0f, 1.0f, 0.8f));
+	pointLight2->transform.setLocalPosition(glm::vec3(0.8f, 1.0f, 0.0f));
+
+	lights.push_back(pointLight1);
+	lights.push_back(pointLight2);
 
 
 }
 
 Scene::~Scene()
 {
-
+	
 	
 }

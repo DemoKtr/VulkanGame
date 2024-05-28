@@ -47,9 +47,12 @@ namespace vkUtil {
 
 		//gBuffer
 		vkUtil::Gbuffer gbuffer;
+		vkUtil::shadowMapBuffer shadowMapBuffer;
 
 
 		vk::CommandBuffer commandBuffer;
+		vk::CommandBuffer shadowCommandBuffer;
+		vk::CommandBuffer geometryCommandBuffer;
 
 		//Sync objects
 		vk::Semaphore imageAvailable, renderFinished;
@@ -65,6 +68,7 @@ namespace vkUtil {
 
 
 		std::vector<glm::mat4> modelTransforms;
+		std::vector<glm::mat4> LightTransforms;
 		Buffer modelBuffer;
 		void* modelBufferWriteLocation;
 
@@ -75,6 +79,8 @@ namespace vkUtil {
 
 		vk::DescriptorSet descriptorSet;
 		vk::DescriptorSet deferedDescriptorSet;
+
+		vk::DescriptorSet shadowDescriptorSet;
 
 		void make_descriptor_resources();
 		void make_depth_resources();

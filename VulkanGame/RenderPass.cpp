@@ -172,3 +172,82 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 	logicalDevice.createSampler(sampler);
 
 }
+
+vk::RenderPass vkInit::create_shadows_renderpass(vk::Device logicalDevice, vkUtil::shadowMapBuffer* shadowmapBuffer, vk::Format attachmentFormat, vk::Format depthFormat)
+{
+	vk::RenderPass shadowRenderPass = {};
+	vk::AttachmentDescription shadowAttachment = {};
+
+	shadowAttachment.format = depthFormat;
+	shadowAttachment.samples = vk::SampleCountFlagBits::e1;
+	shadowAttachment.loadOp = vk::AttachmentLoadOp::eClear;
+	shadowAttachment.storeOp = vk::AttachmentStoreOp::eDontCare;
+	shadowAttachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+	shadowAttachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+	shadowAttachment.initialLayout = vk::ImageLayout::eUndefined;
+	shadowAttachment.finalLayout = vk::ImageLayout::eDepthStencilReadOnlyOptimal;
+
+
+
+	vk::SamplerCreateInfo samplerInfo = {};
+	samplerInfo.magFilter = vk::Filter::eLinear;
+	samplerInfo.minFilter = vk::Filter::eLinear;
+	samplerInfo.mipmapMode = vk::SamplerMipmapMode::eLinear;
+	samplerInfo.addressModeU = vk::SamplerAddressMode::eClampToEdge;
+	samplerInfo.addressModeV = vk::SamplerAddressMode::eClampToEdge;
+	samplerInfo.addressModeW = vk::SamplerAddressMode::eClampToEdge;
+	samplerInfo.mipLodBias = 0.0f;
+	samplerInfo.maxAnisotropy = 1.0f;
+	samplerInfo.minLod = 0.0f;
+	samplerInfo.maxLod = 1.0f;
+	samplerInfo.borderColor = vk::BorderColor::eFloatOpaqueWhite;
+
+	shadowmapBuffer->sampler = logicalDevice.createSampler(samplerInfo);
+
+
+	vk::AttachmentReference depthReference = {};
+	depthReference.attachment = 5;
+	depthReference.layout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+
+
+	vk::SubpassDescription subpass = {};
+	subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
+	subpass.colorAttachmentCount = 0;
+	subpass.pColorAttachments = VK_NULL_HANDLE;
+	subpass.pDepthStencilAttachment = &depthReference;
+
+	
+
+
+
+	std::array<vk::SubpassDependency, 2> dependencies;
+
+	dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependencies[0].dstSubpass = 0;
+	dependencies[0].srcStageMask =  vk::PipelineStageFlagBits::eBottomOfPipe;
+	dependencies[0].dstStageMask =  vk::PipelineStageFlagBits::eColorAttachmentOutput;
+	dependencies[0].srcAccessMask =  vk::AccessFlagBits::eMemoryRead;
+	dependencies[0].dstAccessMask =  vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite;
+	dependencies[0].dependencyFlags = vk::DependencyFlagBits::eByRegion;
+
+	dependencies[1].srcSubpass = 0;
+	dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+	dependencies[1].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+	dependencies[1].dstStageMask = vk::PipelineStageFlagBits::eBottomOfPipe;
+	dependencies[1].srcAccessMask = vk::AccessFlagBits::eMemoryRead;
+	dependencies[1].dependencyFlags = vk::DependencyFlagBits::eByRegion;
+
+	vk::RenderPassCreateInfo renderPassCreateInfo = {};
+	renderPassCreateInfo.sType = vk::StructureType::eRenderPassCreateInfo;
+	renderPassCreateInfo.attachmentCount = 1;
+	renderPassCreateInfo.pAttachments = &shadowAttachment;
+	renderPassCreateInfo.subpassCount = 1;
+	renderPassCreateInfo.pSubpasses = &subpass;
+	renderPassCreateInfo.dependencyCount = 2;
+	renderPassCreateInfo.pDependencies = dependencies.data();
+
+	shadowRenderPass = logicalDevice.createRenderPass(renderPassCreateInfo);
+
+
+	return shadowRenderPass;
+}

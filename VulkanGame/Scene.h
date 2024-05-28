@@ -11,6 +11,6 @@ public:
 	Scene();
 	~Scene();
 	std::unordered_map <meshTypes, std::vector<SceneObject*>> positions;
-
+	std::vector<Light*> lights;
 };
 
