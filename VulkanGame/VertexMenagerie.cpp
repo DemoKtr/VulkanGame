@@ -9,7 +9,9 @@ VertexMenagerie::~VertexMenagerie()
 {
 
 	logicalDevice.destroyBuffer(vertexBuffer.buffer);
+	logicalDevice.destroyBuffer(indexBuffer.buffer);
 	logicalDevice.freeMemory(vertexBuffer.bufferMemory);
+	logicalDevice.freeMemory(indexBuffer.bufferMemory);
 }
 
 void VertexMenagerie::consume(meshTypes meshType, std::vector<float> data, std::vector<uint32_t> indicies)

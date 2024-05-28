@@ -281,5 +281,6 @@ vkImage::Texture::~Texture() {
 	logicalDevice.destroyImageView(normalImageView);
 	logicalDevice.destroySampler(sampler);
 	logicalDevice.destroySampler(normalSampler);
+	
 
 }

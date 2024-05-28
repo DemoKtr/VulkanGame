@@ -698,6 +698,11 @@ namespace vkInit {
         output.graphicsPipeline = geometryPipeline;
         output.deferedGraphicsPipeline = deferedPipeline;
         output.renderpass = renderpass;
+
+        specyfication.device.destroyShaderModule(vertexShader);
+        specyfication.device.destroyShaderModule(fragmentShader);
+        specyfication.device.destroyShaderModule(dvertexShader);
+        specyfication.device.destroyShaderModule(dfragmentShader);
         return output;
     }
 
@@ -781,6 +786,9 @@ namespace vkInit {
         catch (vk::SystemError err) {
             if (debugMode) std::cout << "Failed create shadowMapping Graphics Pipeline!" << std::endl;
         }
+        specyfication.device.destroyShaderModule(vertexShader);
+        specyfication.device.destroyShaderModule(geometryShader);
+
     }
 
 }
