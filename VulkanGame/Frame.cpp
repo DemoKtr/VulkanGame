@@ -90,15 +90,7 @@
 
 			logicalDevice.updateDescriptorSets(writeInfo2, nullptr);
 
-			vk::WriteDescriptorSet writeInfo3;
-			writeInfo3.dstSet = descriptorSet;
-			writeInfo3.dstBinding = 2;
-			writeInfo3.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
-			writeInfo3.descriptorCount = 1;
-			writeInfo3.descriptorType = vk::DescriptorType::eUniformBuffer;
-			writeInfo3.pBufferInfo = &uniformlightBufferDescriptor;
-
-			logicalDevice.updateDescriptorSets(writeInfo3, nullptr);
+			
 		}
 	
 		void vkUtil::SwapChainFrame::make_depth_resources()
@@ -121,6 +113,73 @@
 				logicalDevice, depthBuffer, depthFormat, vk::ImageAspectFlagBits::eDepth, vk::ImageViewType::e2D, 1
 			);
 		}
+
+
+		void vkUtil::SwapChainFrame::writeGbufferDescriptor(vk::DescriptorSet descriptorSet, vk::Device logicalDevice)
+		{
+			vk::DescriptorImageInfo imageDescriptorPos;
+			imageDescriptorPos.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+			imageDescriptorPos.imageView = gbuffer.position.view;
+			imageDescriptorPos.sampler = VK_NULL_HANDLE;
+
+			vk::WriteDescriptorSet descriptorWritePos;
+			descriptorWritePos.dstSet = descriptorSet;
+			descriptorWritePos.dstBinding = 0;
+			descriptorWritePos.dstArrayElement = 0;
+			descriptorWritePos.descriptorType = vk::DescriptorType::eInputAttachment;
+			descriptorWritePos.descriptorCount = 1;
+			descriptorWritePos.pImageInfo = &imageDescriptorPos;
+
+			//logicalDevice.updateDescriptorSets(descriptorWritePos, nullptr);
+
+			vk::DescriptorImageInfo imageDescriptorNormal;
+			imageDescriptorNormal.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+			imageDescriptorNormal.imageView = gbuffer.normal.view;
+			imageDescriptorNormal.sampler = VK_NULL_HANDLE;
+
+			vk::WriteDescriptorSet descriptorWriteNormal;
+			descriptorWriteNormal.dstSet = descriptorSet;
+			descriptorWriteNormal.dstBinding = 1;
+			descriptorWriteNormal.dstArrayElement = 0;
+			descriptorWriteNormal.descriptorType = vk::DescriptorType::eInputAttachment;
+			descriptorWriteNormal.descriptorCount = 1;
+			descriptorWriteNormal.pImageInfo = &imageDescriptorNormal;
+
+			//logicalDevice.updateDescriptorSets(descriptorWriteNormal, nullptr);
+
+			vk::DescriptorImageInfo imageDescriptoralbedo;
+			imageDescriptoralbedo.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+			imageDescriptoralbedo.imageView = gbuffer.albedo.view;
+			imageDescriptoralbedo.sampler = VK_NULL_HANDLE;
+
+			vk::WriteDescriptorSet descriptorWriteAlbedo;
+			descriptorWriteAlbedo.dstSet = descriptorSet;
+			descriptorWriteAlbedo.dstBinding = 2;
+			descriptorWriteAlbedo.dstArrayElement = 0;
+			descriptorWriteAlbedo.descriptorType = vk::DescriptorType::eInputAttachment;
+			descriptorWriteAlbedo.descriptorCount = 1;
+			descriptorWriteAlbedo.pImageInfo = &imageDescriptoralbedo;
+
+			vk::WriteDescriptorSet writeInfo;
+			writeInfo.dstSet = descriptorSet;
+			writeInfo.dstBinding = 3;
+			writeInfo.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+			writeInfo.descriptorCount = 1;
+			writeInfo.descriptorType = vk::DescriptorType::eUniformBuffer;
+			writeInfo.pBufferInfo = &uniformlightBufferDescriptor;
+
+
+
+			std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {
+				descriptorWritePos,descriptorWriteNormal,descriptorWriteAlbedo
+			};
+
+			logicalDevice.updateDescriptorSets(writeDescriptorSets, nullptr);
+
+		}
+
+
+
 		void vkUtil::SwapChainFrame::destroy()
 		{
 			logicalDevice.destroyImageView(imageView);

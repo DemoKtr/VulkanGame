@@ -85,7 +85,7 @@ namespace vkUtil {
 		void make_descriptor_resources();
 		void make_depth_resources();
 		void write_descriptor_set();
-
+		void writeGbufferDescriptor(vk::DescriptorSet descriptorSet, vk::Device logicalDevice);
 		void destroy();
 
 	};
