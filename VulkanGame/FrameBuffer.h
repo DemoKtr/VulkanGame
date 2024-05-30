@@ -58,12 +58,46 @@ namespace vkInit {
 	}
 
 
+	void make_shadow_framebuffers(framebufferInput inputChunk, std::vector<vkUtil::SwapChainFrame>& frames, bool debug) {
+
+
+		for (int i = 0; i < frames.size(); ++i) {
+
+			std::vector<vk::ImageView> attachments = {
+				frames[i].shadowMapBuffer.shadowBufferDepthAttachment.view
+			};
+
+			vk::FramebufferCreateInfo framebufferInfo;
+			framebufferInfo.flags = vk::FramebufferCreateFlags();
+			framebufferInfo.renderPass = inputChunk.renderpass;
+			framebufferInfo.attachmentCount = attachments.size();
+			framebufferInfo.pAttachments = attachments.data();
+			framebufferInfo.width = inputChunk.swapchainExtent.width;
+			framebufferInfo.height = inputChunk.swapchainExtent.height;
+			framebufferInfo.layers = 6;
+
+			try {
+				frames[i].shadowFramebuffer = inputChunk.device.createFramebuffer(framebufferInfo);
+
+				if (debug) {
+					std::cout << "Created framebuffer for frame " << i << std::endl;
+				}
+			}
+			catch (vk::SystemError err) {
+				if (debug) {
+					std::cout << "Failed to create framebuffer for frame " << i << std::endl;
+				}
+			}
+
+		}
+	}
+
 	void make_framebuffers_withGbuffer(framebufferInput inputChunk, std::vector<vkUtil::SwapChainFrame>& frames, bool debug) {
 
 		for (int i = 0; i < frames.size(); ++i) {
 
 			std::vector<vk::ImageView> attachments = {
-				frames[i].imageView, frames[i].gbuffer.position.view,frames[i].gbuffer.normal.view,frames[i].gbuffer.albedo.view, frames[i].depthBufferView
+				frames[i].imageView, frames[i].gbuffer.position.view,frames[i].gbuffer.normal.view,frames[i].gbuffer.albedo.view, frames[i].depthBufferView,
 				//, frames[i].gbuffer.position.view, frames[i].gbuffer.normal.view, frames[i].gbuffer.albedo.view
 			};
 
@@ -92,5 +126,7 @@ namespace vkInit {
 		}
 	}
 }
+
+
 
 

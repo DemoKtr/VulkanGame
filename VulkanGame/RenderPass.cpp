@@ -5,7 +5,7 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 
 
 	std::array<vk::AttachmentDescription,5> attachments;
-	vk::AttachmentReference attachmentRefertences[4];
+	vk::AttachmentReference attachmentRefertences[5];
 
 
 	attachments[0].flags = vk::AttachmentDescriptionFlags();
@@ -173,7 +173,7 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 
 }
 
-vk::RenderPass vkInit::create_shadows_renderpass(vk::Device logicalDevice, vkUtil::shadowMapBuffer* shadowmapBuffer, vk::Format attachmentFormat, vk::Format depthFormat)
+vk::RenderPass vkInit::create_shadows_renderpass(vk::Device logicalDevice, vkUtil::shadowMapBuffer* shadowmapBuffer, vk::Format depthFormat)
 {
 	vk::RenderPass shadowRenderPass = {};
 	vk::AttachmentDescription shadowAttachment = {};
@@ -206,7 +206,7 @@ vk::RenderPass vkInit::create_shadows_renderpass(vk::Device logicalDevice, vkUti
 
 
 	vk::AttachmentReference depthReference = {};
-	depthReference.attachment = 5;
+	depthReference.attachment = 0;
 	depthReference.layout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
 
 
@@ -217,7 +217,6 @@ vk::RenderPass vkInit::create_shadows_renderpass(vk::Device logicalDevice, vkUti
 	subpass.pDepthStencilAttachment = &depthReference;
 
 	
-
 
 
 	std::array<vk::SubpassDependency, 2> dependencies;

@@ -23,6 +23,10 @@ namespace vkUtil {
 		glm::vec3 diffuse;
 		glm::vec3 specular;
 	};
+	struct ShadowUBO {
+		glm::mat4 mvp[2][6]; //tyle ile swiatel na scenie
+		glm::vec4 modelPos[2];  // tyle elemenetow ile jest modeli na scenie
+	};
 
 	/**
 		Holds the data structures associated with a "Frame"
@@ -37,6 +41,7 @@ namespace vkUtil {
 		vk::Image image;
 		vk::ImageView imageView;
 		vk::Framebuffer framebuffer;
+		vk::Framebuffer shadowFramebuffer;
 
 		//zBuffer
 		vk::Image depthBuffer;
@@ -61,10 +66,13 @@ namespace vkUtil {
 		//Resources
 		UBO cameraData;
 		PointLight lightData;
+		ShadowUBO shadowData;
 		Buffer cameraDataBuffer;
 		Buffer lightDataBuffer;
+		Buffer shadowDataBuffer;
 		void* cameraDataWriteLocation;
 		void* lightDataWriteLocation;
+		void* shadowDataWriteLocation;
 
 
 		std::vector<glm::mat4> modelTransforms;
@@ -75,6 +83,7 @@ namespace vkUtil {
 		//Resource Descriptors
 		vk::DescriptorBufferInfo uniformBufferDescriptor;
 		vk::DescriptorBufferInfo uniformlightBufferDescriptor;
+		vk::DescriptorBufferInfo uniformShadowBufferDescriptor;
 		vk::DescriptorBufferInfo modelBufferDescriptor;
 
 		vk::DescriptorSet descriptorSet;
@@ -82,6 +91,7 @@ namespace vkUtil {
 
 		vk::DescriptorSet shadowDescriptorSet;
 
+		void shadowDescripotrsWrite();
 		void make_descriptor_resources();
 		void make_depth_resources();
 		void write_descriptor_set();

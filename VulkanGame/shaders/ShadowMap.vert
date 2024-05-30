@@ -1,11 +1,11 @@
 #version 450
-layout(location = 0) in vec3 vertexPosition;
 
-layout(std140,set = 0, binding = 1) readonly buffer storageBuffer {
-	mat4 model[];
-} ObjectData;
+layout (location = 0) in vec3 inPos;
 
+layout (location = 0) out int outInstanceIndex;
 
-void main() {
-	gl_Position = ObjectData.model[gl_InstanceIndex] * vec4(vertexPosition, 1.0);
+void main()
+{
+	outInstanceIndex = gl_InstanceIndex;
+	gl_Position = vec4(inPos,1.0f);
 }

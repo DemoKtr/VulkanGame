@@ -24,9 +24,8 @@ namespace vkInit {
         std::string vertexFilePath;
         std::string geometryFilePath;
         vk::Extent2D swapchainExtent;
-        vk::Format swapchainImageFormat, depthFormat;
+        vk::Format  depthFormat;
         std::vector<vk::DescriptorSetLayout> shadowDescriptorSetLayout;
-        std::vector<vk::DescriptorSetLayout> deferedDescriptorSetLayouts;
         vkUtil::shadowMapBuffer shadowAttachmentBuffer;
     };
 
@@ -37,6 +36,13 @@ namespace vkInit {
         vk::Pipeline graphicsPipeline;
         vk::Pipeline deferedGraphicsPipeline;
 	};
+
+    struct ShadowGraphicsPipelineOutBundle {
+        vk::PipelineLayout shadowPipelineLayout;
+        vk::RenderPass shadowRenderPass;
+        vk::Pipeline shadowPipeline;
+    };
+    ShadowGraphicsPipelineOutBundle createShadowsPipeline(ShadowGraphicsPipelineInBundle specyfication, bool debugMode);
     vk::PipelineLayout create_pipeline_layout(vk::Device device, std::vector<vk::DescriptorSetLayout> descriptorSetLayouts ,bool debugMode);
     vk::RenderPass create_renderpass(vk::Device device, vk::Format swapchainImageFormat, vk::Format depthFormat, bool debugMode);
     GraphicsPipelineOutBundle create_graphic_pipeline(GraphicsPipelineInBundle specyfication, bool debugMode);
@@ -44,7 +50,6 @@ namespace vkInit {
     vk::PipelineInputAssemblyStateCreateInfo make_input_assembly_info();
     vk::PipelineShaderStageCreateInfo make_shader_info(
         const vk::ShaderModule& shaderModule, const vk::ShaderStageFlagBits& stage);
-    void createShadowsPipeline(ShadowGraphicsPipelineInBundle specyfication, vk::Device logicalDevice, std::vector<vk::DescriptorSetLayout> shadowDescriptorLayout, bool debugMode);
     vk::PipelineVertexInputStateCreateInfo make_vertex_input_info(
         const vk::VertexInputBindingDescription& bindingDescription,
         const std::vector<vk::VertexInputAttributeDescription>& attributeDescriptions);
@@ -180,7 +185,7 @@ namespace vkInit {
         
        vk::PipelineLayoutCreateInfo layoutInfo;
 		layoutInfo.flags = vk::PipelineLayoutCreateFlags();
-
+        
         layoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
 		layoutInfo.pSetLayouts = descriptorSetLayouts.data();
 
@@ -706,10 +711,13 @@ namespace vkInit {
         return output;
     }
 
-    void createShadowsPipeline(ShadowGraphicsPipelineInBundle specyfication, vk::Device logicalDevice,std::vector<vk::DescriptorSetLayout> shadowDescriptorLayout, bool debugMode) {
+    ShadowGraphicsPipelineOutBundle createShadowsPipeline(ShadowGraphicsPipelineInBundle specyfication, bool debugMode) 
+    {
         
+        ShadowGraphicsPipelineOutBundle output;
         vk::Pipeline shadowPipeline = {};
-        vk::PipelineLayout shadowPipelineLayout = create_pipeline_layout(logicalDevice, shadowDescriptorLayout, debugMode);
+        std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << specyfication.shadowDescriptorSetLayout.size() << std::endl;
+        vk::PipelineLayout shadowPipelineLayout = create_pipeline_layout(specyfication.device, specyfication.shadowDescriptorSetLayout, debugMode);
 
 
         vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState = make_input_assembly_info();
@@ -732,7 +740,7 @@ namespace vkInit {
         blendAttachmentState.colorWriteMask = vk::ColorComponentFlagBits::eR;
         blendAttachmentState.blendEnable = VK_FALSE;
         vk::PipelineColorBlendStateCreateInfo colorBlendState = make_color_blend_attachment_stage(blendAttachmentState);
-        vk::RenderPass renderpass = vkInit::create_shadows_renderpass(specyfication.device, &specyfication.shadowAttachmentBuffer, specyfication.swapchainImageFormat, specyfication.depthFormat);
+        vk::RenderPass renderpass = vkInit::create_shadows_renderpass(specyfication.device, &specyfication.shadowAttachmentBuffer, specyfication.depthFormat);
 
 
 
@@ -788,7 +796,10 @@ namespace vkInit {
         }
         specyfication.device.destroyShaderModule(vertexShader);
         specyfication.device.destroyShaderModule(geometryShader);
-
+        output.shadowPipeline = shadowPipeline;
+        output.shadowRenderPass = renderpass;
+        output.shadowPipelineLayout = shadowPipelineLayout;
+        return output;
     }
 
 }

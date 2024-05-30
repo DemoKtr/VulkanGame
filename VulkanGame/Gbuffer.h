@@ -14,5 +14,5 @@ struct attachmentBundle {
 namespace vkGbuffer {
 	void createAttachment(attachmentBundle attachmentDescription);
 	void createGbufferAttachment(vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, vkUtil::Gbuffer* gbuffer);
-	void writeGbufferDescriptor(vk::DescriptorSet descriptorSet, vk::Device logicalDevice, vkUtil::Gbuffer gBuffer);
+	
 }

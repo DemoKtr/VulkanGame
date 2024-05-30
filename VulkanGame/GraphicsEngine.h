@@ -97,11 +97,12 @@ class GraphicsEngine
 	void create_framebuffers();
 	void cleanup_swapchain();
 
-	void record_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex,Scene *scene);
+	void record_draw_commands(vk::CommandBuffer commandBuffer, vk::CommandBuffer shadowCommandBuffer,uint32_t imageIndex,Scene *scene);
 	void record_shadow_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex,Scene *scene);
 
 
 	void render_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& starInstance, uint32_t instanceCount);
+	void render_shadows_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& starInstance, uint32_t instanceCount);
 public:
 	GraphicsEngine(ivec2 screenSize, GLFWwindow* window, bool debugMode);
 	void render(Scene *scene);

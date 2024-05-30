@@ -1,7 +1,21 @@
 #include "Frame.h"
 #include "Memory.h"
 #include "Image.h"
-		void vkUtil::SwapChainFrame::make_descriptor_resources() {
+#include "Shadows.h"
+void vkUtil::SwapChainFrame::shadowDescripotrsWrite()
+{
+	//Geometry shader UBO uniform
+	vk::WriteDescriptorSet shadowWriteInfo;
+	shadowWriteInfo.dstSet = shadowDescriptorSet;
+	shadowWriteInfo.dstBinding = 0;
+	shadowWriteInfo.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+	shadowWriteInfo.descriptorCount = 1;
+	shadowWriteInfo.descriptorType = vk::DescriptorType::eUniformBuffer;
+	shadowWriteInfo.pBufferInfo = &uniformShadowBufferDescriptor;
+
+	logicalDevice.updateDescriptorSets(shadowWriteInfo, nullptr);
+}
+void vkUtil::SwapChainFrame::make_descriptor_resources() {
 
 			BufferInputChunk input;
 			input.logicalDevice = logicalDevice;
@@ -12,11 +26,16 @@
 			cameraDataBuffer = createBuffer(input);
 			input.size = sizeof(PointLight);
 			lightDataBuffer = createBuffer(input);
+			input.size = 2 * sizeof(ShadowUBO);
+			input.usage = vk::BufferUsageFlagBits::eUniformBuffer;
+			shadowDataBuffer = createBuffer(input);
 
 			cameraDataWriteLocation = logicalDevice.mapMemory(cameraDataBuffer.bufferMemory, 0, sizeof(UBO));
 			lightDataWriteLocation = logicalDevice.mapMemory(lightDataBuffer.bufferMemory, 0, sizeof(PointLight));
+			shadowDataWriteLocation = logicalDevice.mapMemory(shadowDataBuffer.bufferMemory, 0, 2*sizeof(ShadowUBO));
 			////////////
 
+			
 
 			input.size = 1024 * sizeof(glm::mat4);
 			input.usage = vk::BufferUsageFlagBits::eStorageBuffer;
@@ -31,7 +50,17 @@
 				modelTransforms.push_back(glm::mat4(1.0f));
 				LightTransforms.push_back(glm::mat4(1.0f));
 			}
-
+			
+			
+			for (uint32_t j = 0; j < 6;++j) {
+				for (uint32_t i = 0; i < 2; ++i) {
+					shadowData.mvp[i][j] = glm::mat4(1.0f);
+					
+				}
+					
+			}
+			shadowData.modelPos[0] = glm::vec4(1.0f);
+			shadowData.modelPos[1] = glm::vec4(1.0f);
 			/*
 			typedef struct VkDescriptorBufferInfo {
 				VkBuffer        buffer;
@@ -46,6 +75,12 @@
 			uniformlightBufferDescriptor.buffer = lightDataBuffer.buffer;
 			uniformlightBufferDescriptor.offset = 0;
 			uniformlightBufferDescriptor.range = sizeof(PointLight);
+
+			uniformShadowBufferDescriptor.buffer = shadowDataBuffer.buffer;
+			uniformShadowBufferDescriptor.offset = 0;
+			uniformShadowBufferDescriptor.range = 2*sizeof(ShadowUBO);
+
+
 
 			modelBufferDescriptor.buffer = modelBuffer.buffer;
 			modelBufferDescriptor.offset = 0;
@@ -91,6 +126,9 @@
 			logicalDevice.updateDescriptorSets(writeInfo2, nullptr);
 
 			
+			
+			
+			
 		}
 	
 		void vkUtil::SwapChainFrame::make_depth_resources()
@@ -112,6 +150,9 @@
 			depthBufferView = vkImage::make_image_view(
 				logicalDevice, depthBuffer, depthFormat, vk::ImageAspectFlagBits::eDepth, vk::ImageViewType::e2D, 1
 			);
+			shadowMapBuffer.height = 1024;
+			shadowMapBuffer.width = 1024;
+			vkShadows::createShadowsAttachment(physicalDevice, logicalDevice, &shadowMapBuffer, depthFormat);
 		}
 
 

@@ -135,7 +135,19 @@ void GraphicsEngine::create_pipeline()
 	graphicsPipeline = output.graphicsPipeline;
 	deferedGraphicsPipeline = output.deferedGraphicsPipeline;
 	deferedLayout = output.deferedLayout;
-	
+
+	vkInit::ShadowGraphicsPipelineInBundle input = {};
+	input.device = device;
+	input.vertexFilePath = "shaders/ShadowMapVert.spv";
+	input.geometryFilePath = "shaders/ShadowMapGeo.spv";
+	input.swapchainExtent = swapchainExtent;
+	input.depthFormat = swapchainFrames[0].depthFormat;
+	input.shadowDescriptorSetLayout = { shadowSetLayout };
+	input.shadowAttachmentBuffer = swapchainFrames[0].shadowMapBuffer;
+	vkInit::ShadowGraphicsPipelineOutBundle out = vkInit::createShadowsPipeline(input,debugMode);
+	shadowRenderPass = out.shadowRenderPass;
+	shadowPipeline = out.shadowPipeline;
+	shadowLayout = out.shadowPipelineLayout;
 }
 void GraphicsEngine::create_swapchain()
 {
@@ -284,6 +296,14 @@ void GraphicsEngine::create_descriptor_set_layouts()
 
 	deferedSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
+	bindings.count = 1;
+	bindings.indices[0] = 0;
+	bindings.types[0] = vk::DescriptorType::eUniformBuffer;
+	bindings.stages[0] = vk::ShaderStageFlagBits::eGeometry;
+
+	shadowSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+
+
 
 
 
@@ -326,7 +346,7 @@ void GraphicsEngine::recreate_swapchain()
 	vkInit::make_frame_command_buffers(commandBufferInput, debugMode);
 }
 
-void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex,Scene* scene)
+void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,vk::CommandBuffer shadowCommandBuffer ,uint32_t imageIndex,Scene* scene)
 {
 	vk::CommandBufferBeginInfo beginInfo = {};
 	
@@ -338,6 +358,40 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint3
 			std::cout << "Failed to begin recording command buffer!" << std::endl;
 		}
 	}
+
+	vk::ClearValue dClear;
+	dClear.depthStencil = vk::ClearDepthStencilValue({ 1.0f, 0 });
+	std::vector<vk::ClearValue> dclearValues = { dClear };
+	vk::RenderPassBeginInfo subrenderPassInfo = {};
+	subrenderPassInfo.renderPass = shadowRenderPass;
+	subrenderPassInfo.framebuffer = swapchainFrames[imageIndex].shadowFramebuffer;
+	subrenderPassInfo.renderArea.offset.x = 0;
+	subrenderPassInfo.renderArea.offset.y = 0;
+	subrenderPassInfo.renderArea.extent = swapchainExtent;
+	subrenderPassInfo.clearValueCount = dclearValues.size();
+	subrenderPassInfo.pClearValues = dclearValues.data();
+
+	commandBuffer.beginRenderPass(&subrenderPassInfo,vk::SubpassContents::eSecondaryCommandBuffers);
+	commandBuffer.executeCommands(shadowCommandBuffer);
+	commandBuffer.endRenderPass();
+	
+	/*
+	vk::ImageMemoryBarrier barrier = {};
+	barrier.srcAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+	barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+	barrier.oldLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+	barrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.image = swapchainFrames[frameNumber].shadowMapBuffer.shadowBufferDepthAttachment.image;
+	barrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eDepth;
+	barrier.subresourceRange.baseMipLevel = 0;
+	barrier.subresourceRange.levelCount = 1;
+	barrier.subresourceRange.baseArrayLayer = 0;
+	barrier.subresourceRange.layerCount = 6;
+	*/
+
+	//commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eLateFragmentTests, vk::PipelineStageFlagBits::eFragmentShader, vk::DependencyFlags(), nullptr, nullptr, barrier);
 
 	vk::RenderPassBeginInfo renderPassInfo = {};
 	renderPassInfo.renderPass = renderpass;
@@ -364,17 +418,18 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint3
 	prepare_scene(commandBuffer);
 	uint32_t startInstance = 0;
 	//Triangles
-
+	
 	for (std::pair<meshTypes, std::vector<SceneObject*>> pair : scene->positions) {
 		render_objects(commandBuffer,pair.first, startInstance, static_cast<uint32_t>(pair.second.size()));
 	}
-
+	
+	// W tym miejscu bym chcia³ postawiæ bariere 
 	commandBuffer.nextSubpass(vk::SubpassContents::eInline);
 
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, deferedGraphicsPipeline);
 
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, deferedLayout, 0, swapchainFrames[imageIndex].deferedDescriptorSet, nullptr);
-
+	
 
 	commandBuffer.draw(3, 1, 0, 0);
 	commandBuffer.endRenderPass();
@@ -391,8 +446,15 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, uint3
 }
 void GraphicsEngine::record_shadow_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex, Scene* scene)
 {
-	vk::CommandBufferBeginInfo beginInfo = {};
+	vk::CommandBufferInheritanceInfo inh = {};
+	inh.renderPass = shadowRenderPass;
+	inh.subpass = 0;
+	inh.framebuffer = swapchainFrames[imageIndex].shadowFramebuffer;
 
+
+	vk::CommandBufferBeginInfo beginInfo;
+	beginInfo.flags = vk::CommandBufferUsageFlagBits::eRenderPassContinue;
+	beginInfo.pInheritanceInfo = &inh;
 	try {
 		commandBuffer.begin(beginInfo);
 	}
@@ -401,32 +463,16 @@ void GraphicsEngine::record_shadow_draw_commands(vk::CommandBuffer commandBuffer
 			std::cout << "Failed to begin recording shadow command buffer!" << std::endl;
 		}
 	}
-
-	vk::RenderPassBeginInfo renderPassInfo = {};
-	renderPassInfo.renderPass = shadowRenderPass;
-	renderPassInfo.framebuffer = swapchainFrames[imageIndex].framebuffer;
-	renderPassInfo.renderArea.offset.x = 0;
-	renderPassInfo.renderArea.offset.y = 0;
-	renderPassInfo.renderArea.extent = swapchainExtent;
-	vk::ClearValue depthClear;
-
-	depthClear.depthStencil = vk::ClearDepthStencilValue({ 1.0f, 0 });
-	std::vector<vk::ClearValue> clearValues = { {depthClear} };
-
-	renderPassInfo.clearValueCount = clearValues.size();
-	renderPassInfo.pClearValues = clearValues.data();
-
-	commandBuffer.beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, shadowPipeline);
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, shadowLayout, 0, swapchainFrames[imageIndex].shadowDescriptorSet, nullptr);
 	prepare_scene(commandBuffer);
 	uint32_t startInstance = 0;
 	//Triangles
-
+	
 	for (std::pair<meshTypes, std::vector<SceneObject*>> pair : scene->positions) {
-		render_objects(commandBuffer, pair.first, startInstance, static_cast<uint32_t>(pair.second.size()));
+		render_shadows_objects(commandBuffer, pair.first, startInstance, static_cast<uint32_t>(pair.second.size()));
 	}
-	commandBuffer.endRenderPass();
+
 
 	try {
 		commandBuffer.end();
@@ -446,6 +492,16 @@ void GraphicsEngine::render_objects(vk::CommandBuffer commandBuffer, meshTypes o
 	materials[objectType]->useTexture(commandBuffer, layout);
 	commandBuffer.drawIndexed(indexCount, instanceCount, firstIndex,0 ,startInstance);
 	startInstance += instanceCount;
+}
+
+void GraphicsEngine::render_shadows_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& starInstance, uint32_t instanceCount)
+{
+	//Triangles
+	int indexCount = meshes->indexCounts.find(objectType)->second;
+	int firstIndex = meshes->firstIndices.find(objectType)->second;
+
+	commandBuffer.drawIndexed(indexCount, instanceCount, firstIndex, 0, starInstance);
+	starInstance += instanceCount;
 }
 
 void GraphicsEngine::render(Scene *scene)
@@ -482,16 +538,14 @@ void GraphicsEngine::render(Scene *scene)
 	
 	vk::CommandBuffer commandBuffer = swapchainFrames[frameNumber].commandBuffer;
 	vk::CommandBuffer shadowCommandBuffer = swapchainFrames[frameNumber].shadowCommandBuffer;
-	vk::CommandBuffer geometryCommandBuffer = swapchainFrames[frameNumber].geometryCommandBuffer;
 
 	commandBuffer.reset();
 	shadowCommandBuffer.reset();
-	geometryCommandBuffer.reset();
 	
 	prepare_frame(imageIndex, scene);
 
-
-	record_draw_commands(commandBuffer, imageIndex,scene);
+	record_shadow_draw_commands(shadowCommandBuffer, imageIndex, scene);
+	record_draw_commands(commandBuffer,shadowCommandBuffer ,imageIndex,scene);
 
 	/*
 
@@ -508,9 +562,8 @@ void GraphicsEngine::render(Scene *scene)
 	barrier.subresourceRange.baseMipLevel = 0;
 	barrier.subresourceRange.levelCount = 1;
 	barrier.subresourceRange.baseArrayLayer = 0;
-	barrier.subresourceRange.layerCount = 2;
+	barrier.subresourceRange.layerCount = 6;
 	
-	commandBuffer.executeCommands(shadowCommandBuffer);
 	commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eLateFragmentTests, vk::PipelineStageFlagBits::eFragmentShader, vk::DependencyFlags(), nullptr, nullptr, barrier);
 	*/
 
@@ -582,8 +635,14 @@ void GraphicsEngine::create_frame_resources()
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment);
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment);
 	gbindings.types.push_back(vk::DescriptorType::eUniformBuffer);
+	
+
+	vkInit::descriptorSetLayoutData shadowBindings;
+	shadowBindings.count = 1;
+	shadowBindings.types.push_back(vk::DescriptorType::eUniformBuffer);
 	frameDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);
 	deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
+	shadowDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), shadowBindings);
 	//deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
 	
 	for (vkUtil::SwapChainFrame& frame : swapchainFrames) //referencja 
@@ -596,6 +655,7 @@ void GraphicsEngine::create_frame_resources()
 
 		frame.descriptorSet = vkInit::allocate_descriptor_set(device, frameDescriptorPool, frameSetLayout);
 		frame.deferedDescriptorSet = vkInit::allocate_descriptor_set(device, deferedDescriptorPool, deferedSetLayout);
+		frame.shadowDescriptorSet = vkInit::allocate_descriptor_set(device, shadowDescriptorPool, shadowSetLayout);
 		
 
 	}
@@ -610,6 +670,8 @@ void GraphicsEngine::create_framebuffers()
 	frameBufferInput.renderpass = renderpass;
 	frameBufferInput.swapchainExtent = swapchainExtent;
 	vkInit::make_framebuffers_withGbuffer(frameBufferInput, swapchainFrames, debugMode);
+	frameBufferInput.renderpass = shadowRenderPass;
+	vkInit::make_shadow_framebuffers(frameBufferInput, swapchainFrames, debugMode);
 }
 
 
@@ -659,33 +721,36 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 		for (SceneObject* obj : pair.second) {
 			obj->getTransform().rotate(glm::vec3(1, 1, 0), 0.001f);
 			obj->getTransform().computeModelMatrix();
+			_frame.shadowData.modelPos[i] = glm::vec4(obj->getTransform().getGlobalPosition(), 1.0f);
 			_frame.modelTransforms[i++] = obj->getTransform().getModelMatrix();
 		}
 		
 
 }
-	
-
 	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), i * sizeof(glm::mat4));
-
 	size_t j = 0;
 	glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), 1024.0f / 1024.0f, 1.0f, 25.0f);
-	std::array<std::vector<glm::mat4>, 2> shadowTransforms;
+	std::vector<glm::mat4> shadowTransform;
 	
-	
+
+
 	for (Light* light : scene->lights) {
-		std::vector<glm::mat4> shadowTransform;
-		shadowTransform.push_back(shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		shadowTransform.push_back(shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		shadowTransform.push_back(shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-		shadowTransform.push_back(shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
-		shadowTransform.push_back(shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		shadowTransform.push_back(shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		_frame.shadowData.mvp[j][0] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		_frame.shadowData.mvp[j][1] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		_frame.shadowData.mvp[j][2] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+		_frame.shadowData.mvp[j][3] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+		_frame.shadowData.mvp[j][4] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		_frame.shadowData.mvp[j++][5] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+
 	}
 
+	
+	memcpy(_frame.shadowDataWriteLocation, &(_frame.shadowData), i * sizeof(vkUtil::ShadowUBO));
+
+	
+	
 	_frame.write_descriptor_set();
-
-
 	_frame.writeGbufferDescriptor(_frame.deferedDescriptorSet, device);
+	_frame.shadowDescripotrsWrite();
 	//vkGbuffer::writeGbufferDescriptor(_frame.deferedDescriptorSet,device,_frame.gbuffer);
 }

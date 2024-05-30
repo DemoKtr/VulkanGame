@@ -199,6 +199,7 @@
     <ClInclude Include="RenderStruct.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneObject.h" />
+    <ClInclude Include="Settings.h" />
     <ClInclude Include="Shaders.h" />
     <ClInclude Include="Shadows.h" />
     <ClInclude Include="single_time_commands.h" />
