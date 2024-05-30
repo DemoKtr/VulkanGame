@@ -235,6 +235,9 @@ GraphicsEngine::~GraphicsEngine()
 	
 	delete meshes;
 	for (const auto& [key, texture] : materials) delete texture;
+	for (const auto& [key, SceneObjects] : models) {
+		for (SceneObject* obj : SceneObjects) delete obj;
+	}
 	delete cubemap;
 	
 	device.destroyDescriptorSetLayout(deferedSetLayout);
