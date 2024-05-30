@@ -13,6 +13,48 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\vkImage">
+      <UniqueIdentifier>{b7a97dfe-447e-40a4-ae64-177bf970e9bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\vkMesh">
+      <UniqueIdentifier>{bfb25268-0649-4376-8657-a4e49fade974}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\vkInit">
+      <UniqueIdentifier>{4643f138-136d-4c1b-8f68-b94f81f3b5a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\vkUtil">
+      <UniqueIdentifier>{9293d9be-78df-4f6e-bfce-e08a269c88a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Scene">
+      <UniqueIdentifier>{70b96b1b-1b08-45d5-9ef3-5155ee412e3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\vkInit\vkBuffers">
+      <UniqueIdentifier>{c99b5c72-535a-4f86-85a0-50fdbe79defd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\vkSettings">
+      <UniqueIdentifier>{4d604a09-441b-463c-ac0b-b0bdca2e2744}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vkSettings">
+      <UniqueIdentifier>{e9e0cc74-8a80-46d7-9c60-f0e68b4a00f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scene">
+      <UniqueIdentifier>{d862e49f-7839-4068-a00e-0850d1155c5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vkInit">
+      <UniqueIdentifier>{01536d5b-f51e-47ad-b2dd-c6e56ba843a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vkUtil">
+      <UniqueIdentifier>{0c19dffe-c5bf-42e0-924c-70ea3143a5ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vkMesh">
+      <UniqueIdentifier>{e75e4be3-d653-46b1-8dd0-3d1f8aa2be51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vkImage">
+      <UniqueIdentifier>{a923e1c8-8e2f-4cd0-bcd0-6dd21c2e665f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vkInit\vkBuffers">
+      <UniqueIdentifier>{8cab72f2-9e13-4f83-ad43-34d3503b0535}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -21,172 +63,172 @@
     <ClCompile Include="GraphicsEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Instance.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Logging.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Device.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Swapchain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Queues.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="app.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Memory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TriangleMesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="VertexMenagerie.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Image.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="single_time_commands.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Descriptors.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="config.cpp">
+      <Filter>Source Files\vkSettings</Filter>
     </ClCompile>
     <ClCompile Include="Frame.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\vkUtil</Filter>
     </ClCompile>
-    <ClCompile Include="config.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Image.cpp">
+      <Filter>Source Files\vkImage</Filter>
     </ClCompile>
     <ClCompile Include="Obj_Mesh.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\vkMesh</Filter>
     </ClCompile>
-    <ClCompile Include="Gbuffer.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Logging.cpp">
+      <Filter>Source Files\vkInit</Filter>
+    </ClCompile>
+    <ClCompile Include="single_time_commands.cpp">
+      <Filter>Source Files\vkUtil</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneObject.cpp">
+      <Filter>Source Files\Scene</Filter>
     </ClCompile>
     <ClCompile Include="RenderPass.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\vkInit</Filter>
     </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Device.cpp">
+      <Filter>Source Files\vkInit</Filter>
+    </ClCompile>
+    <ClCompile Include="Instance.cpp">
+      <Filter>Source Files\vkInit</Filter>
+    </ClCompile>
+    <ClCompile Include="Descriptors.cpp">
+      <Filter>Source Files\vkInit</Filter>
+    </ClCompile>
+    <ClCompile Include="Queues.cpp">
+      <Filter>Source Files\vkUtil</Filter>
+    </ClCompile>
+    <ClCompile Include="Memory.cpp">
+      <Filter>Source Files\vkUtil</Filter>
     </ClCompile>
     <ClCompile Include="Cubemap.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\vkImage</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files\vkImage</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexMenagerie.cpp">
+      <Filter>Source Files\vkMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="TriangleMesh.cpp">
+      <Filter>Source Files\vkMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Swapchain.cpp">
+      <Filter>Source Files\vkInit</Filter>
+    </ClCompile>
+    <ClCompile Include="Gbuffer.cpp">
+      <Filter>Source Files\vkInit\vkBuffers</Filter>
     </ClCompile>
     <ClCompile Include="Shadows.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\vkInit\vkBuffers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GraphicsEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Instance.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Logging.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Device.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Transform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Swapchain.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Queues.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Shaders.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Pipeline.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FrameBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Commands.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Synchronizer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="app.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Frame.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderStruct.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Memory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TriangleMesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VertexMenagerie.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Descrpitors.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vkImage\stb_image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="single_time_commands.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Obj_Mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Gbuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderPass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\vkImage</Filter>
     </ClInclude>
     <ClInclude Include="Cubemap.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\vkImage</Filter>
+    </ClInclude>
+    <ClInclude Include="Frame.h">
+      <Filter>Header Files\vkUtil</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameBuffer.h">
+      <Filter>Header Files\vkInit</Filter>
+    </ClInclude>
+    <ClInclude Include="Descrpitors.h">
+      <Filter>Header Files\vkInit</Filter>
+    </ClInclude>
+    <ClInclude Include="Device.h">
+      <Filter>Header Files\vkInit</Filter>
+    </ClInclude>
+    <ClInclude Include="Gbuffer.h">
+      <Filter>Header Files\vkInit\vkBuffers</Filter>
     </ClInclude>
     <ClInclude Include="Shadows.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\vkInit\vkBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneObject.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands.h">
+      <Filter>Header Files\vkInit</Filter>
+    </ClInclude>
+    <ClInclude Include="Logging.h">
+      <Filter>Header Files\vkInit</Filter>
+    </ClInclude>
+    <ClInclude Include="Queues.h">
+      <Filter>Header Files\vkUtil</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPass.h">
+      <Filter>Header Files\vkInit</Filter>
+    </ClInclude>
+    <ClInclude Include="Instance.h">
+      <Filter>Header Files\vkInit</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Header Files\vkMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders.h">
+      <Filter>Header Files\vkUtil</Filter>
+    </ClInclude>
+    <ClInclude Include="Pipeline.h">
+      <Filter>Header Files\vkInit</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderStruct.h">
+      <Filter>Header Files\vkUtil</Filter>
+    </ClInclude>
+    <ClInclude Include="single_time_commands.h">
+      <Filter>Header Files\vkUtil</Filter>
+    </ClInclude>
+    <ClInclude Include="Obj_Mesh.h">
+      <Filter>Header Files\vkMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files\vkImage</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Swapchain.h">
+      <Filter>Header Files\vkInit</Filter>
+    </ClInclude>
+    <ClInclude Include="vkImage\stb_image.h">
+      <Filter>Header Files\vkImage</Filter>
+    </ClInclude>
+    <ClInclude Include="Memory.h">
+      <Filter>Header Files\vkUtil</Filter>
+    </ClInclude>
+    <ClInclude Include="Synchronizer.h">
+      <Filter>Header Files\vkInit</Filter>
+    </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>Header Files\vkSettings</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexMenagerie.h">
+      <Filter>Header Files\vkMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="TriangleMesh.h">
+      <Filter>Header Files\vkMesh</Filter>
     </ClInclude>
     <ClInclude Include="Settings.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\vkSettings</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
