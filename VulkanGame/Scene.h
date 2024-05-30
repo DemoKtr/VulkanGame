@@ -3,6 +3,9 @@
 #include <deque>
 #include "SceneObject.h"
 #include <unordered_map>
+
+
+
 class Scene
 {
 
@@ -10,7 +13,8 @@ class Scene
 public:
 	Scene();
 	~Scene();
-	std::unordered_map <meshTypes, std::vector<SceneObject*>> positions;
+	//std::unordered_map <meshTypes, std::vector<SceneObject*>> positions;
+	std::vector<SceneObject*> sceneObjects;
 	std::vector<Light*> lights;
 };
 

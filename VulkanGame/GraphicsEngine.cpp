@@ -10,13 +10,28 @@
 #include "Descrpitors.h"
 #include "Obj_Mesh.h"
 #include "Gbuffer.h"
+#include <set>
 
-void GraphicsEngine::make_assets()
+void GraphicsEngine::make_assets(Scene* scene)
 {
 	meshes = new VertexMenagerie();
-	std::unordered_map<meshTypes, std::vector<const char*>> model_filenames = { {meshTypes::KITTY, {"box.obj","box.mtl"}} ,{ meshTypes::DOG, {"box.obj","box.mtl"} } };
 
-	for (std::pair<meshTypes, std::vector<const char*>> pair : model_filenames) {
+	std::unordered_map<meshTypes, std::array<char*,2>> model_filenames = {};// { { meshTypes::KITTY, { "box.obj","box.mtl" } }, { meshTypes::DOG, {"box.obj","box.mtl"} } };
+
+	
+	for (SceneObject* obj : scene->sceneObjects) {
+		if (model_filenames.find(obj->objMaterial.meshType) == model_filenames.end()) {
+			// Jeœli klucz nie istnieje, dodajemy do mapy
+			model_filenames[obj->objMaterial.meshType][0] = obj->objMaterial.model;
+			model_filenames[obj->objMaterial.meshType][1] = obj->objMaterial.material;
+			instanceCounter[obj->objMaterial.meshType]++;
+			models[obj->objMaterial.meshType].push_back(obj);
+		}
+		else { instanceCounter[obj->objMaterial.meshType]++; models[obj->objMaterial.meshType].push_back(obj);
+		}
+	}
+
+	for (std::pair<meshTypes, std::array<char*,2>> pair : model_filenames) {
 		vkMesh::ObjMesh model(pair.second[0], pair.second[1], glm::mat4(1.0f));
 		meshes->consume(pair.first, model.vertices, model.indices);
 	}
@@ -32,8 +47,8 @@ void GraphicsEngine::make_assets()
 
 	//Materials
 	std::unordered_map<meshTypes, std::vector<const char*>> filenames = {
-		{meshTypes::KITTY, {"tex/brick.jpg"}},
-		{meshTypes::DOG, {"tex/rick.jpg"} },
+		{meshTypes::DOG, {"tex/brick.jpg"}},
+		{meshTypes::KITTY, {"tex/rick.jpg"} },
 	};
 
 	//make Descriptor pool
@@ -170,7 +185,7 @@ void GraphicsEngine::create_swapchain()
 	}
 }
 ////////////////////////////////////
-GraphicsEngine::GraphicsEngine(ivec2 screenSize, GLFWwindow* window, bool debugMode)
+GraphicsEngine::GraphicsEngine(ivec2 screenSize, GLFWwindow* window,Scene* scene ,bool debugMode)
 {
 	this->screenSize = screenSize;
 	this->mainWindow = window;
@@ -187,7 +202,7 @@ GraphicsEngine::GraphicsEngine(ivec2 screenSize, GLFWwindow* window, bool debugM
 
 	create_pipeline();
 	finalize_setup();
-	make_assets();
+	make_assets(scene);
 
 }
 
@@ -424,7 +439,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,vk::Co
 	uint32_t startInstance = 0;
 	//Triangles
 	
-	for (std::pair<meshTypes, std::vector<SceneObject*>> pair : scene->positions) {
+	for (std::pair<meshTypes, std::vector<SceneObject*>> pair : models) {
 		render_objects(commandBuffer,pair.first, startInstance, static_cast<uint32_t>(pair.second.size()));
 	}
 	
@@ -474,7 +489,7 @@ void GraphicsEngine::record_shadow_draw_commands(vk::CommandBuffer commandBuffer
 	uint32_t startInstance = 0;
 	//Triangles
 	
-	for (std::pair<meshTypes, std::vector<SceneObject*>> pair : scene->positions) {
+	for (std::pair<meshTypes, std::vector<SceneObject*>> pair : models) {
 		render_shadows_objects(commandBuffer, pair.first, startInstance, static_cast<uint32_t>(pair.second.size()));
 	}
 
@@ -721,7 +736,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 
 	size_t i= 0;
 
-	for(std::pair<meshTypes,std::vector<SceneObject*>> pair: scene->positions)
+	for(std::pair<meshTypes,std::vector<SceneObject*>> pair: models)
  {
 		for (SceneObject* obj : pair.second) {
 			obj->getTransform().rotate(glm::vec3(1, 1, 0), 0.001f);

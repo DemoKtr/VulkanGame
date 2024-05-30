@@ -24,8 +24,11 @@ void Box::update()
 
 Box::Box()
 {
+	objMaterial.setFilenames("box.obj", "box.mtl", "tex.brick.jpg", "");
+	objMaterial.meshType = meshTypes::KITTY;
 }
 
 Box::~Box()
 {
+	objMaterial.clear();
 }

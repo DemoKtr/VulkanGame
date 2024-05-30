@@ -44,8 +44,11 @@ void App::calculateFrameRate()
 App::App(ivec2 screenSize, bool debugMode)
 {
 	build_glfw_window(screenSize, debugMode);
-	graphicsEngine = new GraphicsEngine(screenSize, window, debugMode);
+
 	scene = new Scene();
+	
+	graphicsEngine = new GraphicsEngine(screenSize, window, scene, debugMode);
+	
 }
 
 App::~App()

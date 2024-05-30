@@ -3,9 +3,16 @@
 Scene::Scene()
 {
 	
-	positions.insert({ meshTypes::KITTY, {} });
-	positions.insert({ meshTypes::DOG, {} });
-	positions.insert({ meshTypes::KITTY, {} });
+	
+
+
+
+
+
+
+	//positions.insert({ meshTypes::KITTY, {} });
+	//positions.insert({ meshTypes::DOG, {} });
+	//.insert({ meshTypes::KITTY, {} });
 	
 	Box* box = new Box();
 	Box* box1 = new Box();
@@ -23,8 +30,11 @@ Scene::Scene()
 
 
 
-	positions[meshTypes::KITTY].push_back(box);
-	positions[meshTypes::DOG].push_back(box1);
+	//positions[meshTypes::KITTY].push_back(box);
+	//positions[meshTypes::DOG].push_back(box1);
+
+	sceneObjects.push_back(box);
+	sceneObjects.push_back(box1);
 
 
 	Light* pointLight1 = new Light();

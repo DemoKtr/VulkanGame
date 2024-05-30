@@ -56,7 +56,8 @@ class GraphicsEngine
 
 	VertexMenagerie* meshes;
 	std::unordered_map<meshTypes, vkImage::Texture*>  materials;
-
+	std::unordered_map<meshTypes, int> instanceCounter;
+	std::unordered_map<meshTypes, std::vector<SceneObject*>> models;
 	
 	//Descriptor objects
 
@@ -76,7 +77,7 @@ class GraphicsEngine
 	//vk::DescriptorPool deferedDescriptorPool;
 	vkImage::Cubemap* cubemap;
 
-	void make_assets();
+	void make_assets(Scene* scene);
 	void prepare_scene(vk::CommandBuffer commandBuffer);
 	void prepare_frame(uint32_t imageIndex, Scene* scene);
 
@@ -104,7 +105,7 @@ class GraphicsEngine
 	void render_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& starInstance, uint32_t instanceCount);
 	void render_shadows_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& starInstance, uint32_t instanceCount);
 public:
-	GraphicsEngine(ivec2 screenSize, GLFWwindow* window, bool debugMode);
+	GraphicsEngine(ivec2 screenSize, GLFWwindow* window,Scene* scene ,bool debugMode);
 	void render(Scene *scene);
 	~GraphicsEngine();
 };
