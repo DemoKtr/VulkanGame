@@ -225,6 +225,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 		{
 			logicalDevice.destroyImageView(imageView);
 			logicalDevice.destroyFramebuffer(framebuffer);
+			logicalDevice.destroyFramebuffer(shadowFramebuffer);
 			logicalDevice.destroyFence(inFlight);
 			logicalDevice.destroySemaphore(imageAvailable);
 			logicalDevice.destroySemaphore(renderFinished);
@@ -241,20 +242,27 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			logicalDevice.freeMemory(lightDataBuffer.bufferMemory);
 			logicalDevice.destroyBuffer(lightDataBuffer.buffer);
 
+			logicalDevice.unmapMemory(shadowDataBuffer.bufferMemory);
+			logicalDevice.freeMemory(shadowDataBuffer.bufferMemory);
+			logicalDevice.destroyBuffer(shadowDataBuffer.buffer);
 
 
 			logicalDevice.destroyImage(depthBuffer);
 			logicalDevice.destroyImage(gbuffer.position.image);
 			logicalDevice.destroyImage(gbuffer.normal.image);
 			logicalDevice.destroyImage(gbuffer.albedo.image);
+			logicalDevice.destroyImage(shadowMapBuffer.shadowBufferDepthAttachment.image);
 			logicalDevice.freeMemory(depthBufferMemory);
 			logicalDevice.freeMemory(gbuffer.position.mem);
 			logicalDevice.freeMemory(gbuffer.normal.mem);
 			logicalDevice.freeMemory(gbuffer.albedo.mem);
+			logicalDevice.freeMemory(shadowMapBuffer.shadowBufferDepthAttachment.mem);
 			logicalDevice.destroyImageView(depthBufferView);
 			logicalDevice.destroyImageView(gbuffer.position.view);
 			logicalDevice.destroyImageView(gbuffer.normal.view);
 			logicalDevice.destroyImageView(gbuffer.albedo.view);
+			logicalDevice.destroyImageView(shadowMapBuffer.shadowBufferDepthAttachment.view);
+			logicalDevice.destroySampler(shadowMapBuffer.sampler);
 			
 		}
 

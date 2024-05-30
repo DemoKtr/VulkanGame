@@ -203,15 +203,20 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyCommandPool(commandPool);
 	device.destroyPipeline(graphicsPipeline);
 	device.destroyPipeline(deferedGraphicsPipeline);
+	device.destroyPipeline(shadowPipeline);
 	device.destroyPipelineLayout(layout);
 	device.destroyPipelineLayout(deferedLayout);
+	device.destroyPipelineLayout(shadowLayout);
 	device.destroyRenderPass(renderpass);
+	device.destroyRenderPass(shadowRenderPass);
 	
 	this->cleanup_swapchain();
 	
 	device.destroyDescriptorSetLayout(frameSetLayout);
+	device.destroyDescriptorSetLayout(shadowSetLayout);
 	device.destroyDescriptorSetLayout(meshSetLayout);
 	device.destroyDescriptorPool(meshDescriptorPool);
+	device.destroyDescriptorPool(shadowDescriptorPool);
 	
 	delete meshes;
 	for (const auto& [key, texture] : materials) delete texture;
