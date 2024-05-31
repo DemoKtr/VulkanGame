@@ -47,8 +47,8 @@ void GraphicsEngine::make_assets(Scene* scene)
 
 	//Materials
 	std::unordered_map<meshTypes, std::vector<const char*>> filenames = {
-		{meshTypes::DOG, {"tex/brick.jpg"}},
-		{meshTypes::KITTY, {"tex/rick.jpg"} },
+		{meshTypes::KITTY, {"tex/brick.jpg"}},
+		{meshTypes::DOG, {"tex/rick.jpg"} },
 	};
 
 	//make Descriptor pool

@@ -5,6 +5,13 @@
 
 namespace vkMesh {
 
+	struct TangentBtangent {
+		glm::vec3 tangent;
+		glm::vec3 bTangent;
+	};
+
+
+
 	class ObjMesh
 	{
 	public:
@@ -31,7 +38,9 @@ namespace vkMesh {
 
 		void read_face_data(const std::vector<std::string>& words);
 
-		void read_corner(const std::string& vertex_description);
+		TangentBtangent readBtangent(const std::string& first_vertex_description, const std::string& seccond_vertex_description, const std::string& third_vertex_description);
+		
+		void read_corner(const std::string& vertex_description, TangentBtangent tangent);
 	};
 
 

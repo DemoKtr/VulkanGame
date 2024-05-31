@@ -19,7 +19,7 @@ void VertexMenagerie::consume(meshTypes meshType, std::vector<float> data, std::
 	
 
 			int indexCount = static_cast<int>(indicies.size());
-			int vertexCount = static_cast<int>(data.size() / 8);
+			int vertexCount = static_cast<int>(data.size() / 14);
 			int lastIndex = static_cast<int>(indexLump.size());
 
 			firstIndices.insert(std::make_pair(meshType, lastIndex));
