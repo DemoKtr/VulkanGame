@@ -3,9 +3,10 @@
 layout (input_attachment_index = 0, binding = 0) uniform subpassInput inputPosition;
 layout (input_attachment_index = 1, binding = 1) uniform subpassInput inputNormal;
 layout (input_attachment_index = 2, binding = 2) uniform subpassInput inputAlbedo;
+layout (input_attachment_index = 3, binding = 3) uniform subpassInput inputARM;
 
 
-layout(set = 0,binding = 3) uniform PointLight{
+layout(set = 0,binding = 4) uniform PointLight{
 		vec3 position;
 
 		float constant;

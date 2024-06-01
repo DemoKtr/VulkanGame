@@ -4,6 +4,9 @@ layout(set = 0,binding = 0) uniform UBO {
 	mat4 view;
 	mat4 projection;
 	mat4 viewProjection;
+	vec3 lightPos[2];
+	vec3 viewPos;
+	float heightScale;
 } cameraData;
 
 layout(std140,set = 0, binding = 1) readonly buffer storageBuffer {
@@ -11,21 +14,39 @@ layout(std140,set = 0, binding = 1) readonly buffer storageBuffer {
 } ObjectData;
 
 layout(location = 0) in vec3 vertexPosition;
-layout(location = 1) in vec3 vertexColor;
-layout(location = 2) in vec2 vertTexCoord;
+layout(location = 1) in vec3 vertexNormal;
+layout(location = 2) in vec2 vertexTexCoord;
+layout(location = 3) in vec3 vertexTangent;
+layout(location = 4) in vec3 vertexBitangent;
 
-layout(location = 0) out vec3 fragColor;
-layout(location = 1) out vec2 fragTexCoord;
-layout(location = 2) out vec3 outPos;
-layout(location = 3) out mat3 outNormalMatrix;
+
+layout(location = 0) out VS_OUT{
+	vec3 FragPos;
+	vec2 TexCoords;
+	vec3 TangentLightPos[2];
+	vec3 TangentViewPos;
+	vec3 TangentFragPos;
+	float heightScale;
+} vs_out;
+
 
 
 
 void main() {
-	fragColor = vertexColor;
-	fragTexCoord = vertTexCoord;
-	outPos = vec3(ObjectData.model[gl_InstanceIndex] * vec4(vertexPosition, 1.0));
+
+	vs_out.FragPos = vec3(ObjectData.model[gl_InstanceIndex] * vec4(vertexPosition,1.0f));
+	vs_out.TexCoords = vertexTexCoord;
 	
-	outNormalMatrix = transpose(inverse(mat3(ObjectData.model[gl_InstanceIndex])));
+	mat3 normalMatrix = transpose(inverse(mat3(ObjectData.model[gl_InstanceIndex])));
+	vec3 T = normalize(normalMatrix * vertexTangent);
+	vec3 N = normalize(normalMatrix * vertexNormal);
+	T = normalize(T - dot(T,N) * N);
+	vec3 B = cross(N,T);
+	
+	mat3 TBN = transpose(mat3(T,B,N));
+	for(int i =0; i<2;++i) vs_out.TangentLightPos[i] = TBN * cameraData.lightPos[i];
+	vs_out.TangentViewPos = TBN * cameraData.viewPos;
+	vs_out.TangentFragPos = TBN * vs_out.FragPos;
+	vs_out.heightScale = cameraData.heightScale;
 	gl_Position = cameraData.viewProjection * ObjectData.model[gl_InstanceIndex] * vec4(vertexPosition, 1.0);
 }

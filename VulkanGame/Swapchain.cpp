@@ -112,7 +112,7 @@ vk::PresentModeKHR vkInit::choose_swapchain_present_mode(std::vector<vk::Present
 	for (vk::PresentModeKHR presentMode : presentModes) {
 		if (presentMode == vk::PresentModeKHR::eMailbox) return presentMode;
 	}
-	return vk::PresentModeKHR::eFifo; //mobilki kiedy chcemy ograniczyæ power consumption z jakiegoœ powodu ustawia siê na domyœlne
+	return vk::PresentModeKHR::eMailbox; //mobilki kiedy chcemy ograniczyæ power consumption z jakiegoœ powodu ustawia siê na domyœlne
 }
 
 vk::Extent2D vkInit::choose_swapchain_exten(uint32_t width, uint32_t height, vk::SurfaceCapabilitiesKHR capabilities) {

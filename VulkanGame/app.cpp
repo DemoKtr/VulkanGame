@@ -1,5 +1,5 @@
 #include "app.h"
-
+#include <sstream>
 void App::build_glfw_window(ivec2 screenSize, bool debugMode)
 {
 	glfwInit();
@@ -31,7 +31,9 @@ void App::calculateFrameRate()
 	if (delta >= 1) {
 		int framerate{ std::max(1, int(numFrames / delta)) };
 		
-		std::cout << framerate << " fps.";
+		std::stringstream title{};
+		title << "Running at " << framerate << " fps.";
+		glfwSetWindowTitle(window, title.str().c_str());
 		
 		lastTime = currentTime;
 		numFrames = -1;

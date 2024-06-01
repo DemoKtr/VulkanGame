@@ -178,11 +178,18 @@ void vkMesh::ObjMesh::read_corner(const std::string& vertex_description, Tangent
 	vertices.push_back(pos[0]);
 	vertices.push_back(pos[1]);
 	vertices.push_back(pos[2]);
+	
+	/*
 	//color diffuse
 	vertices.push_back(brushColor.r);
 	vertices.push_back(brushColor.g);
 	vertices.push_back(brushColor.b);
-
+	*/
+	//normal
+	glm::vec3 normal = v[std::stol(v_vt_vn[2]) - 1];
+	vertices.push_back(normal[0]);
+	vertices.push_back(normal[1]);
+	vertices.push_back(normal[2]);
 
 	//texcoord
 	glm::vec2 texcoord = glm::vec2(0.0f, 0.0f);

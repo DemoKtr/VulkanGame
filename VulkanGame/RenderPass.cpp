@@ -4,8 +4,8 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 {
 
 
-	std::array<vk::AttachmentDescription,5> attachments;
-	vk::AttachmentReference attachmentRefertences[5];
+	std::array<vk::AttachmentDescription,6> attachments;
+	vk::AttachmentReference attachmentRefertences[6];
 
 
 	attachments[0].flags = vk::AttachmentDescriptionFlags();
@@ -23,7 +23,7 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 	
 
 	// Init attachment properties
-	for (uint32_t i = 1; i < 4; ++i)
+	for (uint32_t i = 1; i < 5; ++i)
 	{
 		attachments[i].flags = vk::AttachmentDescriptionFlags();
 		attachments[i].samples =  vk::SampleCountFlagBits::e1;
@@ -34,22 +34,22 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 		attachments[i].initialLayout = vk::ImageLayout::eUndefined;
 		attachments[i].finalLayout = vk::ImageLayout::eColorAttachmentOptimal;
 
-		if(i==1) attachments[i].format = gBuffer.position.format;
-		else if(i==2)attachments[i].format = gBuffer.normal.format;
-		else attachments[i].format = gBuffer.albedo.format;
-
+		if (i == 1) attachments[i].format = gBuffer.position.format;
+		else if (i == 2)attachments[i].format = gBuffer.normal.format;
+		else if (i == 3) attachments[i].format = gBuffer.albedo.format;
+		else attachments[i].format = gBuffer.arm.format;
 	}
 
 
-	attachments[4].flags = vk::AttachmentDescriptionFlags();
-	attachments[4].format = depthFormat;
-	attachments[4].samples = vk::SampleCountFlagBits::e1;
-	attachments[4].loadOp = vk::AttachmentLoadOp::eClear;
-	attachments[4].storeOp = vk::AttachmentStoreOp::eStore;
-	attachments[4].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
-	attachments[4].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
-	attachments[4].initialLayout = vk::ImageLayout::eUndefined;
-	attachments[4].finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+	attachments[5].flags = vk::AttachmentDescriptionFlags();
+	attachments[5].format = depthFormat;
+	attachments[5].samples = vk::SampleCountFlagBits::e1;
+	attachments[5].loadOp = vk::AttachmentLoadOp::eClear;
+	attachments[5].storeOp = vk::AttachmentStoreOp::eStore;
+	attachments[5].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+	attachments[5].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+	attachments[5].initialLayout = vk::ImageLayout::eUndefined;
+	attachments[5].finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
 
 	
 
@@ -65,8 +65,10 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 	attachmentRefertences[2] = colorAttachmentRef;
 	colorAttachmentRef.attachment = 3;
 	attachmentRefertences[3] = colorAttachmentRef;
+	colorAttachmentRef.attachment = 4;
+	attachmentRefertences[4] = colorAttachmentRef;
 	vk::AttachmentReference depthAttachmentRef = {};
-	depthAttachmentRef.attachment = 4;
+	depthAttachmentRef.attachment = 5;
 	depthAttachmentRef.layout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
 
 
@@ -75,7 +77,7 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 	std::vector<vk::SubpassDescription> subpassDescriptions;
 	vk::SubpassDescription subpassGeometry = {};
 	subpassGeometry.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
-	subpassGeometry.colorAttachmentCount = 4; // Liczba za³¹czników kolorowych
+	subpassGeometry.colorAttachmentCount = 5; // Liczba za³¹czników kolorowych
 	subpassGeometry.pColorAttachments = attachmentRefertences; // Tablica referencji do za³¹czników kolorowych
 	subpassGeometry.pDepthStencilAttachment = &depthAttachmentRef; // Za³¹cznik g³êbokoœci i/lub szablonu
 	subpassGeometry.inputAttachmentCount = 0;
@@ -85,17 +87,19 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 	vk::AttachmentReference colorReference = { };
 	colorReference.attachment = 0;
 	colorReference.layout = vk::ImageLayout::eColorAttachmentOptimal;
-	vk::AttachmentReference inputReferences[3];
+	vk::AttachmentReference inputReferences[4];
 	inputReferences[0].attachment = 1;
 	inputReferences[0].layout = vk::ImageLayout::eShaderReadOnlyOptimal;
 	inputReferences[1].attachment = 2;
 	inputReferences[1].layout = vk::ImageLayout::eShaderReadOnlyOptimal;
 	inputReferences[2].attachment = 3;
 	inputReferences[2].layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	inputReferences[3].attachment = 4;
+	inputReferences[3].layout = vk::ImageLayout::eShaderReadOnlyOptimal;
 
 	vk::SubpassDescription subpassDeferred = {};
 	subpassDeferred.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
-	subpassDeferred.inputAttachmentCount = 3; // Liczba za³¹czników wejœciowych
+	subpassDeferred.inputAttachmentCount = 4; // Liczba za³¹czników wejœciowych
 	subpassDeferred.pInputAttachments = inputReferences; // Tablica referencji do za³¹czników wejœciowych
 	subpassDeferred.colorAttachmentCount = 1; // Liczba za³¹czników kolorowych wyjœciowych
 	subpassDeferred.pColorAttachments = &colorReference; // Tablica referencji do za³¹czników kolorowych wyjœciowych
@@ -155,6 +159,7 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 
 	return renderpass;
 
+	/*
 	// Create sampler to sample from the color attachments
 	vk::SamplerCreateInfo sampler = {};
 	sampler.magFilter =  vk::Filter::eNearest;
@@ -170,7 +175,7 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 	sampler.borderColor =  vk::BorderColor::eFloatOpaqueWhite;
 	vk::Sampler colorSampler;
 	logicalDevice.createSampler(sampler);
-
+	*/
 }
 
 vk::RenderPass vkInit::create_shadows_renderpass(vk::Device logicalDevice, vkUtil::shadowMapBuffer* shadowmapBuffer, vk::Format depthFormat)

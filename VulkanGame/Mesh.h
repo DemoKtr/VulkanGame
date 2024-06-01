@@ -47,7 +47,7 @@ namespace vkMesh {
 		attributes[0].format = vk::Format::eR32G32B32Sfloat;
 		attributes[0].offset = 0;
 
-		//Color
+		//Normal
 		attributes[1].binding = 0;
 		attributes[1].location = 1;
 		attributes[1].format = vk::Format::eR32G32B32Sfloat;

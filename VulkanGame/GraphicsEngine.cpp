@@ -298,7 +298,7 @@ void GraphicsEngine::create_descriptor_set_layouts()
 
 	frameSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
-	bindings.count = 4;
+	bindings.count = 5;
 	bindings.indices[0] = 0;
 	bindings.indices[1] = 1;
 	bindings.types[0] = vk::DescriptorType::eInputAttachment;
@@ -314,6 +314,11 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
 
 	bindings.indices.push_back(3);
+	bindings.types.push_back(vk::DescriptorType::eInputAttachment);
+	bindings.counts.push_back(1);
+	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
+
+	bindings.indices.push_back(4);
 	bindings.types.push_back(vk::DescriptorType::eUniformBuffer);
 	bindings.counts.push_back(1);
 	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
@@ -450,7 +455,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,vk::Co
 	vk::ClearValue depthClear;
 
 	depthClear.depthStencil = vk::ClearDepthStencilValue({ 1.0f, 0 });
-	std::vector<vk::ClearValue> clearValues = { {colorClear,vk::ClearColorValue(colorsd),vk::ClearColorValue(colorsd),vk::ClearColorValue(colorsd) ,depthClear}};
+	std::vector<vk::ClearValue> clearValues = { {colorClear,vk::ClearColorValue(colorsd),vk::ClearColorValue(colorsd),vk::ClearColorValue(colorsd),vk::ClearColorValue(colorsd),depthClear}};
 
 	renderPassInfo.clearValueCount = clearValues.size();
 	renderPassInfo.pClearValues = clearValues.data();
@@ -674,11 +679,12 @@ void GraphicsEngine::create_frame_resources()
 	
 
 	vkInit::descriptorSetLayoutData gbindings;
-	gbindings.count = 4;
-	gbindings.types.push_back(vk::DescriptorType::eInputAttachment);
-	gbindings.types.push_back(vk::DescriptorType::eInputAttachment);
-	gbindings.types.push_back(vk::DescriptorType::eInputAttachment);
-	gbindings.types.push_back(vk::DescriptorType::eUniformBuffer);
+	gbindings.count = 5;
+	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //pos
+	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //normals
+	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //albedo
+	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //arm
+	gbindings.types.push_back(vk::DescriptorType::eUniformBuffer); //pointlight
 	
 
 	vkInit::descriptorSetLayoutData shadowBindings;
@@ -736,7 +742,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	_frame.cameraData.projection = projection;
 	_frame.cameraData.viewProjection = projection * view;
 	
-	memcpy(_frame.cameraDataWriteLocation, &(_frame.cameraData), sizeof(vkUtil::UBO));
+	
 
 	glm::vec3 position(0.0f,2.0f,0.0f);
 
@@ -785,10 +791,11 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 		_frame.shadowData.mvp[j][3] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
 		_frame.shadowData.mvp[j][4] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 		_frame.shadowData.mvp[j++][5] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-
+		_frame.cameraData.lightPos[j] = light->transform.getGlobalPosition();
 	}
-
-	
+	_frame.cameraData.heightScale = 0.1f;
+	_frame.cameraData.viewPos = eye;
+	memcpy(_frame.cameraDataWriteLocation, &(_frame.cameraData), sizeof(vkUtil::UBO));
 	memcpy(_frame.shadowDataWriteLocation, &(_frame.shadowData), i * sizeof(vkUtil::ShadowUBO));
 
 	

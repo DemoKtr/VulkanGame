@@ -328,7 +328,7 @@ void vkImage::Texture::make_descriptor_set()
 
 	vk::WriteDescriptorSet armdescriptorWrite;
 	armdescriptorWrite.dstSet = descriptorSet;
-	armdescriptorWrite.dstBinding = 1;
+	armdescriptorWrite.dstBinding = 2;
 	armdescriptorWrite.dstArrayElement = 0;
 	armdescriptorWrite.descriptorType = vk::DescriptorType::eCombinedImageSampler;
 	armdescriptorWrite.descriptorCount = 1;
@@ -341,7 +341,7 @@ void vkImage::Texture::make_descriptor_set()
 	depthimageDescriptor.sampler = depthSampler;
 	vk::WriteDescriptorSet depthdescriptorWrite;
 	depthdescriptorWrite.dstSet = descriptorSet;
-	depthdescriptorWrite.dstBinding = 1;
+	depthdescriptorWrite.dstBinding = 3;
 	depthdescriptorWrite.dstArrayElement = 0;
 	depthdescriptorWrite.descriptorType = vk::DescriptorType::eCombinedImageSampler;
 	depthdescriptorWrite.descriptorCount = 1;

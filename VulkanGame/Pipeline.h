@@ -613,7 +613,7 @@ namespace vkInit {
         // Blend attachment states required for all color attachments
         // This is important, as color write mask will otherwise be 0x0 and you
         // won't see anything rendered to the attachment
-        std::array<vk::PipelineColorBlendAttachmentState, 4> blendAttachmentStates = {
+        std::array<vk::PipelineColorBlendAttachmentState, 5> blendAttachmentStates = {
     vk::PipelineColorBlendAttachmentState(
         VK_FALSE,                                  // blendEnable
         vk::BlendFactor::eOne,                    // srcColorBlendFactor
@@ -644,7 +644,17 @@ namespace vkInit {
         vk::BlendOp::eAdd,
         vk::ColorComponentFlags(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT)
     ),
-            vk::PipelineColorBlendAttachmentState(
+    vk::PipelineColorBlendAttachmentState(
+        VK_FALSE,
+        vk::BlendFactor::eOne,
+        vk::BlendFactor::eZero,
+        vk::BlendOp::eAdd,
+        vk::BlendFactor::eOne,
+        vk::BlendFactor::eZero,
+        vk::BlendOp::eAdd,
+        vk::ColorComponentFlags(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT)
+    ),
+    vk::PipelineColorBlendAttachmentState(
         VK_FALSE,
         vk::BlendFactor::eOne,
         vk::BlendFactor::eZero,
