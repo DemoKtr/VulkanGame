@@ -46,14 +46,24 @@ void GraphicsEngine::make_assets(Scene* scene)
 	meshes->finalize(finalizationChunk);
 
 	//Materials
-	std::unordered_map<meshTypes, std::vector<const char*>> filenames = {
-		{meshTypes::KITTY, {"tex/brick.jpg"}},
-		{meshTypes::DOG, {"tex/rick.jpg"} },
+	std::unordered_map<meshTypes, std::array<char*,4>> filenames = {
 	};
-
+	for (SceneObject* obj : scene->sceneObjects) {
+		if(filenames.find(obj->objMaterial.meshType) == filenames.end())
+		{
+			filenames[obj->objMaterial.meshType][0] = obj->objMaterial.diffuse;
+			filenames[obj->objMaterial.meshType][1] = obj->objMaterial.normalMap;
+			filenames[obj->objMaterial.meshType][2] = obj->objMaterial.armMap;
+			filenames[obj->objMaterial.meshType][3] = obj->objMaterial.depthMap;
+		}
+	}
+	
+	
 	//make Descriptor pool
 	vkInit::descriptorSetLayoutData bindings;
-	bindings.count = 2;
+	bindings.count = 4;
+	bindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
+	bindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
 	bindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
 	bindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
 	meshDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(filenames.size()) + 1, bindings);
@@ -68,9 +78,13 @@ void GraphicsEngine::make_assets(Scene* scene)
 	textureInfo.layout = meshSetLayout;
 	textureInfo.descriptorPool = meshDescriptorPool;
 	for (const auto& [obj, filename] : filenames) {
-		textureInfo.filenames = filename;
+		textureInfo.diffusefilenames = filename[0];
+		textureInfo.normalfilenames= filename[1];
+		textureInfo.armfilenames = filename[2];
+		textureInfo.depthfilenames = filename[3];
 		materials[obj] = new vkImage::Texture(textureInfo);
 	}
+	/*
 	textureInfo.layout = meshSetLayout;
 	textureInfo.descriptorPool = meshDescriptorPool;
 	textureInfo.filenames = { {
@@ -82,7 +96,7 @@ void GraphicsEngine::make_assets(Scene* scene)
 			"tex/top.bmp",    //z-
 	} };
 	cubemap = new vkImage::Cubemap(textureInfo);
-
+	*/
 }
 
 void GraphicsEngine::prepare_scene(vk::CommandBuffer commandBuffer)
@@ -284,19 +298,6 @@ void GraphicsEngine::create_descriptor_set_layouts()
 
 	frameSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
-	bindings.count = 2;
-	bindings.indices[0] = 0;
-	bindings.indices[1] = 1;
-	bindings.types[0] =vk::DescriptorType::eCombinedImageSampler;
-	bindings.types[1] =vk::DescriptorType::eCombinedImageSampler;
-	bindings.counts[0] = 1;
-	bindings.counts[1] = 1;
-	bindings.stages[0]=vk::ShaderStageFlagBits::eFragment;
-	bindings.stages[1]=vk::ShaderStageFlagBits::eFragment;
-
-
-	meshSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
-
 	bindings.count = 4;
 	bindings.indices[0] = 0;
 	bindings.indices[1] = 1;
@@ -327,7 +328,26 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	shadowSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
 
+	bindings.count = 4;
+	bindings.indices[0] = 0;
+	bindings.indices[1] = 1;
+	bindings.indices[2] = 2;
+	bindings.indices[3] = 3;
+	bindings.types[0] = vk::DescriptorType::eCombinedImageSampler;
+	bindings.types[1] = vk::DescriptorType::eCombinedImageSampler;
+	bindings.types[2] = vk::DescriptorType::eCombinedImageSampler;
+	bindings.types[3] = vk::DescriptorType::eCombinedImageSampler;
+	bindings.counts[0] = 1;
+	bindings.counts[1] = 1;
+	bindings.counts[2] = 1;
+	bindings.counts[3] = 1;
+	bindings.stages[0] = vk::ShaderStageFlagBits::eFragment;
+	bindings.stages[1] = vk::ShaderStageFlagBits::eFragment;
+	bindings.stages[2] = vk::ShaderStageFlagBits::eFragment;
+	bindings.stages[3] = vk::ShaderStageFlagBits::eFragment;
 
+
+	meshSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
 
 
@@ -412,10 +432,10 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,vk::Co
 	barrier.subresourceRange.levelCount = 1;
 	barrier.subresourceRange.baseArrayLayer = 0;
 	barrier.subresourceRange.layerCount = 6;
+	
+
+	commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eLateFragmentTests, vk::PipelineStageFlagBits::eFragmentShader, vk::DependencyFlags(), nullptr, nullptr, barrier);
 	*/
-
-	//commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eLateFragmentTests, vk::PipelineStageFlagBits::eFragmentShader, vk::DependencyFlags(), nullptr, nullptr, barrier);
-
 	vk::RenderPassBeginInfo renderPassInfo = {};
 	renderPassInfo.renderPass = renderpass;
 	renderPassInfo.framebuffer = swapchainFrames[imageIndex].framebuffer;
@@ -513,6 +533,7 @@ void GraphicsEngine::render_objects(vk::CommandBuffer commandBuffer, meshTypes o
 	int indexCount = meshes->indexCounts.find(objectType)->second;
 	int firstIndex = meshes->firstIndices.find(objectType)->second;
 	materials[objectType]->useTexture(commandBuffer, layout);
+	
 	commandBuffer.drawIndexed(indexCount, instanceCount, firstIndex,0 ,startInstance);
 	startInstance += instanceCount;
 }

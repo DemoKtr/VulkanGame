@@ -24,7 +24,7 @@ void Box::update()
 
 Box::Box()
 {
-	objMaterial.setFilenames("box.obj", "box.mtl", "tex.brick.jpg", "");
+	objMaterial.setFilenames("box.obj", "box.mtl", "tex/floordif.png", "tex/floornormal.png", "tex/floorarm.png", "tex/floordepth.png");
 	objMaterial.meshType = meshTypes::KITTY;
 }
 

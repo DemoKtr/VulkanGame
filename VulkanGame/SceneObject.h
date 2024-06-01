@@ -9,8 +9,10 @@ struct objectMaterial {
 	char* material;
 	char* diffuse;
 	char* normalMap;
+	char* armMap;
+	char* depthMap;
 
-	void setFilenames(const char* newModel, const char* newMaterial, const char* newDiffuse, const char* newNormalMap) {
+	void setFilenames(const char* newModel, const char* newMaterial, const char* newDiffuse, const char* newNormalMap,const char* newArmMap, const char* newDepthMap) {
 		// Zwolnienie poprzednio alokowanej pamiêci (jeœli istnieje)
 		
 
@@ -19,6 +21,8 @@ struct objectMaterial {
 		material = _strdup(newMaterial);
 		diffuse = _strdup(newDiffuse);
 		normalMap = _strdup(newNormalMap);
+		armMap = _strdup(newArmMap);
+		depthMap = _strdup(newDepthMap);
 
 	}
 
@@ -27,6 +31,8 @@ struct objectMaterial {
 		delete[] material;
 		delete[] diffuse;
 		delete[] normalMap;
+		delete[] armMap;
+		delete[] depthMap;
 	}
 
 };

@@ -17,7 +17,7 @@ private:
 	int width, height, channels;
 	vk::Device logicalDevice;
 	vk::PhysicalDevice physicalDevice;
-	std::vector<const char*> filenames;
+	const char* filenames;
 	stbi_uc* pixels[6];
 
 	//Resources

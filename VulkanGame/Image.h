@@ -8,7 +8,10 @@ namespace vkImage {
 	struct TextureInputChunk{
 		vk::Device logicalDevice;
 		vk::PhysicalDevice physicalDevice;
-		std::vector<const char*> filenames;
+		const char* diffusefilenames;
+		const char* normalfilenames;
+		const char* armfilenames;
+		const char* depthfilenames;
 		vk::CommandBuffer commandBuffer;
 		vk::Queue queue;
 		vk::DescriptorSetLayout layout;

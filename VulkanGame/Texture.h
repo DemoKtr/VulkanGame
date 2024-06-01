@@ -6,12 +6,14 @@
 namespace vkImage {
 	class Texture
 	{
-		int width, height, channels, normalchannels, normalwidth, normalheight;
+		int width, height, channels, normalchannels, normalwidth, normalheight, armchannels,armheight,armwidth, depthchannels, depthheight, depthwidth;
 		vk::Device logicalDevice;
 		vk::PhysicalDevice physicalDevice;
-		const char* filename;
+		
 		stbi_uc* pixels;
 		stbi_uc* normalpixels;
+		stbi_uc* armpixels;
+		stbi_uc* depthpixels;
 
 		//res
 		vk::Image image;
@@ -25,6 +27,18 @@ namespace vkImage {
 		vk::DeviceMemory normalImageMemory;
 		vk::ImageView normalImageView;
 		vk::Sampler normalSampler;
+
+		// ARM
+		vk::Image armImage;
+		vk::DeviceMemory armImageMemory;
+		vk::ImageView armImageView;
+		vk::Sampler armSampler;
+
+		// displacement
+		vk::Image depthImage;
+		vk::DeviceMemory depthImageMemory;
+		vk::ImageView depthImageView;
+		vk::Sampler depthSampler;
 
 
 		//Resource Descriptors
@@ -46,6 +60,10 @@ namespace vkImage {
 
 
 	public:
+		const char* diffusefilename;
+		const char* normalfilename;
+		const char* armfilename;
+		const char* depthfilename;
 		Texture(TextureInputChunk info);
 
 		void useTexture(vk::CommandBuffer commandBuffer, vk::PipelineLayout pipelineLayout);
