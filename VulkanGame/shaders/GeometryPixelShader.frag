@@ -58,7 +58,7 @@ void main() {
 	vec3 viewDir = normalize(fs_in.TangentViewPos - fs_in.TangentFragPos);
     vec2 texCoords = fs_in.TexCoords;
 	vec3 normal = texture(normalMap,texCoords).rgb;
-	texCoords = ParallaxMapping(fs_in.TexCoords,  viewDir);  
+	texCoords = (ParallaxMapping(fs_in.TexCoords,  viewDir));  
 	normal = normalize(normal*2.0f-1.0f);
 	gPosition = vec4(fs_in.TangentFragPos,1.0f);
 	gNormal.rgb = normal;

@@ -202,6 +202,7 @@ void vkMesh::ObjMesh::read_corner(const std::string& vertex_description,glm::vec
 	vertices.push_back(tangent.y);
 	vertices.push_back(tangent.z);
 
+	/*
 	std::cout << "Pozycje" << std::endl;
 	std::cout << pos[0] << "  " << pos[1] << "  " << pos[2] << std::endl;
 	std::cout << "UV" << std::endl;
@@ -213,4 +214,5 @@ void vkMesh::ObjMesh::read_corner(const std::string& vertex_description,glm::vec
 	std::cout << std::endl;
 	std::cout << std::endl;
 	std::cout << std::endl;
+	*/
 }
