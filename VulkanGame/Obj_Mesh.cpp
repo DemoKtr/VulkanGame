@@ -100,16 +100,16 @@ void vkMesh::ObjMesh::read_face_data(const std::vector<std::string>& words) {
 
 	for (int i = 0; i < triangleCount; ++i) {
 		
-
-		read_corner(words[1]);
-		read_corner(words[2 + i]);
-		read_corner(words[3 + i]);
+		glm::vec3 tangent = readBtangent(words[1], words[2 + i], words[3 + i]);
+		read_corner(words[1],tangent);
+		read_corner(words[2 + i],tangent);
+		read_corner(words[3 + i],tangent);
 	}
 }
 
-vkMesh::TangentBtangent vkMesh::ObjMesh::readBtangent(const std::string& first_vertex_description, const std::string& seccond_vertex_description, const std::string& third_vertex_description)
+glm::vec3 vkMesh::ObjMesh::readBtangent(const std::string& first_vertex_description, const std::string& seccond_vertex_description, const std::string& third_vertex_description)
 {
-	TangentBtangent result = {};
+	
 
 	std::vector<std::string> firstVertexDescription = split(first_vertex_description, "/");
 	glm::vec3 firstPos = v[std::stol(firstVertexDescription[0]) - 1];;
@@ -149,17 +149,14 @@ vkMesh::TangentBtangent vkMesh::ObjMesh::readBtangent(const std::string& first_v
 	tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
 	tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
 
-	glm::vec3 bitangent;
-	bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
-	bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
-	bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
 
-	result = { tangent,bitangent };
-	return result;
+
+	tangent = glm::normalize(tangent);
+	return tangent;
 
 }
 
-void vkMesh::ObjMesh::read_corner(const std::string& vertex_description) {
+void vkMesh::ObjMesh::read_corner(const std::string& vertex_description,glm::vec3 tangent) {
 
 	if (history.contains(vertex_description)) {
 		indices.push_back(history[vertex_description]);
@@ -199,4 +196,21 @@ void vkMesh::ObjMesh::read_corner(const std::string& vertex_description) {
 	vertices.push_back(normal[0]);
 	vertices.push_back(normal[1]);
 	vertices.push_back(normal[2]);
+
+	//tangent
+	vertices.push_back(tangent.x);
+	vertices.push_back(tangent.y);
+	vertices.push_back(tangent.z);
+
+	std::cout << "Pozycje" << std::endl;
+	std::cout << pos[0] << "  " << pos[1] << "  " << pos[2] << std::endl;
+	std::cout << "UV" << std::endl;
+	std::cout <<texcoord[0] << "  " << texcoord[1]<< std::endl;
+	std::cout << "Tangent" << std::endl;
+	std::cout << tangent[0] << "  " << tangent[1] <<"  "<< tangent[2] <<std::endl;
+	std::cout << std::endl;
+	std::cout << std::endl;
+	std::cout << std::endl;
+	std::cout << std::endl;
+	std::cout << std::endl;
 }

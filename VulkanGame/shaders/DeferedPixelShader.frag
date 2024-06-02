@@ -4,9 +4,10 @@ layout (input_attachment_index = 0, binding = 0) uniform subpassInput inputPosit
 layout (input_attachment_index = 1, binding = 1) uniform subpassInput inputNormal;
 layout (input_attachment_index = 2, binding = 2) uniform subpassInput inputAlbedo;
 layout (input_attachment_index = 3, binding = 3) uniform subpassInput inputARM;
+layout (input_attachment_index = 4, binding = 4) uniform subpassInput inputT;
 
 
-layout(set = 0,binding = 4) uniform PointLight{
+layout(set = 0,binding = 5) uniform PointLight{
 		vec3 position[2];
 		vec3 diffuse[2];
 		vec3 camPos;
@@ -85,20 +86,26 @@ vec3 lightCalc(vec3 worldPos, vec3 lightPos, vec3 V,vec3 diffuse,vec3 N,vec3 F0,
 
 
 void main() {
+	
 	vec3 worldPos = subpassLoad(inputPosition).rgb;
 	vec3 N = normalize(subpassLoad(inputNormal).rgb);
 	vec3 albedo = (subpassLoad(inputAlbedo).rgb);
 	float ao = (subpassLoad(inputARM).r);
 	float roughness = (subpassLoad(inputARM).g);
 	float metalic = (subpassLoad(inputARM).b);
-
+	vec3 T = (subpassLoad(inputT).rgb);
+	vec3 No = vec3((subpassLoad(inputNormal).a),(subpassLoad(inputARM).a),(subpassLoad(inputT).a));
+	T = normalize(T - dot(T, No) * No);
+	vec3 B = cross(No, T);
+	mat3 TBN = transpose(mat3(T,B,No));
+	vec3 camPos = TBN * light.camPos;
 	
-	vec3 V = normalize(light.camPos - worldPos);
+	vec3 V = normalize(camPos - worldPos);
 	vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo, metalic);
 	vec3 Lo = vec3(0.0);
 	//for(int i=0; i<2; ++i) {}
-	Lo +=  lightCalc(worldPos,vec3(0.0f,-2.0f,0.0f),V,vec3(255.0f,255.0f,255.0f),N,F0,albedo,roughness,metalic);
+	Lo +=  lightCalc(worldPos,(TBN*vec3(0.0f,-2.0f,0.0f)),V,vec3(255.0f,255.0f,255.0f),N,F0,albedo,roughness,metalic);
 	
 	 vec3 ambient = vec3(0.03) * albedo * ao;
     

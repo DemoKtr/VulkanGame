@@ -12,6 +12,7 @@ namespace vkUtil {
 		glm::mat4 projection;
 		glm::mat4 viewProjection;
 		float heightScale;
+		glm::vec3 camPos;
 	};
 	struct PointLight {
 		glm::vec3 position[2];

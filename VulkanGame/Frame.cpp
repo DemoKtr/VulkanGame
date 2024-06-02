@@ -215,11 +215,24 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			descriptorWritearm.descriptorType = vk::DescriptorType::eInputAttachment;
 			descriptorWritearm.descriptorCount = 1;
 			descriptorWritearm.pImageInfo = &imageDescriptorarm;
+
+			vk::DescriptorImageInfo imageDescriptorT;
+			imageDescriptorT.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+			imageDescriptorT.imageView = gbuffer.T.view;
+			imageDescriptorT.sampler = VK_NULL_HANDLE;
+
+			vk::WriteDescriptorSet descriptorWriteT;
+			descriptorWriteT.dstSet = descriptorSet;
+			descriptorWriteT.dstBinding = 4;
+			descriptorWriteT.dstArrayElement = 0;
+			descriptorWriteT.descriptorType = vk::DescriptorType::eInputAttachment;
+			descriptorWriteT.descriptorCount = 1;
+			descriptorWriteT.pImageInfo = &imageDescriptorT;
 			
 			
 			vk::WriteDescriptorSet writeInfo;
 			writeInfo.dstSet = descriptorSet;
-			writeInfo.dstBinding = 4;
+			writeInfo.dstBinding = 5;
 			writeInfo.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
 			writeInfo.descriptorCount = 1;
 			writeInfo.descriptorType = vk::DescriptorType::eUniformBuffer;
@@ -228,7 +241,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 
 
 			std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {
-				descriptorWritePos,descriptorWriteNormal,descriptorWriteAlbedo,descriptorWritearm,writeInfo,
+				descriptorWritePos,descriptorWriteNormal,descriptorWriteAlbedo,descriptorWritearm,descriptorWriteT,writeInfo,
 			};
 
 			logicalDevice.updateDescriptorSets(writeDescriptorSets, nullptr);
@@ -268,18 +281,21 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			logicalDevice.destroyImage(gbuffer.normal.image);
 			logicalDevice.destroyImage(gbuffer.albedo.image);
 			logicalDevice.destroyImage(gbuffer.arm.image);
+			logicalDevice.destroyImage(gbuffer.T.image);
 			logicalDevice.destroyImage(shadowMapBuffer.shadowBufferDepthAttachment.image);
 			logicalDevice.freeMemory(depthBufferMemory);
 			logicalDevice.freeMemory(gbuffer.position.mem);
 			logicalDevice.freeMemory(gbuffer.normal.mem);
 			logicalDevice.freeMemory(gbuffer.albedo.mem);
 			logicalDevice.freeMemory(gbuffer.arm.mem);
+			logicalDevice.freeMemory(gbuffer.T.mem);
 			logicalDevice.freeMemory(shadowMapBuffer.shadowBufferDepthAttachment.mem);
 			logicalDevice.destroyImageView(depthBufferView);
 			logicalDevice.destroyImageView(gbuffer.position.view);
 			logicalDevice.destroyImageView(gbuffer.normal.view);
 			logicalDevice.destroyImageView(gbuffer.albedo.view);
 			logicalDevice.destroyImageView(gbuffer.arm.view);
+			logicalDevice.destroyImageView(gbuffer.T.view);
 			logicalDevice.destroyImageView(shadowMapBuffer.shadowBufferDepthAttachment.view);
 			logicalDevice.destroySampler(shadowMapBuffer.sampler);
 			

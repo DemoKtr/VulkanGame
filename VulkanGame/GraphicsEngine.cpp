@@ -298,7 +298,7 @@ void GraphicsEngine::create_descriptor_set_layouts()
 
 	frameSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
-	bindings.count = 5;
+	bindings.count = 6;
 	bindings.indices[0] = 0;
 	bindings.indices[1] = 1;
 	bindings.types[0] = vk::DescriptorType::eInputAttachment;
@@ -319,6 +319,11 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
 
 	bindings.indices.push_back(4);
+	bindings.types.push_back(vk::DescriptorType::eInputAttachment);
+	bindings.counts.push_back(1);
+	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
+
+	bindings.indices.push_back(5);
 	bindings.types.push_back(vk::DescriptorType::eUniformBuffer);
 	bindings.counts.push_back(1);
 	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
@@ -455,7 +460,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,vk::Co
 	vk::ClearValue depthClear;
 
 	depthClear.depthStencil = vk::ClearDepthStencilValue({ 1.0f, 0 });
-	std::vector<vk::ClearValue> clearValues = { {colorClear,vk::ClearColorValue(colorsd),vk::ClearColorValue(colorsd),vk::ClearColorValue(colorsd),vk::ClearColorValue(colorsd),depthClear}};
+	std::vector<vk::ClearValue> clearValues = { {colorClear,vk::ClearColorValue(colorsd),vk::ClearColorValue(colorsd),vk::ClearColorValue(colorsd),vk::ClearColorValue(colorsd),vk::ClearColorValue(colorsd),depthClear}};
 
 	renderPassInfo.clearValueCount = clearValues.size();
 	renderPassInfo.pClearValues = clearValues.data();
@@ -679,11 +684,12 @@ void GraphicsEngine::create_frame_resources()
 	
 
 	vkInit::descriptorSetLayoutData gbindings;
-	gbindings.count = 5;
+	gbindings.count = 6;
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //pos
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //normals
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //albedo
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //arm
+	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //T
 	gbindings.types.push_back(vk::DescriptorType::eUniformBuffer); //pointlight
 	
 
@@ -790,13 +796,14 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 		
 		//std::cout << light->transform.getGlobalPosition().x<< light->transform.getGlobalPosition().y<< light->transform.getGlobalPosition().z << std::endl;
 	}
-	_frame.cameraData.heightScale = 0.1f;
+	_frame.cameraData.heightScale = 0.01f;
 	
 	_frame.lightData.position[0] = glm::vec3(0.0f, 255.5f, 0.0f);
 	_frame.lightData.position[1] = glm::vec3(0.0f, -.5f, 0.0f);
 	_frame.lightData.diffuse[0] = glm::vec3(0.0f,0.0f,0.0f);
 	_frame.lightData.diffuse[1] = glm::vec3();
 	_frame.lightData.camPos = eye;
+	_frame.cameraData.camPos = eye;
 	memcpy(_frame.lightDataWriteLocation, &(_frame.lightData), sizeof(vkUtil::PointLight));
 	memcpy(_frame.cameraDataWriteLocation, &(_frame.cameraData), sizeof(vkUtil::UBO));
 	memcpy(_frame.shadowDataWriteLocation, &(_frame.shadowData), i * sizeof(vkUtil::ShadowUBO));

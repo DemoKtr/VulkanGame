@@ -14,7 +14,7 @@ namespace vkUtil {
 		vk::Format format;
 	};
 	struct Gbuffer{
-		FrameBufferAttachment position, normal, albedo, arm;
+		FrameBufferAttachment position, normal, albedo, arm, T;
 		int32_t width;
 		int32_t height;
 	};
