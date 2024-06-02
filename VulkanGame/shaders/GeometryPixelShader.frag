@@ -44,7 +44,7 @@ void main() {
 	gPosition = vec4(fs_in.WorldPos,1.0f);
 	gNormal.rgb = N;
 	vec3 arm = texture(armMap,fs_in.TexCoords).rgb;
-	gAlbedoSpec.rgb =(texture(albedo,fs_in.TexCoords).rgb);
+	gAlbedoSpec.rgb =pow((texture(albedo,fs_in.TexCoords).rgb),vec3(2.2f));
 	gAlbedoSpec.a = 1.0f;
 	gARM.rgb = arm;
 	

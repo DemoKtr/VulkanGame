@@ -754,22 +754,16 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	glm::vec3 diffuse = glm::vec3(0.8f);
 	glm::vec3 specular = glm::vec3(1.0f);
 
-	_frame.lightData.position = position;
-	_frame.lightData.constant = constant;
-	_frame.lightData.linear = linear;
-	_frame.lightData.quadratic = quadratic;
-	_frame.lightData.ambient = ambient;
-	_frame.lightData.diffuse = diffuse;
-	_frame.lightData.specular = specular;
 
-	memcpy(_frame.lightDataWriteLocation, &(_frame.lightData), sizeof(vkUtil::PointLight));
+
+	
 
 	size_t i= 0;
 
 	for(std::pair<meshTypes,std::vector<SceneObject*>> pair: models)
  {
 		for (SceneObject* obj : pair.second) {
-			obj->getTransform().rotate(glm::vec3(1, 0, 0), 0.0001f);
+			obj->getTransform().rotate(glm::vec3(1, 1, 1), -0.0001f);
 			obj->getTransform().computeModelMatrix();
 			_frame.shadowData.modelPos[i] = glm::vec4(obj->getTransform().getGlobalPosition(), 1.0f);
 			_frame.modelTransforms[i++] = obj->getTransform().getModelMatrix();
@@ -777,6 +771,8 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 		
 
 }
+
+	
 	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), i * sizeof(glm::mat4));
 	size_t j = 0;
 	glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), 1024.0f / 1024.0f, 1.0f, 25.0f);
@@ -792,9 +788,16 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 		_frame.shadowData.mvp[j][4] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 		_frame.shadowData.mvp[j++][5] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 		
+		//std::cout << light->transform.getGlobalPosition().x<< light->transform.getGlobalPosition().y<< light->transform.getGlobalPosition().z << std::endl;
 	}
 	_frame.cameraData.heightScale = 0.1f;
-
+	
+	_frame.lightData.position[0] = glm::vec3(0.0f, 255.5f, 0.0f);
+	_frame.lightData.position[1] = glm::vec3(0.0f, -.5f, 0.0f);
+	_frame.lightData.diffuse[0] = glm::vec3(0.0f,0.0f,0.0f);
+	_frame.lightData.diffuse[1] = glm::vec3();
+	_frame.lightData.camPos = eye;
+	memcpy(_frame.lightDataWriteLocation, &(_frame.lightData), sizeof(vkUtil::PointLight));
 	memcpy(_frame.cameraDataWriteLocation, &(_frame.cameraData), sizeof(vkUtil::UBO));
 	memcpy(_frame.shadowDataWriteLocation, &(_frame.shadowData), i * sizeof(vkUtil::ShadowUBO));
 

@@ -14,15 +14,10 @@ namespace vkUtil {
 		float heightScale;
 	};
 	struct PointLight {
-		glm::vec3 position;
+		glm::vec3 position[2];
+		glm::vec3 diffuse[2];
+		glm::vec3 camPos;
 
-		float constant;
-		float linear;
-		float quadratic;
-
-		glm::vec3 ambient;
-		glm::vec3 diffuse;
-		glm::vec3 specular;
 	};
 	struct ShadowUBO {
 		glm::mat4 mvp[2][6]; //tyle ile swiatel na scenie

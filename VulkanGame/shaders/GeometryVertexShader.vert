@@ -33,7 +33,7 @@ void main() {
 	vs_out.WorldPos = vec3(ObjectData.model[gl_InstanceIndex] * vec4(vertexPosition,1.0f));
 	vs_out.TexCoords = vertexTexCoord;
 	vs_out.heightScale = cameraData.heightScale;
-	mat3 normalMatrix = mat3(transpose(inverse(((ObjectData.model[gl_InstanceIndex])))));
+	mat3 normalMatrix = (transpose(inverse((mat3(ObjectData.model[gl_InstanceIndex])))));
 	vs_out.Normal = normalMatrix *  vertexNormal;
 	gl_Position = cameraData.viewProjection * ObjectData.model[gl_InstanceIndex] * vec4(vertexPosition, 1.0);
 }

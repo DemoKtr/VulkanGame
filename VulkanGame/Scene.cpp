@@ -4,12 +4,6 @@ Scene::Scene()
 {
 	
 	
-
-
-
-
-
-
 	//positions.insert({ meshTypes::KITTY, {} });
 	//positions.insert({ meshTypes::DOG, {} });
 	//.insert({ meshTypes::KITTY, {} });
@@ -18,12 +12,12 @@ Scene::Scene()
 	Box* box1 = new Box();
 
 
-	box->getTransform().setLocalPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+	box->getTransform().setLocalPosition(glm::vec3(0.0f, -0.1f, 0.0f));
 	//box->getTransform().rotate(glm::vec3(0.0f, 0.0f, 1.0f),(22.0f/28.0f));
 	box->getTransform().setLocalScale(glm::vec3(0.1f,0.1f,0.1f));
 	box->getTransform().computeModelMatrix();
 
-	box1->getTransform().setLocalPosition(glm::vec3(0.2f, 0.5f, 0.9f));
+	box1->getTransform().setLocalPosition(glm::vec3(0.2f, -0.1f, 0.3f));
 	//box->getTransform().rotate(glm::vec3(0.0f, 0.0f, 1.0f),(22.0f/28.0f));
 	box1->getTransform().setLocalScale(glm::vec3(0.1f, 0.1f, 0.1f));
 	box1->getTransform().computeModelMatrix();
@@ -40,8 +34,10 @@ Scene::Scene()
 	Light* pointLight1 = new Light();
 	Light* pointLight2 = new Light();
 
-	pointLight1->transform.setLocalPosition(glm::vec3(0.0f, 1.0f, 0.8f));
-	pointLight2->transform.setLocalPosition(glm::vec3(0.8f, 1.0f, 0.0f));
+	pointLight1->transform.setLocalPosition(glm::vec3(0.0f, -200.0f, 0.0f));
+	pointLight1->transform.computeModelMatrix();
+	pointLight2->transform.setLocalPosition(glm::vec3(0.0f, 0.5f, 0.0f));
+	pointLight2->transform.computeModelMatrix();
 
 	lights.push_back(pointLight1);
 	lights.push_back(pointLight2);
