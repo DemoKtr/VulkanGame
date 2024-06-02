@@ -15,7 +15,7 @@ namespace vkMesh {
 		vk::VertexInputBindingDescription bindingDescription;
 		bindingDescription.binding = 0;
 		// xy rgb uv
-		bindingDescription.stride = 14 * sizeof(float);
+		bindingDescription.stride = 11 * sizeof(float);
 		bindingDescription.inputRate = vk::VertexInputRate::eVertex; // einstance do instancjonowania
 
 		return bindingDescription;
@@ -39,7 +39,7 @@ namespace vkMesh {
 		attributes.push_back(dummy);
 		attributes.push_back(dummy);
 		attributes.push_back(dummy);
-		attributes.push_back(dummy);
+
 
 		//Pos
 		attributes[0].binding = 0;
@@ -47,7 +47,7 @@ namespace vkMesh {
 		attributes[0].format = vk::Format::eR32G32B32Sfloat;
 		attributes[0].offset = 0;
 
-		//Normal
+		//vertexColor
 		attributes[1].binding = 0;
 		attributes[1].location = 1;
 		attributes[1].format = vk::Format::eR32G32B32Sfloat;
@@ -60,17 +60,13 @@ namespace vkMesh {
 		attributes[2].offset = 6 * sizeof(float);
 		
 
-		//Tangent
+		//Normal
 		attributes[3].binding = 0;
 		attributes[3].location = 3;
 		attributes[3].format = vk::Format::eR32G32B32Sfloat;
 		attributes[3].offset = 8 * sizeof(float);
 
-		//Btangent
-		attributes[4].binding = 0;
-		attributes[4].location = 4;
-		attributes[4].format = vk::Format::eR32G32B32Sfloat;
-		attributes[4].offset = 11 * sizeof(float);
+
 		return attributes;
 	}
 }

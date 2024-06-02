@@ -30,8 +30,6 @@ void main() {
 	vec3 fragPos = subpassLoad(inputPosition).rgb;
 	vec3 normal = subpassLoad(inputNormal).rgb;
 	vec4 albedo = subpassLoad(inputAlbedo);
-	#define ambient 0.05;
-		
-
+	vec4 arm = subpassLoad(inputARM);
 	outColor = albedo;
 }

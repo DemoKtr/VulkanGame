@@ -100,10 +100,10 @@ void vkMesh::ObjMesh::read_face_data(const std::vector<std::string>& words) {
 
 	for (int i = 0; i < triangleCount; ++i) {
 		
-		TangentBtangent Tangent = readBtangent(words[1], words[2 + i], words[3 + i]);
-		read_corner(words[1],Tangent);
-		read_corner(words[2 + i],Tangent);
-		read_corner(words[3 + i],Tangent);
+
+		read_corner(words[1]);
+		read_corner(words[2 + i]);
+		read_corner(words[3 + i]);
 	}
 }
 
@@ -159,7 +159,7 @@ vkMesh::TangentBtangent vkMesh::ObjMesh::readBtangent(const std::string& first_v
 
 }
 
-void vkMesh::ObjMesh::read_corner(const std::string& vertex_description, TangentBtangent tangent) {
+void vkMesh::ObjMesh::read_corner(const std::string& vertex_description) {
 
 	if (history.contains(vertex_description)) {
 		indices.push_back(history[vertex_description]);
@@ -179,17 +179,13 @@ void vkMesh::ObjMesh::read_corner(const std::string& vertex_description, Tangent
 	vertices.push_back(pos[1]);
 	vertices.push_back(pos[2]);
 	
-	/*
+	
 	//color diffuse
 	vertices.push_back(brushColor.r);
 	vertices.push_back(brushColor.g);
 	vertices.push_back(brushColor.b);
-	*/
-	//normal
-	glm::vec3 normal = v[std::stol(v_vt_vn[2]) - 1];
-	vertices.push_back(normal[0]);
-	vertices.push_back(normal[1]);
-	vertices.push_back(normal[2]);
+	
+	
 
 	//texcoord
 	glm::vec2 texcoord = glm::vec2(0.0f, 0.0f);
@@ -198,12 +194,9 @@ void vkMesh::ObjMesh::read_corner(const std::string& vertex_description, Tangent
 	}
 	vertices.push_back(texcoord[0]);
 	vertices.push_back(texcoord[1]);
-	//Tangent
-	vertices.push_back(tangent.tangent.x);
-	vertices.push_back(tangent.tangent.y);
-	vertices.push_back(tangent.tangent.z);
-	//Btangent
-	vertices.push_back(tangent.bTangent.x);
-	vertices.push_back(tangent.bTangent.y);
-	vertices.push_back(tangent.bTangent.z);
+	//normal
+	glm::vec3 normal = vn[std::stol(v_vt_vn[2]) - 1];
+	vertices.push_back(normal[0]);
+	vertices.push_back(normal[1]);
+	vertices.push_back(normal[2]);
 }

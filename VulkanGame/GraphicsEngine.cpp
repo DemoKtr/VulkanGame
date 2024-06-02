@@ -450,7 +450,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,vk::Co
 
 	vk::ClearValue colorClear;
 	std::array<float, 4> colors = { 1.0f, 0.5f, 0.25f, 1.0f };
-	std::array<float, 4> colorsd = { 1.0f, 0.0f, 0.0f, 0.0f };
+	std::array<float, 4> colorsd = { 0.0f, 0.0f, .0f, 0.0f };
 	colorClear.color = vk::ClearColorValue(colors);
 	vk::ClearValue depthClear;
 
@@ -769,7 +769,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	for(std::pair<meshTypes,std::vector<SceneObject*>> pair: models)
  {
 		for (SceneObject* obj : pair.second) {
-			obj->getTransform().rotate(glm::vec3(1, 1, 0), 0.001f);
+			obj->getTransform().rotate(glm::vec3(1, 0, 0), 0.0001f);
 			obj->getTransform().computeModelMatrix();
 			_frame.shadowData.modelPos[i] = glm::vec4(obj->getTransform().getGlobalPosition(), 1.0f);
 			_frame.modelTransforms[i++] = obj->getTransform().getModelMatrix();
@@ -791,10 +791,10 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 		_frame.shadowData.mvp[j][3] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
 		_frame.shadowData.mvp[j][4] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 		_frame.shadowData.mvp[j++][5] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		_frame.cameraData.lightPos[j] = light->transform.getGlobalPosition();
+		
 	}
 	_frame.cameraData.heightScale = 0.1f;
-	_frame.cameraData.viewPos = eye;
+
 	memcpy(_frame.cameraDataWriteLocation, &(_frame.cameraData), sizeof(vkUtil::UBO));
 	memcpy(_frame.shadowDataWriteLocation, &(_frame.shadowData), i * sizeof(vkUtil::ShadowUBO));
 

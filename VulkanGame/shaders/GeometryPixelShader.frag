@@ -1,11 +1,9 @@
 #version 450
 
 layout(location = 0) in VS_OUT{
-	vec3 FragPos;
+	vec3 WorldPos;
 	vec2 TexCoords;
-	vec3 TangentLightPos[2];
-	vec3 TangentViewPos;
-	vec3 TangentFragPos;
+	vec3 Normal;
 	float heightScale;
 } fs_in;
 
@@ -21,61 +19,32 @@ layout(set=1,binding=1) uniform sampler2D normalMap;
 layout(set=1,binding=2) uniform sampler2D armMap;
 layout(set=1,binding=3) uniform sampler2D depthMap;
 
-vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
-{ 
-    // number of depth layers
-    const float minLayers = 8;
-    const float maxLayers = 32;
-    float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
-    // calculate the size of each layer
-    float layerDepth = 1.0 / numLayers;
-    // depth of current layer
-    float currentLayerDepth = 0.0;
-    // the amount to shift the texture coordinates per layer (from vector P)
-    vec2 P = viewDir.xy / viewDir.z * fs_in.heightScale; 
-    vec2 deltaTexCoords = P / numLayers;
-  
-    // get initial values
-    vec2  currentTexCoords = texCoords;
-    float currentDepthMapValue = texture(depthMap, currentTexCoords).r;
-      
-    while(currentLayerDepth < currentDepthMapValue)
-    {
-        // shift texture coordinates along direction of P
-        currentTexCoords -= deltaTexCoords;
-        // get depthmap value at current texture coordinates
-        currentDepthMapValue = texture(depthMap, currentTexCoords).r;  
-        // get depth of next layer
-        currentLayerDepth += layerDepth;  
-    }
-    
-    // get texture coordinates before collision (reverse operations)
-    vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
+vec3 getNormalFromMap()
+{
+    vec3 tangentNormal = texture(normalMap, fs_in.TexCoords).xyz * 2.0 - 1.0;
 
-    // get depth after and before collision for linear interpolation
-    float afterDepth  = currentDepthMapValue - currentLayerDepth;
-    float beforeDepth = texture(depthMap, prevTexCoords).r - currentLayerDepth + layerDepth;
- 
-    // interpolation of texture coordinates
-    float weight = afterDepth / (afterDepth - beforeDepth);
-    vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+    vec3 Q1  = dFdx(fs_in.WorldPos);
+    vec3 Q2  = dFdy(fs_in.WorldPos);
+    vec2 st1 = dFdx(fs_in.TexCoords);
+    vec2 st2 = dFdy(fs_in.TexCoords);
 
-    return finalTexCoords;
+    vec3 N   = normalize(fs_in.Normal);
+    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+    vec3 B  = -normalize(cross(N, T));
+    mat3 TBN = mat3(T, B, N);
+
+    return normalize(TBN * tangentNormal);
 }
 
 void main() {
 	
-	
-	vec3 viewDir = normalize(fs_in.TangentViewPos - fs_in.TangentFragPos);
-    vec2 texCoords = fs_in.TexCoords;
-    
-    texCoords = ParallaxMapping(fs_in.TexCoords,  viewDir); 
 
-    vec3 normal = texture(normalMap,texCoords).rgb;	
-	gPosition = vec4(fs_in.FragPos,1.0f);
-	gNormal.rgb = normal;
-	vec3 arm = texture(armMap,texCoords).rgb;
-	gAlbedoSpec.rgb = 2.0f *(texture(albedo,texCoords).rgb);
+
+    vec3 N = getNormalFromMap();
+	gPosition = vec4(fs_in.WorldPos,1.0f);
+	gNormal.rgb = N;
+	vec3 arm = texture(armMap,fs_in.TexCoords).rgb;
+	gAlbedoSpec.rgb =(texture(albedo,fs_in.TexCoords).rgb);
 	gAlbedoSpec.a = 1.0f;
 	gARM.rgb = arm;
 	

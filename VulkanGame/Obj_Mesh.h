@@ -40,7 +40,7 @@ namespace vkMesh {
 
 		TangentBtangent readBtangent(const std::string& first_vertex_description, const std::string& seccond_vertex_description, const std::string& third_vertex_description);
 		
-		void read_corner(const std::string& vertex_description, TangentBtangent tangent);
+		void read_corner(const std::string& vertex_description);
 	};
 
 
