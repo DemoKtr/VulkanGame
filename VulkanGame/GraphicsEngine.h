@@ -12,6 +12,7 @@
 class GraphicsEngine
 {
 	ivec2 screenSize;
+	int verticesonScene = {0};
 	bool debugMode;;
 	GLFWwindow* mainWindow;
 	const char* appName{ "VulkanGame" };
@@ -106,7 +107,7 @@ class GraphicsEngine
 	void render_shadows_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& starInstance, uint32_t instanceCount);
 public:
 	GraphicsEngine(ivec2 screenSize, GLFWwindow* window,Scene* scene ,bool debugMode);
-	void render(Scene *scene);
+	void render(Scene *scene,int &verticesCounter);
 	~GraphicsEngine();
 };
 

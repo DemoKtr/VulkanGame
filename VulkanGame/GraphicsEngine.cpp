@@ -34,6 +34,7 @@ void GraphicsEngine::make_assets(Scene* scene)
 	for (std::pair<meshTypes, std::array<char*,2>> pair : model_filenames) {
 		vkMesh::ObjMesh model(pair.second[0], pair.second[1], glm::mat4(1.0f));
 		meshes->consume(pair.first, model.vertices, model.indices);
+		verticesonScene += model.vertices.size()/14;
 	}
 
 
@@ -558,9 +559,9 @@ void GraphicsEngine::render_shadows_objects(vk::CommandBuffer commandBuffer, mes
 	starInstance += instanceCount;
 }
 
-void GraphicsEngine::render(Scene *scene)
+void GraphicsEngine::render(Scene *scene,int &verticesCounter)
 {
-	
+	verticesCounter = verticesonScene;
 	
 	device.waitForFences(1, &swapchainFrames[frameNumber].inFlight, VK_TRUE, UINT64_MAX);
 	device.resetFences(1, &swapchainFrames[frameNumber].inFlight);

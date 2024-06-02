@@ -12,7 +12,7 @@ class App
 	float frameTime;
 	void build_glfw_window(ivec2 screenSize, bool debugMode);
 	void calculateFrameRate();
-
+	int verticesCounter = {};
 	public:
 		App(ivec2 screenSize, bool debugMode);
 		~App();

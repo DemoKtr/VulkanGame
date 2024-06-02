@@ -32,7 +32,7 @@ void App::calculateFrameRate()
 		int framerate{ std::max(1, int(numFrames / delta)) };
 		
 		std::stringstream title{};
-		title << "Running at " << framerate << " fps.";
+		title << "Running at " << framerate << " fps.  There are"<< verticesCounter << "vertices send to gpu";
 		glfwSetWindowTitle(window, title.str().c_str());
 		
 		lastTime = currentTime;
@@ -63,7 +63,7 @@ void App::run()
 {
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
-		graphicsEngine->render(scene);
+		graphicsEngine->render(scene,verticesCounter);
 		calculateFrameRate();
 	}
 }
