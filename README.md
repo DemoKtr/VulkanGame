@@ -7,3 +7,4 @@ What is done :
 -instancing
 what is to do:
 Shadowmapping
+Bloom
