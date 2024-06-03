@@ -67,3 +67,14 @@ public:
 	Box();
 	~Box();
 };
+
+
+class Floor : public SceneObject {
+	// Inherited via StaticSceneObject
+public:
+	void draw() override;
+	void update() override;
+
+	Floor();
+	~Floor();
+};

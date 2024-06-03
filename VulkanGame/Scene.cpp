@@ -10,6 +10,8 @@ Scene::Scene()
 	
 	Box* box = new Box();
 	Box* box1 = new Box();
+	Box* box2 = new Box();
+
 
 
 	box->getTransform().setLocalPosition(glm::vec3(0.0f, -0.1f, 0.0f));
@@ -31,6 +33,7 @@ Scene::Scene()
 	sceneObjects.push_back(box1);
 
 
+
 	Light* pointLight1 = new Light();
 	Light* pointLight2 = new Light();
 
@@ -47,6 +50,7 @@ Scene::Scene()
 
 Scene::~Scene()
 {
-	
+	for (SceneObject* obj : sceneObjects) delete obj;
+	for (Light* light : lights) delete light;
 	
 }

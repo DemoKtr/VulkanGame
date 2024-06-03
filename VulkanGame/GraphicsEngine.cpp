@@ -770,7 +770,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	for(std::pair<meshTypes,std::vector<SceneObject*>> pair: models)
  {
 		for (SceneObject* obj : pair.second) {
-			obj->getTransform().rotate(glm::vec3(1, 1, 1), -0.0001f);
+			//obj->getTransform().rotate(glm::vec3(1, 1, 1), -0.0001f);
 			obj->getTransform().computeModelMatrix();
 			_frame.shadowData.modelPos[i] = glm::vec4(obj->getTransform().getGlobalPosition(), 1.0f);
 			_frame.modelTransforms[i++] = obj->getTransform().getModelMatrix();
@@ -805,8 +805,9 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	_frame.lightData.diffuse[1] = glm::vec3();
 	_frame.lightData.camPos = eye;
 	_frame.cameraData.camPos = eye;
-	memcpy(_frame.lightDataWriteLocation, &(_frame.lightData), sizeof(vkUtil::PointLight));
+	
 	memcpy(_frame.cameraDataWriteLocation, &(_frame.cameraData), sizeof(vkUtil::UBO));
+	memcpy(_frame.lightDataWriteLocation, &(_frame.lightData), sizeof(vkUtil::PointLight));
 	memcpy(_frame.shadowDataWriteLocation, &(_frame.shadowData), i * sizeof(vkUtil::ShadowUBO));
 
 	
