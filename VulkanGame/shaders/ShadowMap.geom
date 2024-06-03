@@ -23,7 +23,7 @@ void main()
 	// Iteracja przez wszystkie sześć twarzy cubemapy dla aktualnego światła
 	for (int face = 0; face < 6; ++face)
 	{
-		gl_Layer = face; // wbudowana zmienna, która określa, do której twarzy renderujemy
+		gl_Layer = lightIndex * 6 + face; // wbudowana zmienna, która określa, do której twarzy renderujemy
 
 		// Iteracja przez wierzchołki trójkąta
 		for (int i = 0; i < gl_in.length(); ++i)

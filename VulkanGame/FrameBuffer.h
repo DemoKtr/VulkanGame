@@ -72,8 +72,8 @@ namespace vkInit {
 			framebufferInfo.renderPass = inputChunk.renderpass;
 			framebufferInfo.attachmentCount = attachments.size();
 			framebufferInfo.pAttachments = attachments.data();
-			framebufferInfo.width = inputChunk.swapchainExtent.width;
-			framebufferInfo.height = inputChunk.swapchainExtent.height;
+			framebufferInfo.width = 1024;
+			framebufferInfo.height =1024;
 			framebufferInfo.layers = 6;
 
 			try {

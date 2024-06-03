@@ -421,7 +421,8 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,vk::Co
 	subrenderPassInfo.framebuffer = swapchainFrames[imageIndex].shadowFramebuffer;
 	subrenderPassInfo.renderArea.offset.x = 0;
 	subrenderPassInfo.renderArea.offset.y = 0;
-	subrenderPassInfo.renderArea.extent = swapchainExtent;
+	subrenderPassInfo.renderArea.extent.height = 1024;
+	subrenderPassInfo.renderArea.extent.width = 1024;
 	subrenderPassInfo.clearValueCount = dclearValues.size();
 	subrenderPassInfo.pClearValues = dclearValues.data();
 
@@ -770,7 +771,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	for(std::pair<meshTypes,std::vector<SceneObject*>> pair: models)
  {
 		for (SceneObject* obj : pair.second) {
-			//obj->getTransform().rotate(glm::vec3(1, 1, 1), -0.0001f);
+			obj->getTransform().rotate(glm::vec3(1, 1, 1), -0.0001f);
 			obj->getTransform().computeModelMatrix();
 			_frame.shadowData.modelPos[i] = glm::vec4(obj->getTransform().getGlobalPosition(), 1.0f);
 			_frame.modelTransforms[i++] = obj->getTransform().getModelMatrix();
