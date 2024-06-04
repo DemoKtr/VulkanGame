@@ -105,7 +105,7 @@ void main() {
     F0 = mix(F0, albedo, metalic);
 	vec3 Lo = vec3(0.0);
 	//for(int i=0; i<2; ++i) {}
-	Lo +=  lightCalc(worldPos,(TBN*vec3(0.0f,-2.0f,0.0f)),V,vec3(255.0f,255.0f,255.0f),N,F0,albedo,roughness,metalic);
+	Lo +=  lightCalc(worldPos,(TBN*vec3(0.0f,2.0f,0.0f)),V,vec3(255.0f,255.0f,255.0f),N,F0,albedo,roughness,metalic);
 	
 	 vec3 ambient = vec3(0.03) * albedo * ao;
     

@@ -600,7 +600,7 @@ namespace vkInit {
         std::vector <vk::VertexInputAttributeDescription> attributeDescriptions = vkMesh::getPosColorAttributeDescriptions();
         vk::PipelineVertexInputStateCreateInfo vertexInputInfo = make_vertex_input_info(bindingDescription, attributeDescriptions);
         pipelineInfo.pVertexInputState = &vertexInputInfo;
-        rasterizationState.cullMode = vk::CullModeFlagBits::eBack;
+        rasterizationState.cullMode = vk::CullModeFlagBits::eFront;
 
         // Offscreen pipeline
         vk::ShaderModule vertexShader = vkUtil::createModule(specyfication.vertexFilePath, specyfication.device, debugMode);

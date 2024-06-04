@@ -10,7 +10,7 @@ Scene::Scene()
 	
 	Box* box = new Box();
 	Box* box1 = new Box();
-	Box* box2 = new Box();
+	Floor* floor = new Floor();
 
 
 
@@ -24,6 +24,10 @@ Scene::Scene()
 	box1->getTransform().setLocalScale(glm::vec3(0.1f, 0.1f, 0.1f));
 	box1->getTransform().computeModelMatrix();
 
+	floor->getTransform().setLocalPosition(glm::vec3(0.2f, -0.2f, 0.3f));
+	//box->getTransform().rotate(glm::vec3(0.0f, 0.0f, 1.0f),(22.0f/28.0f));
+	floor->getTransform().computeModelMatrix();
+
 
 
 	//positions[meshTypes::KITTY].push_back(box);
@@ -31,6 +35,7 @@ Scene::Scene()
 
 	sceneObjects.push_back(box);
 	sceneObjects.push_back(box1);
+	sceneObjects.push_back(floor);
 
 
 

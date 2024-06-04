@@ -4,7 +4,7 @@
 
 int main() {
 	
-	App* myApp = new App(ivec2(1920, 1080), true);
+	App* myApp = new App(ivec2(640, 480), true);
 	myApp->run();
 	delete myApp;
 

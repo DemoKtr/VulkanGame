@@ -744,7 +744,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	glm::mat4 view = glm::lookAt(eye, center, up);
 
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), static_cast<float>(swapchainExtent.width) / static_cast<float>(swapchainExtent.height), 0.1f, 10.0f);
-	projection[1][1] *= 1;
+	projection[1][1] *= -1;
 
 	_frame.cameraData.view = view;
 	_frame.cameraData.projection = projection;
