@@ -17,11 +17,8 @@ namespace vkUtil {
 	struct PointLight {
 		glm::vec4 position;
 		glm::vec4 diffuse;
+		glm::mat4 mvp[6];
 
-	};
-	struct ShadowUBO {
-		glm::mat4 mvp[6]; //tyle ile swiatel na scenie
-		  // tyle elemenetow ile jest modeli na scenie
 	};
 
 	/**
@@ -62,13 +59,10 @@ namespace vkUtil {
 		//Resources
 		UBO cameraData;
 		PointLight lightData;
-		ShadowUBO shadowData;
 		Buffer cameraDataBuffer;
 		Buffer lightDataBuffer;
-		Buffer shadowDataBuffer;
 		void* cameraDataWriteLocation;
 		void* lightDataWriteLocation;
-		void* shadowDataWriteLocation;
 
 
 		std::vector<glm::mat4> modelTransforms;
@@ -82,7 +76,6 @@ namespace vkUtil {
 		//Resource Descriptors
 		vk::DescriptorBufferInfo uniformBufferDescriptor;
 		vk::DescriptorBufferInfo uniformlightBufferDescriptor;
-		vk::DescriptorBufferInfo uniformShadowBufferDescriptor;
 		vk::DescriptorBufferInfo modelBufferDescriptor;
 		vk::DescriptorBufferInfo camPosBufferDescriptor;
 

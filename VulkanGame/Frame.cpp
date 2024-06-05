@@ -10,10 +10,19 @@ void vkUtil::SwapChainFrame::shadowDescripotrsWrite()
 	shadowWriteInfo.dstBinding = 0;
 	shadowWriteInfo.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
 	shadowWriteInfo.descriptorCount = 1;
-	shadowWriteInfo.descriptorType = vk::DescriptorType::eUniformBuffer;
-	shadowWriteInfo.pBufferInfo = &uniformShadowBufferDescriptor;
+	shadowWriteInfo.descriptorType = vk::DescriptorType::eStorageBuffer;
+	shadowWriteInfo.pBufferInfo = &modelBufferDescriptor;
 
 	logicalDevice.updateDescriptorSets(shadowWriteInfo, nullptr);
+
+	vk::WriteDescriptorSet shadowWriteInfo2;
+	shadowWriteInfo2.dstSet = shadowDescriptorSet;
+	shadowWriteInfo2.dstBinding = 1;
+	shadowWriteInfo2.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+	shadowWriteInfo2.descriptorCount = 1;
+	shadowWriteInfo2.descriptorType = vk::DescriptorType::eStorageBuffer;
+	shadowWriteInfo2.pBufferInfo = &uniformlightBufferDescriptor;
+	logicalDevice.updateDescriptorSets(shadowWriteInfo2, nullptr);
 }
 void vkUtil::SwapChainFrame::make_descriptor_resources() {
 
@@ -26,14 +35,11 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			cameraDataBuffer = createBuffer(input);
 			input.size = sizeof(glm::vec4);
 			camPosBuffer  = createBuffer(input);
-			input.size =   sizeof(ShadowUBO);
-			input.usage = vk::BufferUsageFlagBits::eUniformBuffer;
-			shadowDataBuffer = createBuffer(input);
 
 			
 			cameraDataWriteLocation = logicalDevice.mapMemory(cameraDataBuffer.bufferMemory, 0, sizeof(UBO));
 			camPosWriteLoacation = logicalDevice.mapMemory(camPosBuffer.bufferMemory, 0, sizeof(glm::vec4));
-			shadowDataWriteLocation = logicalDevice.mapMemory(shadowDataBuffer.bufferMemory, 0, sizeof(ShadowUBO));
+			
 			////////////
 
 			
@@ -57,11 +63,8 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			}
 			
 			
-			for (uint32_t i = 0; i < 6;++i) {
-					shadowData.mvp[i] = glm::mat4(1.0f);
-
-					
-			}
+			
+			
 			
 			/*
 			typedef struct VkDescriptorBufferInfo {
@@ -77,11 +80,6 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			uniformBufferDescriptor.buffer = cameraDataBuffer.buffer;
 			uniformBufferDescriptor.offset = 0;
 			uniformBufferDescriptor.range = sizeof(UBO);
-
-			
-			uniformShadowBufferDescriptor.buffer = shadowDataBuffer.buffer;
-			uniformShadowBufferDescriptor.offset = 0;
-			uniformShadowBufferDescriptor.range = sizeof(ShadowUBO);
 
 			uniformlightBufferDescriptor.buffer = lightDataBuffer.buffer;
 			uniformlightBufferDescriptor.offset = 0;
@@ -288,9 +286,6 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			logicalDevice.freeMemory(lightDataBuffer.bufferMemory);
 			logicalDevice.destroyBuffer(lightDataBuffer.buffer);
 
-			logicalDevice.unmapMemory(shadowDataBuffer.bufferMemory);
-			logicalDevice.freeMemory(shadowDataBuffer.bufferMemory);
-			logicalDevice.destroyBuffer(shadowDataBuffer.buffer);
 
 
 			logicalDevice.destroyImage(depthBuffer);

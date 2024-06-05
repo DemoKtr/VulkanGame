@@ -5,10 +5,15 @@
 layout (triangles, invocations = POINT_LIGHT_COUNT) in;
 layout (triangle_strip, max_vertices = 18) out;
 
-layout (binding = 0) uniform UBO 
-{
-	mat4 shadowMatrices[6]; // Macierze dla sześciu twarzy cubemapy dla każdego światła
-} ubo;
+struct PointLight{
+		vec4 position;
+		vec4 diffuse;
+		mat4 mvp[6];
+} ;
+
+layout(std140, set = 0, binding = 1)readonly  buffer PointLights {
+    PointLight lights[];
+} light;
 
 layout (location = 0) in int inInstanceIndex[];
 
@@ -25,10 +30,10 @@ void main()
 		gl_Layer = lightIndex * 6 + face; // wbudowana zmienna, która określa, do której twarzy renderujemy
 
 		// Iteracja przez wierzchołki trójkąta
-		for (int i = 0; i < gl_in.length(); ++i)
+		for (int i = 0; i < 3; ++i)
 		{
 			vec4 FragPos = gl_in[i].gl_Position;
-			gl_Position = ubo.shadowMatrices[face] * FragPos;
+			gl_Position = light.lights[lightIndex].mvp[face] * FragPos;
 			EmitVertex();
 		}
 		EndPrimitive();

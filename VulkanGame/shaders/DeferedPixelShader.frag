@@ -9,6 +9,7 @@ layout (input_attachment_index = 4, binding = 4) uniform subpassInput inputT;
 struct PointLight{
 		vec4 position;
 		vec4 diffuse;
+		mat4 mvp[6];
 } ;
 
 layout(std140, set = 0, binding = 5)readonly  buffer PointLights {
