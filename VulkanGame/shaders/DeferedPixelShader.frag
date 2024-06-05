@@ -6,6 +6,8 @@ layout (input_attachment_index = 2, binding = 2) uniform subpassInput inputAlbed
 layout (input_attachment_index = 3, binding = 3) uniform subpassInput inputARM;
 layout (input_attachment_index = 4, binding = 4) uniform subpassInput inputT;
 
+layout(set=0,binding=7) uniform sampler2DArray depthMap;
+
 struct PointLight{
 		vec4 position;
 		vec4 diffuse;

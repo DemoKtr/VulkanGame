@@ -191,7 +191,7 @@ vk::RenderPass vkInit::create_shadows_renderpass(vk::Device logicalDevice, vkUti
 	shadowAttachment.format = depthFormat;
 	shadowAttachment.samples = vk::SampleCountFlagBits::e1;
 	shadowAttachment.loadOp = vk::AttachmentLoadOp::eClear;
-	shadowAttachment.storeOp = vk::AttachmentStoreOp::eDontCare;
+	shadowAttachment.storeOp = vk::AttachmentStoreOp::eStore;
 	shadowAttachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
 	shadowAttachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
 	shadowAttachment.initialLayout = vk::ImageLayout::eUndefined;
@@ -199,20 +199,6 @@ vk::RenderPass vkInit::create_shadows_renderpass(vk::Device logicalDevice, vkUti
 
 
 
-	vk::SamplerCreateInfo samplerInfo = {};
-	samplerInfo.magFilter = vk::Filter::eLinear;
-	samplerInfo.minFilter = vk::Filter::eLinear;
-	samplerInfo.mipmapMode = vk::SamplerMipmapMode::eLinear;
-	samplerInfo.addressModeU = vk::SamplerAddressMode::eClampToEdge;
-	samplerInfo.addressModeV = vk::SamplerAddressMode::eClampToEdge;
-	samplerInfo.addressModeW = vk::SamplerAddressMode::eClampToEdge;
-	samplerInfo.mipLodBias = 0.0f;
-	samplerInfo.maxAnisotropy = 1.0f;
-	samplerInfo.minLod = 0.0f;
-	samplerInfo.maxLod = 1.0f;
-	samplerInfo.borderColor = vk::BorderColor::eFloatOpaqueWhite;
-
-	shadowmapBuffer->sampler = logicalDevice.createSampler(samplerInfo);
 
 
 	vk::AttachmentReference depthReference = {};
@@ -234,15 +220,15 @@ vk::RenderPass vkInit::create_shadows_renderpass(vk::Device logicalDevice, vkUti
 	dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
 	dependencies[0].dstSubpass = 0;
 	dependencies[0].srcStageMask =  vk::PipelineStageFlagBits::eBottomOfPipe;
-	dependencies[0].dstStageMask =  vk::PipelineStageFlagBits::eColorAttachmentOutput;
+	dependencies[0].dstStageMask =  vk::PipelineStageFlagBits::eTopOfPipe;
 	dependencies[0].srcAccessMask =  vk::AccessFlagBits::eMemoryRead;
-	dependencies[0].dstAccessMask =  vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite;
+	dependencies[0].dstAccessMask =  vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
 	dependencies[0].dependencyFlags = vk::DependencyFlagBits::eByRegion;
 
 	dependencies[1].srcSubpass = 0;
 	dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
-	dependencies[1].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-	dependencies[1].dstStageMask = vk::PipelineStageFlagBits::eBottomOfPipe;
+	dependencies[1].srcStageMask = vk::PipelineStageFlagBits::eTopOfPipe;
+	dependencies[1].dstStageMask = vk::PipelineStageFlagBits::eFragmentShader;
 	dependencies[1].srcAccessMask = vk::AccessFlagBits::eMemoryRead;
 	dependencies[1].dependencyFlags = vk::DependencyFlagBits::eByRegion;
 

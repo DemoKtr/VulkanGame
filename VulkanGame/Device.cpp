@@ -37,7 +37,8 @@ bool vkInit::isSuitable(const vk::PhysicalDevice& device, bool debugMode)
 	* the swapchain extension
 	*/
 	const std::vector<const char*> requestedExtensions = {
-		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+		{VK_KHR_SWAPCHAIN_EXTENSION_NAME}, VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME
+
 	};
 
 	if (debugMode) {
@@ -116,11 +117,12 @@ vk::Device vkInit::create_logical_device(vk::PhysicalDevice physicalDevice, vk::
 	}
 	
 	std::vector<const char*> deviceExtensions = {
-		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME
 	};
 
 	vk::PhysicalDeviceFeatures deviceFeatures = vk::PhysicalDeviceFeatures();
 	deviceFeatures.geometryShader = VK_TRUE;
+	
 	//deviceFeatures.samplerAnisotropy = true;
 	std::vector<const char*> enabledLayers;
 	if (debugMode) {

@@ -43,7 +43,7 @@ void vkShadows::createAttachment(attachmentBundle attachmentDescription)
 	imageInfo.samples = vk::SampleCountFlagBits::e1;
 	imageInfo.tiling = vk::ImageTiling::eOptimal;
 	imageInfo.extent.depth = 1;
-	imageInfo.usage = attachmentDescription.usage | vk::ImageUsageFlagBits::eInputAttachment;
+	imageInfo.usage = attachmentDescription.usage | vk::ImageUsageFlagBits::eSampled;
 
 
 	attachmentDescription.attachment->image = attachmentDescription.logicalDevice.createImage(imageInfo);
@@ -64,4 +64,8 @@ void vkShadows::createAttachment(attachmentBundle attachmentDescription)
 	imageViewInfo.subresourceRange.layerCount = 12;
 	imageViewInfo.image = attachmentDescription.attachment->image;
 	attachmentDescription.attachment->view = attachmentDescription.logicalDevice.createImageView(imageViewInfo);
+
+
+
+	
 }

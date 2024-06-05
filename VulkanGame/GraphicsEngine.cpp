@@ -299,7 +299,7 @@ void GraphicsEngine::create_descriptor_set_layouts()
 
 	frameSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
-	bindings.count = 7;
+	bindings.count = 8;
 	bindings.indices[0] = 0;
 	bindings.indices[1] = 1;
 	bindings.types[0] = vk::DescriptorType::eInputAttachment;
@@ -330,6 +330,10 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
 	bindings.indices.push_back(6);
 	bindings.types.push_back(vk::DescriptorType::eUniformBuffer);
+	bindings.counts.push_back(1);
+	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
+	bindings.indices.push_back(7);
+	bindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
 	bindings.counts.push_back(1);
 	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
 
@@ -437,11 +441,11 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,vk::Co
 	commandBuffer.executeCommands(shadowCommandBuffer);
 	commandBuffer.endRenderPass();
 	
-	/*
+	
 	vk::ImageMemoryBarrier barrier = {};
 	barrier.srcAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentWrite;
-	barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
-	barrier.oldLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+	barrier.dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentRead;
+	barrier.oldLayout = vk::ImageLayout::eUndefined;
 	barrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -450,11 +454,12 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,vk::Co
 	barrier.subresourceRange.baseMipLevel = 0;
 	barrier.subresourceRange.levelCount = 1;
 	barrier.subresourceRange.baseArrayLayer = 0;
-	barrier.subresourceRange.layerCount = 6;
+	barrier.subresourceRange.layerCount = 12;
+
 	
 
-	commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eLateFragmentTests, vk::PipelineStageFlagBits::eFragmentShader, vk::DependencyFlags(), nullptr, nullptr, barrier);
-	*/
+	commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eEarlyFragmentTests, vk::PipelineStageFlagBits::eFragmentShader, vk::DependencyFlags(), nullptr, nullptr, barrier);
+	
 	vk::RenderPassBeginInfo renderPassInfo = {};
 	renderPassInfo.renderPass = renderpass;
 	renderPassInfo.framebuffer = swapchainFrames[imageIndex].framebuffer;
@@ -693,7 +698,7 @@ void GraphicsEngine::create_frame_resources()
 	
 
 	vkInit::descriptorSetLayoutData gbindings;
-	gbindings.count = 7;
+	gbindings.count = 8;
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //pos
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //normals
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //albedo
@@ -701,6 +706,7 @@ void GraphicsEngine::create_frame_resources()
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //T
 	gbindings.types.push_back(vk::DescriptorType::eStorageBuffer); //pointlight
 	gbindings.types.push_back(vk::DescriptorType::eUniformBuffer); //camPos
+	gbindings.types.push_back(vk::DescriptorType::eCombinedImageSampler); //camPos
 	
 
 	vkInit::descriptorSetLayoutData shadowBindings;
@@ -784,7 +790,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	
 	
 	
-	glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), 1024.0f / 1024.0f, 1.0f, 25.0f);
+	glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), 1024.0f / 1024.0f, 0.1f, 64.0f);
 	std::vector<glm::mat4> shadowTransform;
 	shadowProj[1][1] *= -1;
 

@@ -157,6 +157,25 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			shadowMapBuffer.height = 1024;
 			shadowMapBuffer.width = 1024;
 			vkShadows::createShadowsAttachment(physicalDevice, logicalDevice, &shadowMapBuffer, depthFormat);
+			vk::SamplerCreateInfo samplerInfo = {};
+			samplerInfo.magFilter = vk::Filter::eLinear;
+			samplerInfo.minFilter = vk::Filter::eLinear;
+			samplerInfo.mipmapMode = vk::SamplerMipmapMode::eLinear;
+			samplerInfo.addressModeU = vk::SamplerAddressMode::eClampToEdge;
+			samplerInfo.addressModeV = vk::SamplerAddressMode::eClampToEdge;
+			samplerInfo.addressModeW = vk::SamplerAddressMode::eClampToEdge;
+			samplerInfo.mipLodBias = 0.0f;
+			samplerInfo.maxAnisotropy = 1.0f;
+			samplerInfo.minLod = 0.0f;
+			samplerInfo.maxLod = 1.0f;
+			samplerInfo.borderColor = vk::BorderColor::eFloatOpaqueWhite;
+
+			try {
+				shadowMapBuffer.sampler = logicalDevice.createSampler(samplerInfo);
+			}
+			catch (vk::SystemError err) {
+				 std::cout << "Failed create shadowMapping FAIKLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL Sampler!" << std::endl;
+			}
 		}
 
 
@@ -250,8 +269,22 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			camPosWriteInfo.descriptorType = vk::DescriptorType::eUniformBuffer;
 			camPosWriteInfo.pBufferInfo = &camPosBufferDescriptor;
 
+
+
+			vk::DescriptorImageInfo imageDescriptorShadow;
+			imageDescriptorShadow.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+			imageDescriptorShadow.imageView = shadowMapBuffer.shadowBufferDepthAttachment.view;
+			imageDescriptorShadow.sampler = shadowMapBuffer.sampler;
+			vk::WriteDescriptorSet imageShadow;
+			imageShadow.dstSet = deferedDescriptorSet;
+			imageShadow.dstBinding = 7;
+			imageShadow.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+			imageShadow.descriptorCount = 1;
+			imageShadow.descriptorType = vk::DescriptorType::eCombinedImageSampler;
+			imageShadow.pImageInfo = &imageDescriptorShadow;
+
 			std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {
-				descriptorWritePos,descriptorWriteNormal,descriptorWriteAlbedo,descriptorWritearm,descriptorWriteT,writeInfo,camPosWriteInfo
+				descriptorWritePos,descriptorWriteNormal,descriptorWriteAlbedo,descriptorWritearm,descriptorWriteT,writeInfo,camPosWriteInfo,imageShadow,
 			};
 
 			logicalDevice.updateDescriptorSets(writeDescriptorSets, nullptr);
