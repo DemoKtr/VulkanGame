@@ -54,6 +54,9 @@ public:
 class Light {
 public:
 	Transform transform;
+	glm::vec4 diffuse;
+	Light();
+	~Light();
 };
 
 

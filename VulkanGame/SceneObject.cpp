@@ -51,3 +51,13 @@ Floor::~Floor()
 {
 	objMaterial.clear();
 }
+
+Light::Light()
+{
+	diffuse = glm::vec4(255.0f,255.0f,255.0f,1.0f);
+	transform.setLocalPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+}
+
+Light::~Light()
+{
+}

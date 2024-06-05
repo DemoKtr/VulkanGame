@@ -6,13 +6,20 @@ layout (input_attachment_index = 2, binding = 2) uniform subpassInput inputAlbed
 layout (input_attachment_index = 3, binding = 3) uniform subpassInput inputARM;
 layout (input_attachment_index = 4, binding = 4) uniform subpassInput inputT;
 
+struct PointLight{
+		vec4 position;
+		vec4 diffuse;
+} ;
 
-layout(set = 0,binding = 5) uniform PointLight{
-		vec3 position[2];
-		vec3 diffuse[2];
-		vec3 camPos;
-
+layout(std140, set = 0, binding = 5)readonly  buffer PointLights {
+    PointLight lights[];
 } light;
+
+layout(set = 0,binding = 6) uniform CAMPOS {
+	vec4 camPos;
+} cameraPosition;
+
+
 
 const float PI = 3.14159265359;
 
@@ -98,15 +105,14 @@ void main() {
 	T = normalize(T - dot(T, No) * No);
 	vec3 B = cross(No, T);
 	mat3 TBN = transpose(mat3(T,B,No));
-	vec3 camPos = TBN * light.camPos;
+	vec3 camPos = TBN * vec3(cameraPosition.camPos.xyz);
 	
 	vec3 V = normalize(camPos - worldPos);
 	vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo, metalic);
 	vec3 Lo = vec3(0.0);
-	//for(int i=0; i<2; ++i) {}
-	Lo +=  lightCalc(worldPos,(TBN*vec3(0.0f,2.0f,0.0f)),V,vec3(255.0f,255.0f,255.0f),N,F0,albedo,roughness,metalic);
-	
+	 
+	 for(int i=0;i<2;++i)Lo +=  lightCalc(worldPos,(TBN * vec3(light.lights[i].position)),V,vec3(light.lights[i].diffuse),N,F0,albedo,roughness,metalic);
 	 vec3 ambient = vec3(0.03) * albedo * ao;
     
     vec3 color = ambient + Lo;

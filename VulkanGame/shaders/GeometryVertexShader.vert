@@ -4,8 +4,8 @@ layout(set = 0,binding = 0) uniform UBO {
 	mat4 view;
 	mat4 projection;
 	mat4 viewProjection;
-	float heightScale;
-	vec3 camPos;
+	vec4 heightScale;
+	vec4 camPos;
 } cameraData;
 
 layout(std140,set = 0, binding = 1) readonly buffer storageBuffer {
@@ -37,14 +37,14 @@ void main() {
 
 	vec3 WorldPos = vec3(ObjectData.model[gl_InstanceIndex] * vec4(vertexPosition,1.0f));
 	vs_out.TexCoords = vertexTexCoord;
-	vs_out.heightScale = cameraData.heightScale;
+	vs_out.heightScale = cameraData.heightScale.x;
 	vec3 T = normalize(mat3(ObjectData.model[gl_InstanceIndex]) * vertexTangent);
 	vec3 N = normalize(mat3(ObjectData.model[gl_InstanceIndex]) * vertexNormal);
 	T = normalize(T - dot(T, N) * N);
     vec3 B = cross(N, T);
 	mat3 TBN = transpose(mat3(T,B,N));
 	vs_out.TangentFragPos = TBN * WorldPos;
-	vs_out.TangentViewPos = TBN * vec3(0.0f,0.0f,-1.0f);
+	vs_out.TangentViewPos = TBN * vec3(cameraData.camPos.xyz);
 	vs_out.T = T;
 	vs_out.N = N;
 	gl_Position = cameraData.viewProjection * ObjectData.model[gl_InstanceIndex] * vec4(vertexPosition, 1.0);

@@ -11,18 +11,17 @@ namespace vkUtil {
 		glm::mat4 view;
 		glm::mat4 projection;
 		glm::mat4 viewProjection;
-		float heightScale;
-		glm::vec3 camPos;
+		glm::vec4 heightScale;
+		glm::vec4 camPos;
 	};
 	struct PointLight {
-		glm::vec3 position[2];
-		glm::vec3 diffuse[2];
-		glm::vec3 camPos;
+		glm::vec4 position;
+		glm::vec4 diffuse;
 
 	};
 	struct ShadowUBO {
-		glm::mat4 mvp[2][6]; //tyle ile swiatel na scenie
-		glm::vec4 modelPos[2];  // tyle elemenetow ile jest modeli na scenie
+		glm::mat4 mvp[6]; //tyle ile swiatel na scenie
+		  // tyle elemenetow ile jest modeli na scenie
 	};
 
 	/**
@@ -73,15 +72,19 @@ namespace vkUtil {
 
 
 		std::vector<glm::mat4> modelTransforms;
-		std::vector<glm::mat4> LightTransforms;
+		std::vector<PointLight> LightTransforms;
 		Buffer modelBuffer;
 		void* modelBufferWriteLocation;
+		glm::vec4 camPos = glm::vec4(0.0f);
+		Buffer camPosBuffer;
+		void* camPosWriteLoacation;
 
 		//Resource Descriptors
 		vk::DescriptorBufferInfo uniformBufferDescriptor;
 		vk::DescriptorBufferInfo uniformlightBufferDescriptor;
 		vk::DescriptorBufferInfo uniformShadowBufferDescriptor;
 		vk::DescriptorBufferInfo modelBufferDescriptor;
+		vk::DescriptorBufferInfo camPosBufferDescriptor;
 
 		vk::DescriptorSet descriptorSet;
 		vk::DescriptorSet deferedDescriptorSet;

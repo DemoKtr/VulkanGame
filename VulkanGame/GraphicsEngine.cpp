@@ -299,7 +299,7 @@ void GraphicsEngine::create_descriptor_set_layouts()
 
 	frameSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
-	bindings.count = 6;
+	bindings.count = 7;
 	bindings.indices[0] = 0;
 	bindings.indices[1] = 1;
 	bindings.types[0] = vk::DescriptorType::eInputAttachment;
@@ -325,6 +325,10 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
 
 	bindings.indices.push_back(5);
+	bindings.types.push_back(vk::DescriptorType::eStorageBuffer);
+	bindings.counts.push_back(1);
+	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
+	bindings.indices.push_back(6);
 	bindings.types.push_back(vk::DescriptorType::eUniformBuffer);
 	bindings.counts.push_back(1);
 	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
@@ -686,13 +690,14 @@ void GraphicsEngine::create_frame_resources()
 	
 
 	vkInit::descriptorSetLayoutData gbindings;
-	gbindings.count = 6;
+	gbindings.count = 7;
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //pos
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //normals
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //albedo
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //arm
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //T
-	gbindings.types.push_back(vk::DescriptorType::eUniformBuffer); //pointlight
+	gbindings.types.push_back(vk::DescriptorType::eStorageBuffer); //pointlight
+	gbindings.types.push_back(vk::DescriptorType::eUniformBuffer); //camPos
 	
 
 	vkInit::descriptorSetLayoutData shadowBindings;
@@ -749,19 +754,11 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	_frame.cameraData.view = view;
 	_frame.cameraData.projection = projection;
 	_frame.cameraData.viewProjection = projection * view;
+	_frame.cameraData.heightScale = glm::vec4( 0.01f);
+	_frame.camPos = glm::vec4(eye, 1.0f);
 	
+
 	
-
-	glm::vec3 position(0.0f,2.0f,0.0f);
-
-	float constant= 0.7f;
-	float linear = 0.09f;
-	float quadratic = 0.032;
-
-	glm::vec3 ambient =glm::vec3(0.05f);
-	glm::vec3 diffuse = glm::vec3(0.8f);
-	glm::vec3 specular = glm::vec3(1.0f);
-
 
 
 	
@@ -771,9 +768,9 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	for(std::pair<meshTypes,std::vector<SceneObject*>> pair: models)
  {
 		for (SceneObject* obj : pair.second) {
-			obj->getTransform().rotate(glm::vec3(1, 1, 1), -0.0001f);
+			//obj->getTransform().rotate(glm::vec3(1, 1,1), 0.0001f);
 			obj->getTransform().computeModelMatrix();
-			_frame.shadowData.modelPos[i] = glm::vec4(obj->getTransform().getGlobalPosition(), 1.0f);
+			//_frame.shadowData.modelPos[i] = glm::vec4(obj->getTransform().getGlobalPosition(), 1.0f);
 			_frame.modelTransforms[i++] = obj->getTransform().getModelMatrix();
 		}
 		
@@ -781,37 +778,33 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 }
 
 	
-	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), i * sizeof(glm::mat4));
-	size_t j = 0;
+	
+	
 	glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), 1024.0f / 1024.0f, 1.0f, 25.0f);
 	std::vector<glm::mat4> shadowTransform;
-	
+	shadowProj[1][1] *= -1;
 
-
+	size_t j = 0;
 	for (Light* light : scene->lights) {
-		_frame.shadowData.mvp[j][0] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		_frame.shadowData.mvp[j][1] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		_frame.shadowData.mvp[j][2] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-		_frame.shadowData.mvp[j][3] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
-		_frame.shadowData.mvp[j][4] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		_frame.shadowData.mvp[j++][5] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		
+		_frame.LightTransforms[j].position = glm::vec4(light->transform.getGlobalPosition(), 1.0f);
+		_frame.LightTransforms[j++].diffuse = light->diffuse;
 		
 		//std::cout << light->transform.getGlobalPosition().x<< light->transform.getGlobalPosition().y<< light->transform.getGlobalPosition().z << std::endl;
 	}
-	_frame.cameraData.heightScale = 0.01f;
 	
-	_frame.lightData.position[0] = glm::vec3(0.0f, 255.5f, 0.0f);
-	_frame.lightData.position[1] = glm::vec3(0.0f, -.5f, 0.0f);
-	_frame.lightData.diffuse[0] = glm::vec3(0.0f,0.0f,0.0f);
-	_frame.lightData.diffuse[1] = glm::vec3();
-	_frame.lightData.camPos = eye;
-	_frame.cameraData.camPos = eye;
-	
+	_frame.shadowData.mvp[5] = (shadowProj * glm::lookAt(scene->lights[0]->transform.getGlobalPosition(), scene->lights[0]->transform.getGlobalPosition() + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	_frame.shadowData.mvp[0] = (shadowProj * glm::lookAt(scene->lights[0]->transform.getGlobalPosition(), scene->lights[0]->transform.getGlobalPosition() + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	_frame.shadowData.mvp[1] = (shadowProj * glm::lookAt(scene->lights[0]->transform.getGlobalPosition(), scene->lights[0]->transform.getGlobalPosition() + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	_frame.shadowData.mvp[2] = (shadowProj * glm::lookAt(scene->lights[0]->transform.getGlobalPosition(), scene->lights[0]->transform.getGlobalPosition() + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+	_frame.shadowData.mvp[3] = (shadowProj * glm::lookAt(scene->lights[0]->transform.getGlobalPosition(), scene->lights[0]->transform.getGlobalPosition() + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+	_frame.shadowData.mvp[4] = (shadowProj * glm::lookAt(scene->lights[0]->transform.getGlobalPosition(), scene->lights[0]->transform.getGlobalPosition() + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 	memcpy(_frame.cameraDataWriteLocation, &(_frame.cameraData), sizeof(vkUtil::UBO));
-	memcpy(_frame.lightDataWriteLocation, &(_frame.lightData), sizeof(vkUtil::PointLight));
-	memcpy(_frame.shadowDataWriteLocation, &(_frame.shadowData), i * sizeof(vkUtil::ShadowUBO));
+	memcpy(_frame.camPosWriteLoacation, &(_frame.camPos), sizeof(glm::vec4));
+	memcpy(_frame.shadowDataWriteLocation, &(_frame.shadowData),  sizeof(vkUtil::ShadowUBO));
+	memcpy(_frame.lightDataWriteLocation, (_frame.LightTransforms.data()), j * sizeof(vkUtil::PointLight));
 
-	
+	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), i * sizeof(glm::mat4));
 	
 	_frame.write_descriptor_set();
 	_frame.writeGbufferDescriptor(_frame.deferedDescriptorSet, device);

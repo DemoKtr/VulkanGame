@@ -24,15 +24,16 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			input.size = sizeof(UBO);
 			input.usage = vk::BufferUsageFlagBits::eUniformBuffer;
 			cameraDataBuffer = createBuffer(input);
-			input.size = sizeof(PointLight);
-			lightDataBuffer = createBuffer(input);
-			input.size = 2 * sizeof(ShadowUBO);
+			input.size = sizeof(glm::vec4);
+			camPosBuffer  = createBuffer(input);
+			input.size =   sizeof(ShadowUBO);
 			input.usage = vk::BufferUsageFlagBits::eUniformBuffer;
 			shadowDataBuffer = createBuffer(input);
 
+			
 			cameraDataWriteLocation = logicalDevice.mapMemory(cameraDataBuffer.bufferMemory, 0, sizeof(UBO));
-			lightDataWriteLocation = logicalDevice.mapMemory(lightDataBuffer.bufferMemory, 0, sizeof(PointLight));
-			shadowDataWriteLocation = logicalDevice.mapMemory(shadowDataBuffer.bufferMemory, 0, 2*sizeof(ShadowUBO));
+			camPosWriteLoacation = logicalDevice.mapMemory(camPosBuffer.bufferMemory, 0, sizeof(glm::vec4));
+			shadowDataWriteLocation = logicalDevice.mapMemory(shadowDataBuffer.bufferMemory, 0, sizeof(ShadowUBO));
 			////////////
 
 			
@@ -40,46 +41,51 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			input.size = 1024 * sizeof(glm::mat4);
 			input.usage = vk::BufferUsageFlagBits::eStorageBuffer;
 			modelBuffer = createBuffer(input);
-
+			input.usage = vk::BufferUsageFlagBits::eStorageBuffer;
+			input.size = 1024 * sizeof(PointLight);
+			lightDataBuffer = createBuffer(input);
+			lightDataWriteLocation = logicalDevice.mapMemory(lightDataBuffer.bufferMemory, 0, 1024 * sizeof(PointLight));
 			modelBufferWriteLocation = logicalDevice.mapMemory(modelBuffer.bufferMemory, 0, 1024 * sizeof(glm::mat4));
 
 			modelTransforms.reserve(1024);
 			LightTransforms.reserve(1024);
+			
 			for (int i = 0; i < 1024; ++i)
 			{
 				modelTransforms.push_back(glm::mat4(1.0f));
-				LightTransforms.push_back(glm::mat4(1.0f));
+				LightTransforms.push_back(PointLight());
 			}
 			
 			
-			for (uint32_t j = 0; j < 6;++j) {
-				for (uint32_t i = 0; i < 2; ++i) {
-					shadowData.mvp[i][j] = glm::mat4(1.0f);
-					
-				}
+			for (uint32_t i = 0; i < 6;++i) {
+					shadowData.mvp[i] = glm::mat4(1.0f);
+
 					
 			}
-			shadowData.modelPos[0] = glm::vec4(1.0f);
-			shadowData.modelPos[1] = glm::vec4(1.0f);
+			
 			/*
 			typedef struct VkDescriptorBufferInfo {
 				VkBuffer        buffer;
 				VkDeviceSize    offset;
 				VkDeviceSize    range;
-			} VkDescriptorBufferInfo;
+			} VkDescriptorBufferInfo; =
 			*/
+			camPosBufferDescriptor.buffer = camPosBuffer.buffer;
+			camPosBufferDescriptor.offset = 0;
+			camPosBufferDescriptor.range = sizeof(glm::vec4);
+
 			uniformBufferDescriptor.buffer = cameraDataBuffer.buffer;
 			uniformBufferDescriptor.offset = 0;
 			uniformBufferDescriptor.range = sizeof(UBO);
 
-			uniformlightBufferDescriptor.buffer = lightDataBuffer.buffer;
-			uniformlightBufferDescriptor.offset = 0;
-			uniformlightBufferDescriptor.range = sizeof(PointLight);
-
+			
 			uniformShadowBufferDescriptor.buffer = shadowDataBuffer.buffer;
 			uniformShadowBufferDescriptor.offset = 0;
-			uniformShadowBufferDescriptor.range = 2*sizeof(ShadowUBO);
+			uniformShadowBufferDescriptor.range = sizeof(ShadowUBO);
 
+			uniformlightBufferDescriptor.buffer = lightDataBuffer.buffer;
+			uniformlightBufferDescriptor.offset = 0;
+			uniformlightBufferDescriptor.range = 1024 * sizeof(PointLight);
 
 
 			modelBufferDescriptor.buffer = modelBuffer.buffer;
@@ -164,7 +170,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			imageDescriptorPos.sampler = VK_NULL_HANDLE;
 
 			vk::WriteDescriptorSet descriptorWritePos;
-			descriptorWritePos.dstSet = descriptorSet;
+			descriptorWritePos.dstSet = deferedDescriptorSet;
 			descriptorWritePos.dstBinding = 0;
 			descriptorWritePos.dstArrayElement = 0;
 			descriptorWritePos.descriptorType = vk::DescriptorType::eInputAttachment;
@@ -179,7 +185,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			imageDescriptorNormal.sampler = VK_NULL_HANDLE;
 
 			vk::WriteDescriptorSet descriptorWriteNormal;
-			descriptorWriteNormal.dstSet = descriptorSet;
+			descriptorWriteNormal.dstSet = deferedDescriptorSet;
 			descriptorWriteNormal.dstBinding = 1;
 			descriptorWriteNormal.dstArrayElement = 0;
 			descriptorWriteNormal.descriptorType = vk::DescriptorType::eInputAttachment;
@@ -194,7 +200,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			imageDescriptoralbedo.sampler = VK_NULL_HANDLE;
 
 			vk::WriteDescriptorSet descriptorWriteAlbedo;
-			descriptorWriteAlbedo.dstSet = descriptorSet;
+			descriptorWriteAlbedo.dstSet = deferedDescriptorSet;
 			descriptorWriteAlbedo.dstBinding = 2;
 			descriptorWriteAlbedo.dstArrayElement = 0;
 			descriptorWriteAlbedo.descriptorType = vk::DescriptorType::eInputAttachment;
@@ -209,7 +215,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			imageDescriptorarm.sampler = VK_NULL_HANDLE;
 
 			vk::WriteDescriptorSet descriptorWritearm;
-			descriptorWritearm.dstSet = descriptorSet;
+			descriptorWritearm.dstSet = deferedDescriptorSet;
 			descriptorWritearm.dstBinding = 3;
 			descriptorWritearm.dstArrayElement = 0;
 			descriptorWritearm.descriptorType = vk::DescriptorType::eInputAttachment;
@@ -222,7 +228,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			imageDescriptorT.sampler = VK_NULL_HANDLE;
 
 			vk::WriteDescriptorSet descriptorWriteT;
-			descriptorWriteT.dstSet = descriptorSet;
+			descriptorWriteT.dstSet = deferedDescriptorSet;
 			descriptorWriteT.dstBinding = 4;
 			descriptorWriteT.dstArrayElement = 0;
 			descriptorWriteT.descriptorType = vk::DescriptorType::eInputAttachment;
@@ -231,17 +237,23 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			
 			
 			vk::WriteDescriptorSet writeInfo;
-			writeInfo.dstSet = descriptorSet;
+			writeInfo.dstSet = deferedDescriptorSet;
 			writeInfo.dstBinding = 5;
 			writeInfo.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
 			writeInfo.descriptorCount = 1;
-			writeInfo.descriptorType = vk::DescriptorType::eUniformBuffer;
+			writeInfo.descriptorType = vk::DescriptorType::eStorageBuffer;
 			writeInfo.pBufferInfo = &uniformlightBufferDescriptor;
 
-
+			vk::WriteDescriptorSet camPosWriteInfo;
+			camPosWriteInfo.dstSet = deferedDescriptorSet;
+			camPosWriteInfo.dstBinding = 6;
+			camPosWriteInfo.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+			camPosWriteInfo.descriptorCount = 1;
+			camPosWriteInfo.descriptorType = vk::DescriptorType::eUniformBuffer;
+			camPosWriteInfo.pBufferInfo = &camPosBufferDescriptor;
 
 			std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {
-				descriptorWritePos,descriptorWriteNormal,descriptorWriteAlbedo,descriptorWritearm,descriptorWriteT,writeInfo,
+				descriptorWritePos,descriptorWriteNormal,descriptorWriteAlbedo,descriptorWritearm,descriptorWriteT,writeInfo,camPosWriteInfo
 			};
 
 			logicalDevice.updateDescriptorSets(writeDescriptorSets, nullptr);
@@ -258,6 +270,11 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			logicalDevice.destroyFence(inFlight);
 			logicalDevice.destroySemaphore(imageAvailable);
 			logicalDevice.destroySemaphore(renderFinished);
+
+
+			logicalDevice.unmapMemory(camPosBuffer.bufferMemory);
+			logicalDevice.freeMemory(camPosBuffer.bufferMemory);
+			logicalDevice.destroyBuffer(camPosBuffer.buffer);
 
 			logicalDevice.unmapMemory(cameraDataBuffer.bufferMemory);
 			logicalDevice.freeMemory(cameraDataBuffer.bufferMemory);
