@@ -8,6 +8,7 @@ layout(location = 0) in VS_OUT{
 	vec3 TangentViewPos;
 	vec3 T;
 	vec3 N;
+	vec3 worldPos;
 } fs_in;
 
 
@@ -17,6 +18,7 @@ layout(location = 2) out vec4 gNormal;
 layout(location = 3) out vec4 gAlbedoSpec;
 layout(location = 4) out vec4 gARM;
 layout(location = 5) out vec4 gT;
+layout(location = 6) out vec4 gWP;
 
 layout(set=1,binding=0) uniform sampler2D albedo;
 layout(set=1,binding=1) uniform sampler2D normalMap;
@@ -54,7 +56,7 @@ vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 }
 
 void main() {
-
+	gWP.rgb = fs_in.worldPos;
 	vec3 viewDir = normalize(fs_in.TangentViewPos - fs_in.TangentFragPos);
     vec2 texCoords = fs_in.TexCoords;
 	vec3 normal = texture(normalMap,texCoords).rgb;

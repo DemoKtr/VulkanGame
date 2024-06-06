@@ -5,6 +5,7 @@ layout (input_attachment_index = 1, binding = 1) uniform subpassInput inputNorma
 layout (input_attachment_index = 2, binding = 2) uniform subpassInput inputAlbedo;
 layout (input_attachment_index = 3, binding = 3) uniform subpassInput inputARM;
 layout (input_attachment_index = 4, binding = 4) uniform subpassInput inputT;
+layout (input_attachment_index = 5, binding = 8) uniform subpassInput inputWorldPos;
 
 layout(set=0,binding=7) uniform sampler2DArray depthMap;
 
@@ -22,7 +23,7 @@ layout(set = 0,binding = 6) uniform CAMPOS {
 	vec4 camPos;
 } cameraPosition;
 
-
+#define SHADOW_FACTOR 0.25
 
 const float PI = 3.14159265359;
 
@@ -95,6 +96,64 @@ vec3 lightCalc(vec3 worldPos, vec3 lightPos, vec3 V,vec3 diffuse,vec3 N,vec3 F0,
 }
 
 
+float textureProj(vec4 P, float layer, vec2 offset)
+{
+	float shadow = 1.0;
+	vec4 shadowCoord = P / P.w;
+	shadowCoord.st = shadowCoord.st * 0.5 + 0.5;
+	
+	if (shadowCoord.z > -1.0 && shadowCoord.z < 1.0) 
+	{
+		float dist = texture(depthMap, vec3(shadowCoord.st + offset, layer)).r;
+		if (shadowCoord.w > 0.0 && dist < shadowCoord.z) 
+		{
+			shadow = SHADOW_FACTOR;
+		}
+	}
+	return shadow;
+}
+
+float filterPCF(vec4 sc, float layer)
+{
+	ivec2 texDim = textureSize(depthMap, 0).xy;
+	float scale = 1.5;
+	float dx = scale * 1.0 / float(texDim.x);
+	float dy = scale * 1.0 / float(texDim.y);
+
+	float shadowFactor = 0.0;
+	int count = 0;
+	int range = 1;
+	
+	for (int x = -range; x <= range; x++)
+	{
+		for (int y = -range; y <= range; y++)
+		{
+			shadowFactor += textureProj(sc, layer, vec2(dx*x, dy*y));
+			count++;
+		}
+	
+	}
+	return shadowFactor / count;
+}
+
+vec3 shadow(vec3 fragcolor, vec3 fragpos) {
+	
+	
+	 
+	for(int i = 0; i < 2; ++i)
+	{
+	for(int face=0;face<6;++face){
+		vec4 shadowClip	= light.lights[i].mvp[face] * vec4(fragpos, 1.0);
+		float shadowFactor = 0.0f;
+		shadowFactor = filterPCF(shadowClip, i*6 + face);
+		fragcolor *= shadowFactor;
+	}
+	
+	}
+	
+return fragcolor;
+}
+
 void main() {
 	
 	vec3 worldPos = subpassLoad(inputPosition).rgb;
@@ -120,11 +179,18 @@ void main() {
     
     vec3 color = ambient + Lo;
 
+	vec3 wp = (subpassLoad(inputWorldPos).rgb);
+	vec3 world = inverse(TBN)*(worldPos);
+	color = shadow(vec3(color),world);
     // HDR tonemapping
     color = color / (color + vec3(1.0));
     // gamma correct
     color = pow(color, vec3(1.0/2.2)); 
 
+	vec3 c =  vec3(0.0f);
+	c.r = texture(depthMap,vec3(inUV.xy,0)).r;
+	c.g = texture(depthMap,vec3(inUV.xy,1)).r;
+	c.b = texture(depthMap,vec3(inUV.xy,3)).r;
     outColor = vec4(color, 1.0f);
 	
 }

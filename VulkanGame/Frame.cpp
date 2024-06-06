@@ -169,13 +169,9 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			samplerInfo.minLod = 0.0f;
 			samplerInfo.maxLod = 1.0f;
 			samplerInfo.borderColor = vk::BorderColor::eFloatOpaqueWhite;
-
-			try {
-				shadowMapBuffer.sampler = logicalDevice.createSampler(samplerInfo);
-			}
-			catch (vk::SystemError err) {
-				 std::cout << "Failed create shadowMapping FAIKLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL Sampler!" << std::endl;
-			}
+			shadowMapBuffer.sampler = logicalDevice.createSampler(samplerInfo);
+			
+			
 		}
 
 
@@ -272,7 +268,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 
 
 			vk::DescriptorImageInfo imageDescriptorShadow;
-			imageDescriptorShadow.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+			imageDescriptorShadow.imageLayout = vk::ImageLayout::eDepthStencilReadOnlyOptimal;
 			imageDescriptorShadow.imageView = shadowMapBuffer.shadowBufferDepthAttachment.view;
 			imageDescriptorShadow.sampler = shadowMapBuffer.sampler;
 			vk::WriteDescriptorSet imageShadow;
@@ -283,8 +279,22 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			imageShadow.descriptorType = vk::DescriptorType::eCombinedImageSampler;
 			imageShadow.pImageInfo = &imageDescriptorShadow;
 
+
+			vk::DescriptorImageInfo imageDescriptorworldPos;
+			imageDescriptorworldPos.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+			imageDescriptorworldPos.imageView = gbuffer.worldPos.view; 
+			imageDescriptorworldPos.sampler = VK_NULL_HANDLE;
+
+			vk::WriteDescriptorSet descriptorWriteworldPos;
+			descriptorWriteworldPos.dstSet = deferedDescriptorSet;
+			descriptorWriteworldPos.dstBinding = 8;
+			descriptorWriteworldPos.dstArrayElement = 0;
+			descriptorWriteworldPos.descriptorType = vk::DescriptorType::eInputAttachment;
+			descriptorWriteworldPos.descriptorCount = 1;
+			descriptorWriteworldPos.pImageInfo = &imageDescriptorworldPos;
+
 			std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {
-				descriptorWritePos,descriptorWriteNormal,descriptorWriteAlbedo,descriptorWritearm,descriptorWriteT,writeInfo,camPosWriteInfo,imageShadow,
+				descriptorWritePos,descriptorWriteNormal,descriptorWriteAlbedo,descriptorWritearm,descriptorWriteT,writeInfo,camPosWriteInfo,imageShadow,descriptorWriteworldPos,
 			};
 
 			logicalDevice.updateDescriptorSets(writeDescriptorSets, nullptr);
@@ -298,10 +308,13 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			logicalDevice.destroyImageView(imageView);
 			logicalDevice.destroyFramebuffer(framebuffer);
 			logicalDevice.destroyFramebuffer(shadowFramebuffer);
-			logicalDevice.destroyFence(inFlight);
-			logicalDevice.destroySemaphore(imageAvailable);
-			logicalDevice.destroySemaphore(renderFinished);
+			
 
+			logicalDevice.destroySemaphore(imageAvailable);
+			
+			
+			logicalDevice.destroySemaphore(renderFinished);
+			logicalDevice.destroyFence(inFlight);
 
 			logicalDevice.unmapMemory(camPosBuffer.bufferMemory);
 			logicalDevice.freeMemory(camPosBuffer.bufferMemory);
@@ -327,6 +340,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			logicalDevice.destroyImage(gbuffer.albedo.image);
 			logicalDevice.destroyImage(gbuffer.arm.image);
 			logicalDevice.destroyImage(gbuffer.T.image);
+			logicalDevice.destroyImage(gbuffer.worldPos.image);
 			logicalDevice.destroyImage(shadowMapBuffer.shadowBufferDepthAttachment.image);
 			logicalDevice.freeMemory(depthBufferMemory);
 			logicalDevice.freeMemory(gbuffer.position.mem);
@@ -334,6 +348,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			logicalDevice.freeMemory(gbuffer.albedo.mem);
 			logicalDevice.freeMemory(gbuffer.arm.mem);
 			logicalDevice.freeMemory(gbuffer.T.mem);
+			logicalDevice.freeMemory(gbuffer.worldPos.mem);
 			logicalDevice.freeMemory(shadowMapBuffer.shadowBufferDepthAttachment.mem);
 			logicalDevice.destroyImageView(depthBufferView);
 			logicalDevice.destroyImageView(gbuffer.position.view);
@@ -341,6 +356,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			logicalDevice.destroyImageView(gbuffer.albedo.view);
 			logicalDevice.destroyImageView(gbuffer.arm.view);
 			logicalDevice.destroyImageView(gbuffer.T.view);
+			logicalDevice.destroyImageView(gbuffer.worldPos.view);
 			logicalDevice.destroyImageView(shadowMapBuffer.shadowBufferDepthAttachment.view);
 			logicalDevice.destroySampler(shadowMapBuffer.sampler);
 			

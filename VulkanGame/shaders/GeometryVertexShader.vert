@@ -28,6 +28,7 @@ layout(location = 0) out VS_OUT{
 	vec3 TangentViewPos;
 	vec3 T;
 	vec3 N;
+	vec3 worldPos;
 } vs_out;
 
 
@@ -35,6 +36,7 @@ layout(location = 0) out VS_OUT{
 
 void main() {
 
+	vs_out.worldPos = vec3(ObjectData.model[gl_InstanceIndex] * vec4(vertexPosition,1.0f));
 	vec3 WorldPos = vec3(ObjectData.model[gl_InstanceIndex] * vec4(vertexPosition,1.0f));
 	vs_out.TexCoords = vertexTexCoord;
 	vs_out.heightScale = cameraData.heightScale.x;

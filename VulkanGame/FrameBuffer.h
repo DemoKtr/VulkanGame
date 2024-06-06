@@ -74,7 +74,7 @@ namespace vkInit {
 			framebufferInfo.pAttachments = attachments.data();
 			framebufferInfo.width = 1024;
 			framebufferInfo.height =1024;
-			framebufferInfo.layers = 6;
+			framebufferInfo.layers = 12;
 
 			try {
 				frames[i].shadowFramebuffer = inputChunk.device.createFramebuffer(framebufferInfo);
@@ -97,7 +97,7 @@ namespace vkInit {
 		for (int i = 0; i < frames.size(); ++i) {
 
 			std::vector<vk::ImageView> attachments = {
-				frames[i].imageView, frames[i].gbuffer.position.view,frames[i].gbuffer.normal.view,frames[i].gbuffer.albedo.view,frames[i].gbuffer.arm.view, frames[i].gbuffer.T.view ,frames[i].depthBufferView,
+				frames[i].imageView, frames[i].gbuffer.position.view,frames[i].gbuffer.normal.view,frames[i].gbuffer.albedo.view,frames[i].gbuffer.arm.view, frames[i].gbuffer.T.view, frames[i].gbuffer.worldPos.view ,frames[i].depthBufferView,
 				//, frames[i].gbuffer.position.view, frames[i].gbuffer.normal.view, frames[i].gbuffer.albedo.view
 			};
 

@@ -15,7 +15,10 @@ layout(std140, set = 0, binding = 1)readonly  buffer PointLights {
     PointLight lights[];
 } light;
 
-layout (location = 0) in int inInstanceIndex[];
+layout(location = 0) in int outInstanceIndex[];
+layout(location = 1) in mat4 modelMatrix[];
+layout(location = 5) in mat3 tbnMatrix[];
+
 
 
 
@@ -28,11 +31,11 @@ void main()
 	for (int face = 0; face < 6; ++face)
 	{
 		gl_Layer = lightIndex * 6 + face; // wbudowana zmienna, która określa, do której twarzy renderujemy
-
-		// Iteracja przez wierzchołki trójkąta
 		for (int i = 0; i < 3; ++i)
 		{
 			vec4 FragPos = gl_in[i].gl_Position;
+			FragPos =  modelMatrix[0] * FragPos;
+			//FragPos =  vec4(tbnMatrix[0] * vec3(FragPos).xyz,1.0f);
 			gl_Position = light.lights[lightIndex].mvp[face] * FragPos;
 			EmitVertex();
 		}

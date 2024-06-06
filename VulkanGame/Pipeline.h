@@ -613,7 +613,7 @@ namespace vkInit {
         // Blend attachment states required for all color attachments
         // This is important, as color write mask will otherwise be 0x0 and you
         // won't see anything rendered to the attachment
-        std::array<vk::PipelineColorBlendAttachmentState, 6> blendAttachmentStates = {
+        std::array<vk::PipelineColorBlendAttachmentState, 7> blendAttachmentStates = {
     vk::PipelineColorBlendAttachmentState(
         VK_FALSE,                                  // blendEnable
         vk::BlendFactor::eOne,                    // srcColorBlendFactor
@@ -623,6 +623,16 @@ namespace vkInit {
         vk::BlendFactor::eZero,                   // dstAlphaBlendFactor
         vk::BlendOp::eAdd,                        // alphaBlendOp
         vk::ColorComponentFlags(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT) // colorWriteMask
+    ),
+    vk::PipelineColorBlendAttachmentState(
+        VK_FALSE,
+        vk::BlendFactor::eOne,
+        vk::BlendFactor::eZero,
+        vk::BlendOp::eAdd,
+        vk::BlendFactor::eOne,
+        vk::BlendFactor::eZero,
+        vk::BlendOp::eAdd,
+        vk::ColorComponentFlags(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT)
     ),
     vk::PipelineColorBlendAttachmentState(
         VK_FALSE,
@@ -736,7 +746,6 @@ namespace vkInit {
         
         ShadowGraphicsPipelineOutBundle output;
         vk::Pipeline shadowPipeline = {};
-        std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << specyfication.shadowDescriptorSetLayout.size() << std::endl;
         vk::PipelineLayout shadowPipelineLayout = create_pipeline_layout(specyfication.device, specyfication.shadowDescriptorSetLayout, debugMode);
 
 
@@ -751,8 +760,19 @@ namespace vkInit {
         depthStageInfo.depthBoundsTestEnable = false;
         depthStageInfo.stencilTestEnable = false;
         //Viewport and Scissor
-        vk::Viewport viewport = make_viewport(specyfication.swapchainExtent);
-        vk::Rect2D scissor = make_scissor(specyfication.swapchainExtent);
+            vk::Rect2D scissor = {};
+            scissor.offset.x = 0.0f;
+            scissor.offset.y = 0.0f;
+            scissor.extent.width = 1024;
+            scissor.extent.height = 1024;
+            vk::Viewport viewport = {};
+            viewport.x = 0.0f;
+            viewport.y = 0.0f;
+            viewport.width = (float)1024;
+            viewport.height = (float)1024;
+            viewport.minDepth = 0.0f;
+            viewport.maxDepth = 1.0f;
+
         vk::PipelineViewportStateCreateInfo viewportState = make_viewport_state(viewport, scissor);
         vk::PipelineMultisampleStateCreateInfo multisampleState = make_multisampling_info();
         std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;

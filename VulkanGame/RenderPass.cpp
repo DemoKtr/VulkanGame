@@ -4,8 +4,8 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 {
 
 
-	std::array<vk::AttachmentDescription,7> attachments;
-	vk::AttachmentReference attachmentRefertences[7];
+	std::array<vk::AttachmentDescription,8> attachments;
+	vk::AttachmentReference attachmentRefertences[8];
 
 
 	attachments[0].flags = vk::AttachmentDescriptionFlags();
@@ -23,7 +23,7 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 	
 
 	// Init attachment properties
-	for (uint32_t i = 1; i < 6; ++i)
+	for (uint32_t i = 1; i < 7; ++i)
 	{
 		attachments[i].flags = vk::AttachmentDescriptionFlags();
 		attachments[i].samples =  vk::SampleCountFlagBits::e1;
@@ -38,19 +38,20 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 		else if (i == 2)attachments[i].format = gBuffer.normal.format;
 		else if (i == 3) attachments[i].format = gBuffer.albedo.format;
 		else if (i==4) attachments[i].format = gBuffer.arm.format;
-		else  attachments[i].format = gBuffer.T.format;
+		else if(i==5)  attachments[i].format = gBuffer.T.format;
+		else   attachments[i].format = gBuffer.worldPos.format;
 	}
 
 
-	attachments[6].flags = vk::AttachmentDescriptionFlags();
-	attachments[6].format = depthFormat;
-	attachments[6].samples = vk::SampleCountFlagBits::e1;
-	attachments[6].loadOp = vk::AttachmentLoadOp::eClear;
-	attachments[6].storeOp = vk::AttachmentStoreOp::eStore;
-	attachments[6].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
-	attachments[6].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
-	attachments[6].initialLayout = vk::ImageLayout::eUndefined;
-	attachments[6].finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+	attachments[7].flags = vk::AttachmentDescriptionFlags();
+	attachments[7].format = depthFormat;
+	attachments[7].samples = vk::SampleCountFlagBits::e1;
+	attachments[7].loadOp = vk::AttachmentLoadOp::eClear;
+	attachments[7].storeOp = vk::AttachmentStoreOp::eStore;
+	attachments[7].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+	attachments[7].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+	attachments[7].initialLayout = vk::ImageLayout::eUndefined;
+	attachments[7].finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
 
 	
 
@@ -70,8 +71,10 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 	attachmentRefertences[4] = colorAttachmentRef;
 	colorAttachmentRef.attachment = 5;
 	attachmentRefertences[5] = colorAttachmentRef;
+	colorAttachmentRef.attachment = 6;
+	attachmentRefertences[6] = colorAttachmentRef;
 	vk::AttachmentReference depthAttachmentRef = {};
-	depthAttachmentRef.attachment = 6;
+	depthAttachmentRef.attachment = 7;
 	depthAttachmentRef.layout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
 
 
@@ -80,7 +83,7 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 	std::vector<vk::SubpassDescription> subpassDescriptions;
 	vk::SubpassDescription subpassGeometry = {};
 	subpassGeometry.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
-	subpassGeometry.colorAttachmentCount = 6; // Liczba za³¹czników kolorowych
+	subpassGeometry.colorAttachmentCount = 7; // Liczba za³¹czników kolorowych
 	subpassGeometry.pColorAttachments = attachmentRefertences; // Tablica referencji do za³¹czników kolorowych
 	subpassGeometry.pDepthStencilAttachment = &depthAttachmentRef; // Za³¹cznik g³êbokoœci i/lub szablonu
 	subpassGeometry.inputAttachmentCount = 0;
@@ -90,7 +93,7 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 	vk::AttachmentReference colorReference = { };
 	colorReference.attachment = 0;
 	colorReference.layout = vk::ImageLayout::eColorAttachmentOptimal;
-	vk::AttachmentReference inputReferences[5];
+	vk::AttachmentReference inputReferences[6];
 	inputReferences[0].attachment = 1;
 	inputReferences[0].layout = vk::ImageLayout::eShaderReadOnlyOptimal;
 	inputReferences[1].attachment = 2;
@@ -101,10 +104,13 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 	inputReferences[3].layout = vk::ImageLayout::eShaderReadOnlyOptimal;
 	inputReferences[4].attachment = 5;
 	inputReferences[4].layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	inputReferences[5].attachment = 6;
+	inputReferences[5].layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+
 
 	vk::SubpassDescription subpassDeferred = {};
 	subpassDeferred.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
-	subpassDeferred.inputAttachmentCount = 5; // Liczba za³¹czników wejœciowych
+	subpassDeferred.inputAttachmentCount = 6; // Liczba za³¹czników wejœciowych
 	subpassDeferred.pInputAttachments = inputReferences; // Tablica referencji do za³¹czników wejœciowych
 	subpassDeferred.colorAttachmentCount = 1; // Liczba za³¹czników kolorowych wyjœciowych
 	subpassDeferred.pColorAttachments = &colorReference; // Tablica referencji do za³¹czników kolorowych wyjœciowych
@@ -198,9 +204,6 @@ vk::RenderPass vkInit::create_shadows_renderpass(vk::Device logicalDevice, vkUti
 	shadowAttachment.finalLayout = vk::ImageLayout::eDepthStencilReadOnlyOptimal;
 
 
-
-
-
 	vk::AttachmentReference depthReference = {};
 	depthReference.attachment = 0;
 	depthReference.layout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
@@ -220,16 +223,17 @@ vk::RenderPass vkInit::create_shadows_renderpass(vk::Device logicalDevice, vkUti
 	dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
 	dependencies[0].dstSubpass = 0;
 	dependencies[0].srcStageMask =  vk::PipelineStageFlagBits::eBottomOfPipe;
-	dependencies[0].dstStageMask =  vk::PipelineStageFlagBits::eTopOfPipe;
+	dependencies[0].dstStageMask =  vk::PipelineStageFlagBits::eColorAttachmentOutput;
 	dependencies[0].srcAccessMask =  vk::AccessFlagBits::eMemoryRead;
-	dependencies[0].dstAccessMask =  vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+	dependencies[0].dstAccessMask =  vk::AccessFlagBits::eColorAttachmentWrite;
 	dependencies[0].dependencyFlags = vk::DependencyFlagBits::eByRegion;
 
 	dependencies[1].srcSubpass = 0;
 	dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
-	dependencies[1].srcStageMask = vk::PipelineStageFlagBits::eTopOfPipe;
-	dependencies[1].dstStageMask = vk::PipelineStageFlagBits::eFragmentShader;
-	dependencies[1].srcAccessMask = vk::AccessFlagBits::eMemoryRead;
+	dependencies[1].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+	dependencies[1].dstStageMask = vk::PipelineStageFlagBits::eBottomOfPipe;
+	dependencies[1].srcAccessMask = vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite;
+	dependencies[1].dstAccessMask = vk::AccessFlagBits::eMemoryRead;
 	dependencies[1].dependencyFlags = vk::DependencyFlagBits::eByRegion;
 
 	vk::RenderPassCreateInfo renderPassCreateInfo = {};
