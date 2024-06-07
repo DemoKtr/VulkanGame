@@ -799,7 +799,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	glm::vec3 up = { 0.0f, 1.0f, 0.0f };
 	glm::mat4 view = glm::lookAt(eye, center, up);
 
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), static_cast<float>(swapchainExtent.width) / static_cast<float>(swapchainExtent.height), 0.1f, 10.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), static_cast<float>(swapchainExtent.width) / static_cast<float>(swapchainExtent.height), 0.1f, 10214.0f);
 	projection[1][1] *= -1;
 
 	_frame.cameraData.view = view;
@@ -819,7 +819,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	for(std::pair<meshTypes,std::vector<SceneObject*>> pair: models)
  {
 		for (SceneObject* obj : pair.second) {
-			//obj->getTransform().rotate(glm::vec3(1, 1,0), 0.0001f);
+			obj->getTransform().rotate(glm::vec3(0, 1,0), 0.0001f);
 			obj->getTransform().computeModelMatrix();
 			//_frame.shadowData.modelPos[i] = glm::vec4(obj->getTransform().getGlobalPosition(), 1.0f);
 			_frame.modelTransforms[i++] = obj->getTransform().getModelMatrix();
@@ -831,13 +831,14 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	
 	
 	
-	glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), static_cast < float>(1)/ static_cast < float>(1), 0.1f, 128.0f);
+	glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), static_cast < float>(1)/ static_cast < float>(1), 0.1f,1024.0f);
 	std::vector<glm::mat4> shadowTransform;
 	shadowProj[1][1] *= -1;
 
 	size_t j = 0;
 	for (Light* light : scene->lights) {
 		
+		if(j==0)light->move();
 		_frame.LightTransforms[j].mvp[5] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 		_frame.LightTransforms[j].mvp[0] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 		_frame.LightTransforms[j].mvp[1] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));

@@ -27,12 +27,12 @@ layout(set=1,binding=3) uniform sampler2D depthMap;
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 { 
-   float layerDepth = 1.0 / 64.0f;
+   float layerDepth = 1.0 / 48.0f;
 	float currLayerDepth = 0.0;
-	vec2 deltaUV = viewDir.xy * 0.1 / (viewDir.z * 64.0f);
+	vec2 deltaUV = viewDir.xy * 0.01 / (viewDir.z * 48.0f);
 	vec2 currUV = texCoords;
 	float height = 1.0 - textureLod(depthMap, currUV, 0.0).a;
-	for (int i = 0; i < 64.0f; i++) {
+	for (int i = 0; i < 48.0f; i++) {
 		currLayerDepth += layerDepth;
 		currUV -= deltaUV;
 		height = 1.0 - textureLod(depthMap, currUV, 0.0).a;

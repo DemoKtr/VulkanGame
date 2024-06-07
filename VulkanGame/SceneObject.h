@@ -55,7 +55,9 @@ class Light {
 public:
 	Transform transform;
 	glm::vec4 diffuse;
+	float angle = { 0};
 	Light();
+	void move();
 	~Light();
 };
 

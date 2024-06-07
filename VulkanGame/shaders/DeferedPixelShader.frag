@@ -122,7 +122,7 @@ float filterPCF(vec4 sc, float layer)
 
 	float shadowFactor = 0.0;
 	int count = 0;
-	int range = 1;
+	int range = 3;
 	
 	for (int x = -range; x <= range; x++)
 	{
@@ -187,9 +187,9 @@ void main() {
     // gamma correct
     color = pow(color, vec3(1.0/2.2)); 
 
-	//vec3 c =  vec3(0.0f);
-	//c.r = texture(depthMap,vec3(inUV.xy,0)).r;
-	//c.g = texture(depthMap,vec3(inUV.xy,1)).r;
+	vec3 c =  vec3(0.0f);
+	c.r = texture(depthMap,vec3(inUV.xy,1)).r;
+	//c.g = texture(depthMap,vec3(inUV.xy,7)).r;
 	//c.b = texture(depthMap,vec3(inUV.xy,3)).r;
     outColor = vec4(color, 1.0f);
 	

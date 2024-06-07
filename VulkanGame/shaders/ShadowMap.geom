@@ -2,7 +2,7 @@
 
 #define POINT_LIGHT_COUNT 2
 
-layout (triangles, invocations = POINT_LIGHT_COUNT) in;
+layout (triangles) in;
 layout (triangle_strip, max_vertices = 18) out;
 
 struct PointLight{
@@ -26,19 +26,21 @@ void main()
 {
 	int lightIndex = gl_InvocationID; // Aktualne światło punktowe
 	
-
+	for(int l=0;l<2;++l){
+	
 	// Iteracja przez wszystkie sześć twarzy cubemapy dla aktualnego światła
 	for (int face = 0; face < 6; ++face)
 	{
-		gl_Layer = lightIndex * 6 + face; // wbudowana zmienna, która określa, do której twarzy renderujemy
+		gl_Layer = l* 6 + face; // wbudowana zmienna, która określa, do której twarzy renderujemy
 		for (int i = 0; i < 3; ++i)
 		{
 			vec4 FragPos = gl_in[i].gl_Position;
 			FragPos =  modelMatrix[0] * FragPos;
 			//FragPos =  vec4(tbnMatrix[0] * vec3(FragPos).xyz,1.0f);
-			gl_Position = light.lights[lightIndex].mvp[face] * FragPos;
+			gl_Position = light.lights[l].mvp[face] * FragPos;
 			EmitVertex();
 		}
 		EndPrimitive();
+	}
 	}
 }
