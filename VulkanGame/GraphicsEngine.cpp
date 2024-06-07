@@ -441,11 +441,25 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,vk::Co
 	subrenderPassInfo.clearValueCount = dclearValues.size();
 	subrenderPassInfo.pClearValues = dclearValues.data();
 
-	commandBuffer.beginRenderPass(&subrenderPassInfo,vk::SubpassContents::eSecondaryCommandBuffers);
-	commandBuffer.executeCommands(shadowCommandBuffer);
+	commandBuffer.beginRenderPass(&subrenderPassInfo,vk::SubpassContents::eInline);
+	
+	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, shadowPipeline);
+	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, shadowLayout, 0, swapchainFrames[imageIndex].shadowDescriptorSet, nullptr);
+	prepare_scene(commandBuffer);
+	uint32_t startInstance = 0;
+	//Triangles
+
+	for (std::pair<meshTypes, std::vector<SceneObject*>> pair : models) {
+		render_shadows_objects(commandBuffer, pair.first, startInstance, static_cast<uint32_t>(pair.second.size()));
+	}
+
+
+	
+	
+	
 	commandBuffer.endRenderPass();
 	
-	
+	/*
 	vk::ImageMemoryBarrier barrier = {};
 	barrier.sType = vk::StructureType::eImageMemoryBarrier;
 	barrier.srcAccessMask = vk::AccessFlagBits::eHostWrite;
@@ -461,10 +475,31 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,vk::Co
 	barrier.subresourceRange.baseArrayLayer = 0;
 	barrier.subresourceRange.layerCount = 12;
 
+	vk::BufferMemoryBarrier vaoBarrier = {};
+	vaoBarrier.sType = vk::StructureType::eBufferMemoryBarrier;
+	vaoBarrier.srcAccessMask = vk::AccessFlagBits::eVertexAttributeRead; // Odczyt pamiêci Ÿród³owej
+	vaoBarrier.dstAccessMask = vk::AccessFlagBits::eVertexAttributeRead; // Odczyt pamiêci docelowej
+	vaoBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	vaoBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	vaoBarrier.buffer = meshes->indexBuffer.buffer; // Twój bufor wierzcho³ków
+	vaoBarrier.offset = 0;
+	vaoBarrier.size = VK_WHOLE_SIZE;
+	vk::BufferMemoryBarrier vboBarrier = {};
+	vboBarrier.sType = vk::StructureType::eBufferMemoryBarrier;
+	vboBarrier.srcAccessMask = vk::AccessFlagBits::eVertexAttributeRead; // Odczyt pamiêci Ÿród³owej
+	vboBarrier.dstAccessMask = vk::AccessFlagBits::eVertexAttributeRead; // Odczyt pamiêci docelowej
+	vboBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	vboBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	vboBarrier.buffer = meshes->vertexBuffer.buffer; // Twój bufor wierzcho³ków
+	vboBarrier.offset = 0;
+	vboBarrier.size = VK_WHOLE_SIZE;
 	
 
 	commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eHost, vk::PipelineStageFlagBits::eBottomOfPipe, vk::DependencyFlags(), nullptr, nullptr, barrier);
-	
+	commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eVertexInput, vk::PipelineStageFlagBits::eVertexInput, vk::DependencyFlags(), nullptr, vaoBarrier,nullptr);
+	commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eVertexInput, vk::PipelineStageFlagBits::eVertexInput, vk::DependencyFlags(), nullptr, vboBarrier,nullptr);
+	*/
+
 	vk::RenderPassBeginInfo renderPassInfo = {};
 	renderPassInfo.renderPass = renderpass;
 	renderPassInfo.framebuffer = swapchainFrames[imageIndex].framebuffer;
@@ -488,7 +523,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,vk::Co
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, graphicsPipeline);
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, swapchainFrames[imageIndex].descriptorSet, nullptr);
 	prepare_scene(commandBuffer);
-	uint32_t startInstance = 0;
+	startInstance = 0;
 	//Triangles
 	
 	for (std::pair<meshTypes, std::vector<SceneObject*>> pair : models) {
@@ -770,7 +805,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	_frame.cameraData.view = view;
 	_frame.cameraData.projection = projection;
 	_frame.cameraData.viewProjection = projection * view;
-	_frame.cameraData.heightScale = glm::vec4( 0.01f);
+	_frame.cameraData.heightScale = glm::vec4( 0.0001f);
 	_frame.camPos = glm::vec4(eye, 1.0f);
 	
 
@@ -784,7 +819,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	for(std::pair<meshTypes,std::vector<SceneObject*>> pair: models)
  {
 		for (SceneObject* obj : pair.second) {
-			//obj->getTransform().rotate(glm::vec3(1, 1,1), 0.0001f);
+			//obj->getTransform().rotate(glm::vec3(1, 1,0), 0.0001f);
 			obj->getTransform().computeModelMatrix();
 			//_frame.shadowData.modelPos[i] = glm::vec4(obj->getTransform().getGlobalPosition(), 1.0f);
 			_frame.modelTransforms[i++] = obj->getTransform().getModelMatrix();

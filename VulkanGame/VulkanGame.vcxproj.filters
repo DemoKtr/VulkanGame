@@ -230,5 +230,8 @@
     <ClInclude Include="Settings.h">
       <Filter>Header Files\vkSettings</Filter>
     </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
