@@ -166,6 +166,8 @@
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="Obj_Mesh.cpp" />
     <ClCompile Include="Particle.cpp" />
+    <ClCompile Include="ParticleEmiter.cpp" />
+    <ClCompile Include="ParticleMenagerie.cpp" />
     <ClCompile Include="Queues.cpp" />
     <ClCompile Include="RenderPass.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -196,6 +198,8 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Obj_Mesh.h" />
     <ClInclude Include="Particle.h" />
+    <ClInclude Include="ParticleEmiter.h" />
+    <ClInclude Include="ParticleMenagerie.h" />
     <ClInclude Include="Pipeline.h" />
     <ClInclude Include="Queues.h" />
     <ClInclude Include="RenderPass.h" />

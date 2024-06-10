@@ -55,6 +55,11 @@ Scene::Scene()
 	lights.push_back(pointLight2);
 
 
+	ParticleEmiter *p1;
+
+	particleEmiters.push_back(p1);
+
+
 }
 
 Scene::~Scene()

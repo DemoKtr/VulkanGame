@@ -15,7 +15,7 @@
 void GraphicsEngine::make_assets(Scene* scene)
 {
 	meshes = new VertexMenagerie();
-
+	this->particles = new ParticleMenagerie();
 	std::unordered_map<meshTypes, std::array<char*,2>> model_filenames = {};// { { meshTypes::KITTY, { "box.obj","box.mtl" } }, { meshTypes::DOG, {"box.obj","box.mtl"} } };
 
 	
@@ -98,6 +98,11 @@ void GraphicsEngine::make_assets(Scene* scene)
 	} };
 	cubemap = new vkImage::Cubemap(textureInfo);
 	*/
+	
+	for (ParticleEmiter* obj : scene->particleEmiters) {
+		particles->consume();
+	}
+	particles->finalization(finalizationChunk);
 }
 
 void GraphicsEngine::prepare_scene(vk::CommandBuffer commandBuffer)
@@ -247,11 +252,14 @@ GraphicsEngine::~GraphicsEngine()
 	
 	device.destroyDescriptorSetLayout(frameSetLayout);
 	device.destroyDescriptorSetLayout(shadowSetLayout);
+	device.destroyDescriptorSetLayout(particleSetLayout);
 	device.destroyDescriptorSetLayout(meshSetLayout);
 	device.destroyDescriptorPool(meshDescriptorPool);
+	device.destroyDescriptorPool(particleDescriptorPool);
 	device.destroyDescriptorPool(shadowDescriptorPool);
 	
 	delete meshes;
+	delete particles;
 	for (const auto& [key, texture] : materials) delete texture;
 	for (const auto& [key, SceneObjects] : models) {
 		for (SceneObject* obj : SceneObjects) delete obj;
@@ -377,7 +385,19 @@ void GraphicsEngine::create_descriptor_set_layouts()
 
 	meshSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
+	bindings.count = 2;
+	bindings.indices[0] = 0;
+	bindings.indices[1] = 1;
+	bindings.types[0] = vk::DescriptorType::eUniformBuffer;
+	bindings.types[1] = vk::DescriptorType::eStorageBuffer;
+	bindings.counts[0] = 1;
+	bindings.counts[1] = 1;
+	bindings.stages[0] = vk::ShaderStageFlagBits::eCompute;
+	bindings.stages[1] = vk::ShaderStageFlagBits::eCompute;
 
+
+
+	particleSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
 
 }
@@ -394,7 +414,7 @@ void GraphicsEngine::finalize_setup()
 	maincommandBuffer = output.graphicCommandBuffer;
 	computeCommandBuffer = output.computeCommandBuffer;
 	vkInit::make_frame_command_buffers(commandBufferInput, debugMode);
-
+	
 	create_frame_resources();
 	
 
@@ -758,10 +778,16 @@ void GraphicsEngine::create_frame_resources()
 	vkInit::descriptorSetLayoutData shadowBindings;
 	shadowBindings.count = 2;
 	shadowBindings.types.push_back(vk::DescriptorType::eStorageBuffer);
-	shadowBindings.types.push_back(vk::DescriptorType::eStorageBuffer);
+	shadowBindings.types.push_back(vk::DescriptorType::eStorageBuffer);\
+
+	
+
+
 	frameDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);
 	deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
 	shadowDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), shadowBindings);
+	particleDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);
+	
 	//deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
 	
 	for (vkUtil::SwapChainFrame& frame : swapchainFrames) //referencja 
@@ -775,6 +801,7 @@ void GraphicsEngine::create_frame_resources()
 		frame.descriptorSet = vkInit::allocate_descriptor_set(device, frameDescriptorPool, frameSetLayout);
 		frame.deferedDescriptorSet = vkInit::allocate_descriptor_set(device, deferedDescriptorPool, deferedSetLayout);
 		frame.shadowDescriptorSet = vkInit::allocate_descriptor_set(device, shadowDescriptorPool, shadowSetLayout);
+		//frame.particleDescriptorSet = vkInit::allocate_descriptor_set(device, shadowDescriptorPool, particleSetLayout);
 		
 
 	}
@@ -860,7 +887,6 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	memcpy(_frame.cameraDataWriteLocation, &(_frame.cameraData), sizeof(vkUtil::UBO));
 	memcpy(_frame.camPosWriteLoacation, &(_frame.camPos), sizeof(glm::vec4));
 	memcpy(_frame.lightDataWriteLocation, (_frame.LightTransforms.data()), j * sizeof(vkUtil::PointLight));
-
 	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), i * sizeof(glm::mat4));
 	
 	_frame.write_descriptor_set();

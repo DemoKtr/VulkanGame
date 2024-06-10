@@ -8,6 +8,7 @@
 #include "Image.h"
 #include "Texture.h"
 #include "Cubemap.h"
+#include "ParticleMenagerie.h"
 
 class GraphicsEngine
 {
@@ -61,6 +62,8 @@ class GraphicsEngine
 	int maxFramesInFlight, frameNumber;
 
 	VertexMenagerie* meshes;
+	ParticleMenagerie* particles;
+
 	std::unordered_map<meshTypes, vkImage::Texture*>  materials;
 	std::unordered_map<meshTypes, int> instanceCounter;
 	std::unordered_map<meshTypes, std::vector<SceneObject*>> models;
@@ -75,12 +78,17 @@ class GraphicsEngine
 	vk::DescriptorSetLayout deferedSetLayout;
 	vk::DescriptorPool deferedDescriptorPool;
 
+	vk::DescriptorSetLayout particleSetLayout;
+	vk::DescriptorPool particleDescriptorPool;
+
 
 	vk::DescriptorSetLayout shadowSetLayout;
 	vk::DescriptorPool shadowDescriptorPool;
 
-	//vk::DescriptorSetLayout deferedSetLayout;
-	//vk::DescriptorPool deferedDescriptorPool;
+
+	
+
+
 	vkImage::Cubemap* cubemap;
 
 	void make_assets(Scene* scene);

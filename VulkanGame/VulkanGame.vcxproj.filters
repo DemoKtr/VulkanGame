@@ -138,6 +138,12 @@
     <ClCompile Include="Particle.cpp">
       <Filter>Source Files\vkParticle</Filter>
     </ClCompile>
+    <ClCompile Include="ParticleEmiter.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleMenagerie.cpp">
+      <Filter>Source Files\vkParticle</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GraphicsEngine.h">
@@ -243,6 +249,12 @@
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Particle.h">
+      <Filter>Header Files\vkParticle</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleEmiter.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleMenagerie.h">
       <Filter>Header Files\vkParticle</Filter>
     </ClInclude>
   </ItemGroup>

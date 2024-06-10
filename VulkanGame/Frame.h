@@ -2,6 +2,7 @@
 #include "config.h"
 #include "Memory.h"
 #include "RenderStruct.h"
+
 namespace vkUtil {
 
 	/**
@@ -64,7 +65,7 @@ namespace vkUtil {
 		void* cameraDataWriteLocation;
 		void* lightDataWriteLocation;
 
-
+	
 		FrameBufferAttachment particleAttachment;
 
 		std::vector<glm::mat4> modelTransforms;
@@ -80,6 +81,7 @@ namespace vkUtil {
 		vk::DescriptorBufferInfo uniformlightBufferDescriptor;
 		vk::DescriptorBufferInfo modelBufferDescriptor;
 		vk::DescriptorBufferInfo camPosBufferDescriptor;
+		
 
 		vk::DescriptorSet descriptorSet;
 		vk::DescriptorSet deferedDescriptorSet;
@@ -88,6 +90,7 @@ namespace vkUtil {
 		vk::DescriptorSet shadowDescriptorSet;
 
 		void shadowDescripotrsWrite();
+		void particleDescripotrsWrite();
 		void make_descriptor_resources();
 		void make_depth_resources();
 		void write_descriptor_set();

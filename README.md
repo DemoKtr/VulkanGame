@@ -5,7 +5,8 @@ What is done :
 -implement PBR
 -Paralax mapping
 -instancing
+-ShadowMap
 what is to do:
-Shadowmapping
+Particle compute shaders
 Bloom
 

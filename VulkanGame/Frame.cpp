@@ -24,6 +24,7 @@ void vkUtil::SwapChainFrame::shadowDescripotrsWrite()
 	shadowWriteInfo2.pBufferInfo = &uniformlightBufferDescriptor;
 	logicalDevice.updateDescriptorSets(shadowWriteInfo2, nullptr);
 }
+
 void vkUtil::SwapChainFrame::make_descriptor_resources() {
 
 			BufferInputChunk input;
@@ -301,7 +302,45 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 
 		}
 
+		void vkUtil::SwapChainFrame::particleDescripotrsWrite()
+		{
+			vk::WriteDescriptorSet writeInfo;
+			/*
+			typedef struct VkWriteDescriptorSet {
+				VkStructureType                  sType;
+				const void* pNext;
+				VkDescriptorSet                  dstSet;
+				uint32_t                         dstBinding;
+				uint32_t                         dstArrayElement;
+				uint32_t                         descriptorCount;
+				VkDescriptorType                 descriptorType;
+				const VkDescriptorImageInfo* pImageInfo;
+				const VkDescriptorBufferInfo* pBufferInfo;
+				const VkBufferView* pTexelBufferView;
+			} VkWriteDescriptorSet;
+			*/
 
+			writeInfo.dstSet = particleDescriptorSet;
+			writeInfo.dstBinding = 0;
+			writeInfo.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+			writeInfo.descriptorCount = 1;
+			writeInfo.descriptorType = vk::DescriptorType::eUniformBuffer;
+			writeInfo.pBufferInfo = &uniformBufferDescriptor;
+
+			logicalDevice.updateDescriptorSets(writeInfo, nullptr);
+
+			vk::WriteDescriptorSet writeInfo2;
+			writeInfo2.dstSet = particleDescriptorSet;
+			writeInfo2.dstBinding = 1;
+			writeInfo2.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+			writeInfo2.descriptorCount = 1;
+			writeInfo2.descriptorType = vk::DescriptorType::eStorageBuffer;
+			writeInfo2.pBufferInfo = &modelBufferDescriptor;
+
+			logicalDevice.updateDescriptorSets(writeInfo2, nullptr);
+
+
+		}
 
 		void vkUtil::SwapChainFrame::destroy()
 		{
