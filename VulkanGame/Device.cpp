@@ -152,10 +152,10 @@ vk::Device vkInit::create_logical_device(vk::PhysicalDevice physicalDevice, vk::
 	return nullptr;
 }
 
-std::array<vk::Queue,2> vkInit::get_Queues(vk::PhysicalDevice physicalDevice, vk::Device device,vk::SurfaceKHR surface, bool debugMode)
+std::array<vk::Queue,3> vkInit::get_Queues(vk::PhysicalDevice physicalDevice, vk::Device device,vk::SurfaceKHR surface, bool debugMode)
 {
 	vkUtil::QueueFamilyIndices indices = vkUtil::findQueueFamilies(physicalDevice, surface ,debugMode);
-	return { { device.getQueue(indices.graphicsFamily.value(),0), device.getQueue(indices.presentFamily.value(),0)} };
+	return { { device.getQueue(indices.graphicsFamily.value(),0), device.getQueue(indices.presentFamily.value(),0), device.getQueue(indices.computeFamily.value(),0)} };
 }
 
 

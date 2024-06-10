@@ -49,8 +49,8 @@ namespace vkUtil {
 
 
 		vk::CommandBuffer commandBuffer;
-		vk::CommandBuffer shadowCommandBuffer;
-		vk::CommandBuffer geometryCommandBuffer;
+		vk::CommandBuffer computeCommandBuffer;
+
 
 		//Sync objects
 		vk::Semaphore imageAvailable, renderFinished;
@@ -64,6 +64,8 @@ namespace vkUtil {
 		void* cameraDataWriteLocation;
 		void* lightDataWriteLocation;
 
+
+		FrameBufferAttachment particleAttachment;
 
 		std::vector<glm::mat4> modelTransforms;
 		std::vector<PointLight> LightTransforms;
@@ -81,6 +83,7 @@ namespace vkUtil {
 
 		vk::DescriptorSet descriptorSet;
 		vk::DescriptorSet deferedDescriptorSet;
+		vk::DescriptorSet particleDescriptorSet;
 
 		vk::DescriptorSet shadowDescriptorSet;
 

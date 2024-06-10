@@ -54,7 +54,7 @@ void vkGbuffer::createAttachment(attachmentBundle attachmentDescription)
 
 }
 
-void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::Device logicalDevice,vkUtil::Gbuffer* gbuffer)
+void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::Device logicalDevice,vkUtil::Gbuffer* gbuffer, vkUtil::FrameBufferAttachment* attachmnent)
 {
 	attachmentBundle attachmentDescription;
 	attachmentDescription.logicalDevice = logicalDevice;
@@ -73,9 +73,13 @@ void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::De
 	createAttachment(attachmentDescription);
 	attachmentDescription.attachment = &gbuffer->worldPos;
 	createAttachment(attachmentDescription);
+	attachmentDescription.attachment = attachmnent;
+	createAttachment(attachmentDescription);
 	attachmentDescription.attachment = &gbuffer->albedo;
 	attachmentDescription.format = vk::Format::eR8G8B8A8Unorm;
 	createAttachment(attachmentDescription);
 }
+
+
 
 

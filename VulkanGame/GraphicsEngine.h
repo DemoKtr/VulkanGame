@@ -29,6 +29,7 @@ class GraphicsEngine
 	vk::Device device {nullptr};
 	vk::Queue graphicsQueue{ nullptr };
 	vk::Queue presentQueue{ nullptr };
+	vk::Queue computeQueue{ nullptr };
 
 	//swapchain
 	vk::SwapchainKHR swapchain;
@@ -52,6 +53,10 @@ class GraphicsEngine
 	vk::CommandPool commandPool;
 	vk::CommandBuffer maincommandBuffer;
 	
+	//compute
+	vk::CommandPool computeCommandPool;
+	vk::CommandBuffer computeCommandBuffer;
+
 	//synchronizers 
 	int maxFramesInFlight, frameNumber;
 
@@ -99,7 +104,7 @@ class GraphicsEngine
 	void create_framebuffers();
 	void cleanup_swapchain();
 
-	void record_draw_commands(vk::CommandBuffer commandBuffer, vk::CommandBuffer shadowCommandBuffer,uint32_t imageIndex,Scene *scene);
+	void record_draw_commands(vk::CommandBuffer commandBuffer,uint32_t imageIndex,Scene *scene);
 	void record_shadow_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex,Scene *scene);
 
 

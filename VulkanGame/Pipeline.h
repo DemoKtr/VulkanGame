@@ -5,6 +5,7 @@
 #include "Mesh.h"
 #include "RenderStruct.h"
 #include "RenderPass.h"
+#include "Particle.h"
 namespace vkInit {
 	struct GraphicsPipelineInBundle {
 		vk::Device device;
@@ -28,6 +29,17 @@ namespace vkInit {
         std::vector<vk::DescriptorSetLayout> shadowDescriptorSetLayout;
         vkUtil::shadowMapBuffer shadowAttachmentBuffer;
     };
+    struct ParticleGraphicsPipelineInBundle {
+        vk::Device device;
+        std::string vertexFilePath;
+        std::string fragmentFilePath;
+        std::string computeFilePath;
+        vk::Extent2D swapchainExtent;
+        vk::Format  depthFormat;
+        vkUtil::FrameBufferAttachment particleAttachment;
+        std::vector<vk::DescriptorSetLayout> particleComputeDescriptorSetLayout;
+        std::vector<vk::DescriptorSetLayout> particleGraphicDescriptorSetLayout;
+    };
 
 	struct GraphicsPipelineOutBundle {
         vk::PipelineLayout layout;
@@ -41,6 +53,13 @@ namespace vkInit {
         vk::PipelineLayout shadowPipelineLayout;
         vk::RenderPass shadowRenderPass;
         vk::Pipeline shadowPipeline;
+    };
+    struct ParticleGraphicsPipelineOutBundle {
+        vk::PipelineLayout particlePipelineLayout;
+        vk::PipelineLayout particleComputePipelineLayout;
+        vk::RenderPass particleRenderPass;
+        vk::Pipeline particleComputePipeline;
+        vk::Pipeline particleGrphicPipeline;
     };
     ShadowGraphicsPipelineOutBundle createShadowsPipeline(ShadowGraphicsPipelineInBundle specyfication, bool debugMode);
     vk::PipelineLayout create_pipeline_layout(vk::Device device, std::vector<vk::DescriptorSetLayout> descriptorSetLayouts ,bool debugMode);
@@ -58,7 +77,7 @@ namespace vkInit {
         \returns the input assembly stage creation info
     */
     vk::PipelineInputAssemblyStateCreateInfo make_input_assembly_info();
-
+    ParticleGraphicsPipelineOutBundle createParticlePipeline(ParticleGraphicsPipelineInBundle specification, bool debugMode);
     /**
         Configure a programmable shader stage.
 
@@ -350,6 +369,8 @@ namespace vkInit {
 
         return inputAssemblyInfo;
     }
+
+   
     vk::PipelineShaderStageCreateInfo make_shader_info(const vk::ShaderModule& shaderModule, const vk::ShaderStageFlagBits& stage) {
 
         vk::PipelineShaderStageCreateInfo shaderInfo = {};
@@ -841,6 +862,132 @@ namespace vkInit {
         output.shadowPipelineLayout = shadowPipelineLayout;
         return output;
     }
+
+
+    ParticleGraphicsPipelineOutBundle createParticlePipeline(ParticleGraphicsPipelineInBundle specification, bool debugMode)
+    {
+
+       
+        vk::GraphicsPipelineCreateInfo pipelineInfo = {};
+        vk::PipelineLayout particleGraphicPipelineLayout = create_pipeline_layout(specification.device, specification.particleGraphicDescriptorSetLayout, debugMode);
+       
+        
+        vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState = make_input_assembly_info();
+        vk::PipelineRasterizationStateCreateInfo rasterizationState = make_rasterizer_info();
+       
+       
+        vk::PipelineDepthStencilStateCreateInfo depthStageInfo;
+        depthStageInfo.flags = vk::PipelineDepthStencilStateCreateFlags();
+        depthStageInfo.depthTestEnable = true;
+        depthStageInfo.depthWriteEnable = true;
+        depthStageInfo.depthCompareOp = vk::CompareOp::eLess;
+        depthStageInfo.depthBoundsTestEnable = false;
+        depthStageInfo.stencilTestEnable = false;
+        //Viewport and Scissor
+        vk::Rect2D scissor = {};
+        scissor.offset.x = 0.0f;
+        scissor.offset.y = 0.0f;
+        scissor.extent.width = specification.swapchainExtent.width;
+        scissor.extent.height = specification.swapchainExtent.height;
+        vk::Viewport viewport = {};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = (float)specification.swapchainExtent.width;
+        viewport.height = (float)specification.swapchainExtent.height;
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        vk::PipelineViewportStateCreateInfo viewportState = make_viewport_state(viewport, scissor);
+        vk::PipelineMultisampleStateCreateInfo multisampleState = make_multisampling_info();
+
+        vk::VertexInputBindingDescription bindingDescription = vkParticle::getParticleVBO();
+        std::vector <vk::VertexInputAttributeDescription> attributeDescriptions = vkParticle::getParticleVAO();
+        vk::PipelineVertexInputStateCreateInfo vertexInputInfo = make_vertex_input_info(bindingDescription, attributeDescriptions);
+        
+        
+        vk::PipelineColorBlendAttachmentState blendAttachmentState = make_color_blend_attachment_state();
+        // Additive blending
+        blendAttachmentState.colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA;;
+        blendAttachmentState.blendEnable = VK_TRUE;
+        blendAttachmentState.colorBlendOp = vk::BlendOp::eAdd;
+        blendAttachmentState.srcColorBlendFactor = vk::BlendFactor::eOne;
+        blendAttachmentState.dstColorBlendFactor = vk::BlendFactor::eOne;
+        blendAttachmentState.alphaBlendOp = vk::BlendOp::eAdd;
+        blendAttachmentState.srcAlphaBlendFactor = vk::BlendFactor::eSrcAlpha;
+        blendAttachmentState.dstAlphaBlendFactor = vk::BlendFactor::eDstAlpha;
+
+        vk::PipelineColorBlendStateCreateInfo colorBlendState = make_color_blend_attachment_stage(blendAttachmentState);
+        
+        vk::RenderPass renderpass = vkInit::create_particle_renderpass(specification.device, specification.depthFormat, specification.particleAttachment);
+        pipelineInfo.pInputAssemblyState = &inputAssemblyState;
+        pipelineInfo.renderPass = renderpass;
+        pipelineInfo.layout = particleGraphicPipelineLayout;
+        pipelineInfo.pRasterizationState = &rasterizationState;
+
+        pipelineInfo.pMultisampleState = &multisampleState;
+        pipelineInfo.pViewportState = &viewportState;
+        pipelineInfo.pDepthStencilState = &depthStageInfo;
+        rasterizationState.depthBiasEnable = VK_TRUE;
+        /////////////////////////////////////////////////////////////
+        std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
+
+        vk::ShaderModule vertexShader = vkUtil::createModule(specification.vertexFilePath, specification.device, debugMode);
+        vk::PipelineShaderStageCreateInfo vertexShaderInfo = make_shader_info(vertexShader, vk::ShaderStageFlagBits::eVertex);
+        shaderStages[0] = (vertexShaderInfo);
+
+        vk::ShaderModule geometryShader = vkUtil::createModule(specification.fragmentFilePath, specification.device, debugMode);
+        vk::PipelineShaderStageCreateInfo geometryShaderInfo = make_shader_info(geometryShader, vk::ShaderStageFlagBits::eFragment);
+        shaderStages[1] = geometryShaderInfo;
+
+        pipelineInfo.stageCount = shaderStages.size();
+        pipelineInfo.pStages = shaderStages.data();
+        pipelineInfo.subpass = 0;
+
+        vk::Pipeline particlePipeline = {};
+        try {
+            vk::Pipeline particlePipeline = specification.device.createGraphicsPipeline(nullptr, pipelineInfo).value;
+        }
+        catch (vk::SystemError err) {
+            if (debugMode) std::cout << "Failed create particle Compute Pipeline!" << std::endl;
+        }
+
+
+
+        //compute
+        vk::PipelineLayout particleComputePipelineLayout = create_pipeline_layout(specification.device, specification.particleComputeDescriptorSetLayout, debugMode);
+        vk::ComputePipelineCreateInfo computePipelineCreateInfo = {};
+        computePipelineCreateInfo.sType = vk::StructureType::eComputePipelineCreateInfo;
+        computePipelineCreateInfo.layout = particleComputePipelineLayout;
+        computePipelineCreateInfo.flags = {};
+        //
+         //computePipelineCreateInfo.stage
+
+       vk::PipelineShaderStageCreateInfo cxomputeshaderStages;
+
+        vk::ShaderModule computeShader = vkUtil::createModule(specification.computeFilePath, specification.device, debugMode);
+        vk::PipelineShaderStageCreateInfo computeShaderInfo = make_shader_info(computeShader, vk::ShaderStageFlagBits::eCompute);
+        cxomputeshaderStages = (computeShaderInfo);
+        computePipelineCreateInfo.stage = cxomputeshaderStages;
+        vk::Pipeline computePipeline = {};
+        try {
+            vk::Pipeline computePipeline = specification.device.createComputePipeline(nullptr, computePipelineCreateInfo).value;
+        }
+        catch (vk::SystemError err) {
+            if (debugMode) std::cout << "Failed create particle Compute Pipeline!" << std::endl;
+        }
+
+        specification.device.destroyShaderModule(geometryShader);
+        specification.device.destroyShaderModule(vertexShader);
+        specification.device.destroyShaderModule(computeShader);
+
+        ParticleGraphicsPipelineOutBundle output;
+        output.particleComputePipeline = computePipeline;
+        output.particleGrphicPipeline = particlePipeline;
+        output.particlePipelineLayout = particleGraphicPipelineLayout;
+        output.particleComputePipelineLayout = particleComputePipelineLayout;
+        output.particleRenderPass = renderpass;
+        return output;
+    }
+
 
 }
 

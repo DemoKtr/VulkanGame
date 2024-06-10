@@ -24,6 +24,12 @@ vkUtil::QueueFamilyIndices vkUtil::findQueueFamilies(vk::PhysicalDevice device, 
 				std::cout << "Queue Family " << i << "is suitable for present" << std::endl;
 			}
 		}
+		if (queueFamily.queueFlags & vk::QueueFlagBits::eCompute) {
+			indices.computeFamily = i;
+			if (debugMode) {
+				std::cout << "Queue Family " << i << "is suitable for compute" << std::endl;
+			}
+		}
 
 		if (indices.isComplete()) {
 			break;

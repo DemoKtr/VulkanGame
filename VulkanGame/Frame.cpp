@@ -341,6 +341,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			logicalDevice.destroyImage(gbuffer.arm.image);
 			logicalDevice.destroyImage(gbuffer.T.image);
 			logicalDevice.destroyImage(gbuffer.worldPos.image);
+			logicalDevice.destroyImage(particleAttachment.image);
 			logicalDevice.destroyImage(shadowMapBuffer.shadowBufferDepthAttachment.image);
 			logicalDevice.freeMemory(depthBufferMemory);
 			logicalDevice.freeMemory(gbuffer.position.mem);
@@ -349,6 +350,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			logicalDevice.freeMemory(gbuffer.arm.mem);
 			logicalDevice.freeMemory(gbuffer.T.mem);
 			logicalDevice.freeMemory(gbuffer.worldPos.mem);
+			logicalDevice.freeMemory(particleAttachment.mem);
 			logicalDevice.freeMemory(shadowMapBuffer.shadowBufferDepthAttachment.mem);
 			logicalDevice.destroyImageView(depthBufferView);
 			logicalDevice.destroyImageView(gbuffer.position.view);
@@ -357,6 +359,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			logicalDevice.destroyImageView(gbuffer.arm.view);
 			logicalDevice.destroyImageView(gbuffer.T.view);
 			logicalDevice.destroyImageView(gbuffer.worldPos.view);
+			logicalDevice.destroyImageView(particleAttachment.view);
 			logicalDevice.destroyImageView(shadowMapBuffer.shadowBufferDepthAttachment.view);
 			logicalDevice.destroySampler(shadowMapBuffer.sampler);
 			

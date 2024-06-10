@@ -55,6 +55,12 @@
     <Filter Include="Source Files\vkInit\vkBuffers">
       <UniqueIdentifier>{8cab72f2-9e13-4f83-ad43-34d3503b0535}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\vkParticle">
+      <UniqueIdentifier>{59fe2fc8-1832-4b34-8103-70923953a710}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vkParticle">
+      <UniqueIdentifier>{36d147d7-2c2f-4513-ac37-ebabc4e0e600}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -128,6 +134,9 @@
     </ClCompile>
     <ClCompile Include="Shadows.cpp">
       <Filter>Source Files\vkInit\vkBuffers</Filter>
+    </ClCompile>
+    <ClCompile Include="Particle.cpp">
+      <Filter>Source Files\vkParticle</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -232,6 +241,9 @@
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Particle.h">
+      <Filter>Header Files\vkParticle</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

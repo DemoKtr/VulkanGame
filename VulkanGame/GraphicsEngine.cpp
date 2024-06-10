@@ -134,11 +134,13 @@ void GraphicsEngine::choice_device()
 {
 	this->physicalDevice = vkInit::choose_physical_device(instance, debugMode);
 	this->device = vkInit::create_logical_device(physicalDevice, surface,debugMode);
-	std::array<vk::Queue, 2> queues = vkInit::get_Queues(physicalDevice, device, surface, debugMode);
+	std::array<vk::Queue, 3> queues = vkInit::get_Queues(physicalDevice, device, surface, debugMode);
 	
 	this->graphicsQueue = queues[0];
 	
 	this->presentQueue = queues[1];
+
+	this->computeQueue = queues[2];
 	
 	this->create_swapchain();
 	
@@ -231,6 +233,7 @@ GraphicsEngine::~GraphicsEngine()
 	}
 	
 	device.destroyCommandPool(commandPool);
+	device.destroyCommandPool(computeCommandPool);
 	device.destroyPipeline(graphicsPipeline);
 	device.destroyPipeline(deferedGraphicsPipeline);
 	device.destroyPipeline(shadowPipeline);
@@ -385,9 +388,11 @@ void GraphicsEngine::finalize_setup()
 
 
 	commandPool = vkInit::make_command_pool( physicalDevice, device, surface, debugMode);
-
-	vkInit::commandBufferInputChunk commandBufferInput = { device, commandPool, swapchainFrames };
-	maincommandBuffer = vkInit::make_command_buffer(commandBufferInput, debugMode);
+	computeCommandPool = vkInit::make_compute_command_pool(physicalDevice, device, surface,debugMode);;
+	vkInit::commandBufferInputChunk commandBufferInput = { device, commandPool,computeCommandPool ,swapchainFrames };
+	vkInit::commandBufferOutput output = vkInit::make_command_buffer(commandBufferInput, debugMode);
+	maincommandBuffer = output.graphicCommandBuffer;
+	computeCommandBuffer = output.computeCommandBuffer;
 	vkInit::make_frame_command_buffers(commandBufferInput, debugMode);
 
 	create_frame_resources();
@@ -410,12 +415,12 @@ void GraphicsEngine::recreate_swapchain()
 	create_swapchain();
 	create_framebuffers();
 	create_frame_resources();
-	vkInit::commandBufferInputChunk commandBufferInput = { device, commandPool, swapchainFrames };
+	vkInit::commandBufferInputChunk commandBufferInput = { device, commandPool,computeCommandPool ,swapchainFrames };
 	vkInit::make_frame_command_buffers(commandBufferInput, debugMode);
 	
 }
 
-void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,vk::CommandBuffer shadowCommandBuffer ,uint32_t imageIndex,Scene* scene)
+void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,uint32_t imageIndex,Scene* scene)
 {
 	vk::CommandBufferBeginInfo beginInfo = {};
 	
@@ -645,15 +650,15 @@ void GraphicsEngine::render(Scene *scene,int &verticesCounter)
 	
 	
 	vk::CommandBuffer commandBuffer = swapchainFrames[frameNumber].commandBuffer;
-	vk::CommandBuffer shadowCommandBuffer = swapchainFrames[frameNumber].shadowCommandBuffer;
+	vk::CommandBuffer computeParticleCommandBuffer = swapchainFrames[frameNumber].computeCommandBuffer;
 
 	commandBuffer.reset();
-	shadowCommandBuffer.reset();
+	computeParticleCommandBuffer.reset();
 	
 	prepare_frame(imageIndex, scene);
 
-	record_shadow_draw_commands(shadowCommandBuffer, imageIndex, scene);
-	record_draw_commands(commandBuffer,shadowCommandBuffer ,imageIndex,scene);
+
+	record_draw_commands(commandBuffer, imageIndex,scene);
 
 	/*
 

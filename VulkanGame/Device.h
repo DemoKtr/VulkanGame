@@ -18,7 +18,7 @@ namespace vkInit {
 	
 
 	vk::Device create_logical_device(vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface, bool debugMode);
-	std::array<vk::Queue, 2> get_Queues(vk::PhysicalDevice physicalDevice, vk::Device device,vk::SurfaceKHR surface, bool debugMode);
+	std::array<vk::Queue, 3> get_Queues(vk::PhysicalDevice physicalDevice, vk::Device device,vk::SurfaceKHR surface, bool debugMode);
 	
 	
 }
