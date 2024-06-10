@@ -4,16 +4,10 @@
 
 ParticleMenagerie::ParticleMenagerie()
 {
-
-
-
 }
 
 ParticleMenagerie::~ParticleMenagerie()
 {
-
-
-	
 	logicalDevice.freeMemory(particleBuffer.bufferMemory);
 	logicalDevice.destroyBuffer(particleBuffer.buffer);
 }
@@ -27,7 +21,7 @@ void ParticleMenagerie::finalization(FinalizationChunk finalizationChunk)
 	std::vector<vkParticle::Particle> particles(numberOfEmiter * burstParticleCount);
 	for (auto& particle : particles) {
 		particle.pos = glm::vec3(rndDist(randomizer), rndDist(randomizer), rndDist(randomizer));
-		particle.vel = glm::vec2(0.0f);
+		particle.vel = glm::vec3(0.0f);
 		particle.gradientPos.x = particle.pos.x / 2.0f;
 	}
 	vk::DeviceSize storageBufferSize = particles.size() * sizeof(vkParticle::Particle);

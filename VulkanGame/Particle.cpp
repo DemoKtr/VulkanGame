@@ -52,7 +52,7 @@ std::vector<vk::VertexInputAttributeDescription> vkParticle::getParticleVAO()
 	attributes[1].binding = 0;
 	attributes[1].location = 1;
 	attributes[1].format = vk::Format::eR32G32B32A32Sfloat;
-	attributes[1].offset = 5 * sizeof(float);
+	attributes[1].offset = 6 * sizeof(float);
 
 	return attributes;
 }

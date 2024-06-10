@@ -7,7 +7,7 @@ namespace vkParticle {
 	struct Particle
 	{
 		glm::vec3 pos;								// Particle position
-		glm::vec2 vel;								// Particle velocity
+		glm::vec3 vel;								// Particle velocity
 		glm::vec4 gradientPos;
 
 	};

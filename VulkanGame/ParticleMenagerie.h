@@ -11,13 +11,7 @@ public:
 	bool benchmark = true;
 	int burstParticleCount = 1024;
 	int numberOfEmiter = { 0 };
-
 	Buffer particleBuffer;
-	vk::DescriptorBufferInfo particleBufferDescriptor;
-	void* particleWriteLoacation;
-
-	vk::DescriptorSet particleDescriptorSet;
-
 	void finalization(FinalizationChunk finalizationChunk);
 	void consume();
 };

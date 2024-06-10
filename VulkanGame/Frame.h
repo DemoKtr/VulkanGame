@@ -82,6 +82,10 @@ namespace vkUtil {
 		vk::DescriptorBufferInfo modelBufferDescriptor;
 		vk::DescriptorBufferInfo camPosBufferDescriptor;
 		
+		
+		vk::DescriptorBufferInfo particleBufferDescriptor;
+		void* particleWriteLoacation;
+
 
 		vk::DescriptorSet descriptorSet;
 		vk::DescriptorSet deferedDescriptorSet;
