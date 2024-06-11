@@ -63,7 +63,7 @@ class GraphicsEngine
 	
 	//compute
 	vk::CommandPool computeCommandPool;
-	vk::CommandBuffer computeCommandBuffer;
+	
 
 	//synchronizers 
 	int maxFramesInFlight, frameNumber;
@@ -119,8 +119,10 @@ class GraphicsEngine
 	void create_framebuffers();
 	void cleanup_swapchain();
 
-	void record_draw_commands(vk::CommandBuffer commandBuffer,uint32_t imageIndex,Scene *scene);
-	void record_shadow_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex,Scene *scene);
+	void record_draw_commands(vk::CommandBuffer commandBuffer,uint32_t imageIndex);
+	void record_compute_commands(vk::CommandBuffer commandBuffer,uint32_t imageIndex);
+	void record_particle_draw_commands(vk::CommandBuffer commandBuffer,uint32_t imageIndex);
+	void record_shadow_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex);
 
 
 	void render_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& starInstance, uint32_t instanceCount);

@@ -59,8 +59,6 @@ namespace vkInit {
 		commandBufferOutput output;
 		try {
 			output.graphicCommandBuffer = inputChunk.device.allocateCommandBuffers(allocInfo)[0];
-			allocInfo.commandPool = inputChunk.commandPool;
-			output.computeCommandBuffer = inputChunk.device.allocateCommandBuffers(allocInfo)[0];
 			if (debugMode) std::cout << "Allocated main command buffer for frame" <<std::endl;
 			return output;
 
@@ -79,6 +77,11 @@ namespace vkInit {
 		allocInfo.level = vk::CommandBufferLevel::ePrimary;
 		allocInfo.commandBufferCount = 1;
 
+		vk::CommandBufferAllocateInfo compallocInfo = {};
+		compallocInfo.commandPool = inputChunk.computeCommandPool;
+		compallocInfo.level = vk::CommandBufferLevel::ePrimary;
+		compallocInfo.commandBufferCount = 1;
+
 		vk::CommandBufferAllocateInfo secallocInfo = {};
 		secallocInfo.commandPool = inputChunk.commandPool;
 		secallocInfo.level = vk::CommandBufferLevel::eSecondary;
@@ -88,9 +91,10 @@ namespace vkInit {
 			try {
 				inputChunk.frames[i].commandBuffer = inputChunk.device.allocateCommandBuffers(allocInfo)[0];
 				if (debugMode) std::cout << "Allocated Primary command buffer for frame" << i << std::endl;
-				inputChunk.frames[i].computeCommandBuffer = inputChunk.device.allocateCommandBuffers(secallocInfo)[0];
-				if (debugMode) std::cout << "Allocated Shadow command buffer for frame" << i << std::endl;
-				
+				inputChunk.frames[i].particleSeccondaryCommandBuffer = inputChunk.device.allocateCommandBuffers(secallocInfo)[0];
+				if (debugMode) std::cout << "Allocated graphic particle command buffer for frame" << i << std::endl;
+				inputChunk.frames[i].computeCommandBuffer = inputChunk.device.allocateCommandBuffers(compallocInfo)[0];
+				if (debugMode) std::cout << "Allocated compute command buffer for frame" << i << std::endl;
 			}
 			catch (vk::SystemError err) {
 				std::cout << "FAILED!!! Allocated command buffer for frame" << i << std::endl;

@@ -367,6 +367,7 @@ void vkUtil::SwapChainFrame::destroy()
 			
 
 			logicalDevice.destroySemaphore(imageAvailable);
+			logicalDevice.destroySemaphore(computeFinished);
 			
 			
 			logicalDevice.destroySemaphore(renderFinished);

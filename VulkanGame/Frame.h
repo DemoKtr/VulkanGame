@@ -65,7 +65,7 @@ namespace vkUtil {
 
 
 		//Sync objects
-		vk::Semaphore imageAvailable, renderFinished;
+		vk::Semaphore imageAvailable, renderFinished, computeFinished;
 		vk::Fence inFlight;
 
 		//Resources

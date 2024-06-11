@@ -947,7 +947,7 @@ namespace vkInit {
         if (debugMode) std::cout << "Creating particle Graphics Pipeline " << std::endl;
 
         try {
-            vk::Pipeline particlePipeline = specification.device.createGraphicsPipeline(nullptr, pipelineInfo).value;
+            particlePipeline = specification.device.createGraphicsPipeline(nullptr, pipelineInfo).value;
         }
         catch (vk::SystemError err) {
             if (debugMode) std::cout << "Failed create particle Graphic Pipeline!" << std::endl;
@@ -973,7 +973,7 @@ namespace vkInit {
         vk::Pipeline computePipeline = {};
         if (debugMode) std::cout << "Creating compute particle Pipeline " << std::endl;
         try {
-            vk::Pipeline computePipeline = specification.device.createComputePipeline(nullptr, computePipelineCreateInfo).value;
+            computePipeline = specification.device.createComputePipeline(nullptr, computePipelineCreateInfo).value;
         }
         catch (vk::SystemError err) {
             if (debugMode) std::cout << "Failed create particle Compute Pipeline!" << std::endl;

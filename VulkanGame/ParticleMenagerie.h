@@ -18,6 +18,7 @@ public:
 	void finalization(FinalizationChunk finalizationChunk);
 	void consume();
 	void make_descriptors_resources();
-
+	vk::DeviceSize getBufferSize();
+	vk::DeviceSize size;
 };
 

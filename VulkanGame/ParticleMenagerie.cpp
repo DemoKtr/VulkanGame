@@ -25,7 +25,7 @@ void ParticleMenagerie::finalization(FinalizationChunk finalizationChunk)
 		particle.gradientPos.x = particle.pos.x / 2.0f;
 	}
 	vk::DeviceSize storageBufferSize = particles.size() * sizeof(vkParticle::Particle);
-
+	size = storageBufferSize;
 
 	BufferInputChunk inputChunk;
 	inputChunk.logicalDevice = logicalDevice;
@@ -91,4 +91,9 @@ void ParticleMenagerie::make_descriptors_resources()
 	particleBufferDescriptor.range = numberOfEmiter*burstParticleCount*sizeof(vkParticle::Particle);
 
 
+}
+
+vk::DeviceSize ParticleMenagerie::getBufferSize()
+{
+	return size;
 }

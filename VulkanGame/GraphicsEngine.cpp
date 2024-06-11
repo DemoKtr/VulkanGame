@@ -258,11 +258,11 @@ GraphicsEngine::~GraphicsEngine()
 	
 	device.destroyCommandPool(commandPool);
 	device.destroyCommandPool(computeCommandPool);
+	device.destroyPipeline(particleGraphicPipeline);
+	device.destroyPipeline(particleComputePipeline);
 	device.destroyPipeline(graphicsPipeline);
 	device.destroyPipeline(deferedGraphicsPipeline);
 	device.destroyPipeline(shadowPipeline);
-	device.destroyPipeline(particleGraphicPipeline);
-	device.destroyPipeline(particleComputePipeline);
 	device.destroyPipelineLayout(layout);
 	device.destroyPipelineLayout(deferedLayout);
 	device.destroyPipelineLayout(shadowLayout);
@@ -436,7 +436,6 @@ void GraphicsEngine::finalize_setup()
 	vkInit::commandBufferInputChunk commandBufferInput = { device, commandPool,computeCommandPool ,swapchainFrames };
 	vkInit::commandBufferOutput output = vkInit::make_command_buffer(commandBufferInput, debugMode);
 	maincommandBuffer = output.graphicCommandBuffer;
-	computeCommandBuffer = output.computeCommandBuffer;
 	vkInit::make_frame_command_buffers(commandBufferInput, debugMode);
 	
 	create_frame_resources();
@@ -464,7 +463,7 @@ void GraphicsEngine::recreate_swapchain()
 	
 }
 
-void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,uint32_t imageIndex,Scene* scene)
+void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,uint32_t imageIndex)
 {
 	vk::CommandBufferBeginInfo beginInfo = {};
 	
@@ -600,7 +599,83 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,uint32
 		}
 	}
 }
-void GraphicsEngine::record_shadow_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex, Scene* scene)
+void GraphicsEngine::record_compute_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex)
+{
+
+
+	vk::CommandBufferBeginInfo beginInfo = {};
+
+	try {
+		commandBuffer.begin(beginInfo);
+	}
+	catch (vk::SystemError err) {
+		if (debugMode) {
+			std::cout << "Failed to begin recording compute command buffer!" << std::endl;
+		}
+	}
+
+	vk::BufferMemoryBarrier bufferBarrier = {  // sType                                  // pNext
+	vk::AccessFlagBits::eShaderWrite,          // srcAccessMask
+	vk::AccessFlagBits::eShaderRead,           // dstAccessMask
+	vk::QueueFamilyIgnored,                   // srcQueueFamilyIndex
+	vk::QueueFamilyIgnored,                   // dstQueueFamilyIndex
+	particles->particleBuffer.buffer,                 // buffer
+	0,                                         // offset
+	particles->getBufferSize()
+	};
+	
+	// Pipeline barrier to ensure the proper ordering of buffer accesses
+	commandBuffer.pipelineBarrier(
+		vk::PipelineStageFlagBits::eAllCommands,     // srcStageMask
+		vk::PipelineStageFlagBits::eComputeShader, // dstStageMask
+		vk::DependencyFlags(),                     // dependencyFlags
+		nullptr,                                   // memoryBarriers
+		bufferBarrier,                             // bufferBarriers
+		nullptr                                    // imageBarriers
+	);
+	
+
+	// Dispatch the compute job
+	commandBuffer.bindPipeline(vk::PipelineBindPoint::eCompute, particleComputePipeline);
+	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eCompute, particleComputeLayout, 0, swapchainFrames[imageIndex].particleDescriptorSet, nullptr);
+	commandBuffer.dispatch(1024,1,1);
+
+	// Add barrier to ensure that compute shader has finished writing to the buffer
+	// Without this the (rendering) vertex shader may display incomplete results (partial data from last frame)
+	
+
+
+	vk::BufferMemoryBarrier bufferBarrier2 = {  // sType                                  // pNext
+	vk::AccessFlagBits::eShaderRead,          // srcAccessMask
+	vk::AccessFlagBits::eMemoryRead,           // dstAccessMask
+	vk::QueueFamilyIgnored,                   // srcQueueFamilyIndex
+	vk::QueueFamilyIgnored,                   // dstQueueFamilyIndex
+	particles->particleBuffer.buffer,                 // buffer
+	0,                                         // offset
+	particles->getBufferSize()
+	};
+
+	// Pipeline barrier to ensure the proper ordering of buffer accesses
+	commandBuffer.pipelineBarrier(
+		vk::PipelineStageFlagBits::eComputeShader,     // srcStageMask
+		vk::PipelineStageFlagBits::eBottomOfPipe, // dstStageMask
+		vk::DependencyFlags(),                     // dependencyFlags
+		nullptr,                                   // memoryBarriers
+		bufferBarrier2,                             // bufferBarriers
+		nullptr                                    // imageBarriers
+	);
+
+
+
+
+	commandBuffer.end();
+	//vkEndCommandBuffer(compute.commandBuffer);
+}
+
+
+
+
+void GraphicsEngine::record_shadow_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex)
 {
 	vk::CommandBufferInheritanceInfo inh = {};
 	inh.renderPass = shadowRenderPass;
@@ -668,6 +743,14 @@ void GraphicsEngine::render(Scene *scene,int &verticesCounter,float deltaTime)
 	device.waitForFences(1, &swapchainFrames[frameNumber].inFlight, VK_TRUE, UINT64_MAX);
 	device.resetFences(1, &swapchainFrames[frameNumber].inFlight);
 	
+
+
+
+
+
+
+
+
 	//acquireNextImageKHR(vk::SwapChainKHR, timeout, semaphore_to_signal, fence)
 	uint32_t imageIndex;
 	try {
@@ -695,16 +778,16 @@ void GraphicsEngine::render(Scene *scene,int &verticesCounter,float deltaTime)
 	
 	vk::CommandBuffer commandBuffer = swapchainFrames[frameNumber].commandBuffer;
 	vk::CommandBuffer computeParticleCommandBuffer = swapchainFrames[frameNumber].computeCommandBuffer;
-	//vk::CommandBuffer graphicParticleCommandBuffer = swapchainFrames[frameNumber].particleSeccondaryCommandBuffer;
+	vk::CommandBuffer graphicParticleCommandBuffer = swapchainFrames[frameNumber].particleSeccondaryCommandBuffer;
 
 	commandBuffer.reset();
 	computeParticleCommandBuffer.reset();
-	//graphicParticleCommandBuffer.reset();
+	graphicParticleCommandBuffer.reset();
 	
 	prepare_frame(imageIndex, scene,deltaTime);
 
-
-	record_draw_commands(commandBuffer, imageIndex,scene);
+	record_compute_commands(computeParticleCommandBuffer,imageIndex);
+	record_draw_commands(commandBuffer,imageIndex);
 
 	/*
 
@@ -726,11 +809,35 @@ void GraphicsEngine::render(Scene *scene,int &verticesCounter,float deltaTime)
 	commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eLateFragmentTests, vk::PipelineStageFlagBits::eFragmentShader, vk::DependencyFlags(), nullptr, nullptr, barrier);
 	*/
 
+
+
+	vk::PipelineStageFlags waitStageMask = vk::PipelineStageFlagBits::eComputeShader;
+	vk::Semaphore waitSemaphores[] = { swapchainFrames[frameNumber].imageAvailable,swapchainFrames[frameNumber].computeFinished };
+	// Submit compute commands
+	vk::SubmitInfo computeSubmitInfo = {};
+	computeSubmitInfo.commandBufferCount = 1;
+	computeSubmitInfo.pCommandBuffers = &computeParticleCommandBuffer;
+	computeSubmitInfo.waitSemaphoreCount = 1;
+	computeSubmitInfo.pWaitSemaphores = &swapchainFrames[frameNumber].imageAvailable;
+	computeSubmitInfo.pWaitDstStageMask = &waitStageMask;
+	computeSubmitInfo.signalSemaphoreCount = 2;
+	computeSubmitInfo.pSignalSemaphores = waitSemaphores;
+
+	try {
+		computeQueue.submit(computeSubmitInfo);
+	}
+	catch (vk::SystemError err) {
+
+		if (debugMode) {
+			std::cout << "failed to submit compute command buffer!" << std::endl;
+		}
+	}
+
 	vk::SubmitInfo submitInfo = {};
 
-	vk::Semaphore waitSemaphores[] = { swapchainFrames[frameNumber].imageAvailable };
-	vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
-	submitInfo.waitSemaphoreCount = 1;
+	//vk::Semaphore waitSemaphores[] = { swapchainFrames[frameNumber].imageAvailable,swapchainFrames[frameNumber].computeFinished };
+	vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput,vk::PipelineStageFlagBits::eComputeShader };
+	submitInfo.waitSemaphoreCount = 2;
 	submitInfo.pWaitSemaphores = waitSemaphores;
 	submitInfo.pWaitDstStageMask = waitStages;
 
@@ -804,7 +911,7 @@ void GraphicsEngine::create_frame_resources()
 	vkInit::descriptorSetLayoutData shadowBindings;
 	shadowBindings.count = 2;
 	shadowBindings.types.push_back(vk::DescriptorType::eStorageBuffer);
-	shadowBindings.types.push_back(vk::DescriptorType::eStorageBuffer);\
+	shadowBindings.types.push_back(vk::DescriptorType::eStorageBuffer);
 
 	
 
@@ -820,6 +927,7 @@ void GraphicsEngine::create_frame_resources()
 	{
 		frame.imageAvailable = vkInit::make_semaphore(device, debugMode);
 		frame.renderFinished = vkInit::make_semaphore(device, debugMode);
+		frame.computeFinished = vkInit::make_semaphore(device, debugMode);
 		frame.inFlight = vkInit::make_fence(device, debugMode);
 
 		frame.make_descriptor_resources();
