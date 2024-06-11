@@ -1,6 +1,6 @@
 #include "ParticleMenagerie.h"
 #include <random>
-#include "Particle.h"
+
 
 ParticleMenagerie::ParticleMenagerie()
 {
@@ -36,15 +36,15 @@ void ParticleMenagerie::finalization(FinalizationChunk finalizationChunk)
 	Buffer stagingBuffer = vkUtil::createBuffer(inputChunk);
 
 	//fill it with vertex data
-	void* memoryLocation = logicalDevice.mapMemory(stagingBuffer.bufferMemory, 0, inputChunk.size);
-	memcpy(memoryLocation, particles.data(), inputChunk.size);
+	particleWriteLoacation = logicalDevice.mapMemory(stagingBuffer.bufferMemory, 0, inputChunk.size);
+	memcpy(particleWriteLoacation, particles.data(), inputChunk.size);
 
 	logicalDevice.unmapMemory(stagingBuffer.bufferMemory);
 
 	//make the vertex buffer
 
 	inputChunk.usage = vk::BufferUsageFlagBits::eTransferDst
-		| vk::BufferUsageFlagBits::eVertexBuffer;
+		| vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eStorageBuffer;
 	inputChunk.memoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal;
 	particleBuffer = vkUtil::createBuffer(inputChunk);
 
@@ -64,4 +64,31 @@ void ParticleMenagerie::finalization(FinalizationChunk finalizationChunk)
 void ParticleMenagerie::consume()
 {
 	numberOfEmiter += 1;
+}
+
+void ParticleMenagerie::make_descriptors_resources()
+{
+	
+
+	particleData.reserve(numberOfEmiter * burstParticleCount);
+
+
+	for (int i = 0; i < numberOfEmiter * burstParticleCount; ++i)
+	{
+		particleData.push_back(vkParticle::Particle());
+	}
+
+
+	/*
+	typedef struct VkDescriptorBufferInfo {
+		VkBuffer        buffer;
+		VkDeviceSize    offset;
+		VkDeviceSize    range;
+	} VkDescriptorBufferInfo; =
+	*/
+	particleBufferDescriptor.buffer = particleBuffer.buffer;
+	particleBufferDescriptor.offset = 0;
+	particleBufferDescriptor.range = numberOfEmiter*burstParticleCount*sizeof(vkParticle::Particle);
+
+
 }

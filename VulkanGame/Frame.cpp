@@ -43,7 +43,11 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			
 			////////////
 
-			
+			input.size = sizeof(particleUBO);
+			input.usage = vk::BufferUsageFlagBits::eUniformBuffer;
+			particleUBOBuffer = createBuffer(input);
+			particleUBOWriteLoacation = logicalDevice.mapMemory(particleUBOBuffer.bufferMemory,0, sizeof(particleUBO));
+
 
 			input.size = 1024 * sizeof(glm::mat4);
 			input.usage = vk::BufferUsageFlagBits::eStorageBuffer;
@@ -82,6 +86,11 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			uniformBufferDescriptor.offset = 0;
 			uniformBufferDescriptor.range = sizeof(UBO);
 
+
+			particleUBOBufferDescriptor.buffer = particleUBOBuffer.buffer;
+			particleUBOBufferDescriptor.offset = 0;
+			particleUBOBufferDescriptor.range = sizeof(particleUBO);
+
 			uniformlightBufferDescriptor.buffer = lightDataBuffer.buffer;
 			uniformlightBufferDescriptor.offset = 0;
 			uniformlightBufferDescriptor.range = 1024 * sizeof(PointLight);
@@ -93,7 +102,9 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 
 		}
 
-		void vkUtil::SwapChainFrame::write_descriptor_set() {
+
+
+void vkUtil::SwapChainFrame::write_descriptor_set() {
 
 			vk::WriteDescriptorSet writeInfo;
 			/*
@@ -136,7 +147,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			
 		}
 	
-		void vkUtil::SwapChainFrame::make_depth_resources()
+void vkUtil::SwapChainFrame::make_depth_resources()
 		{
 			depthFormat = vkImage::find_supported_format(physicalDevice, { vk::Format::eD32Sfloat,vk::Format::eD24UnormS8Uint }, vk::ImageTiling::eOptimal, vk::FormatFeatureFlagBits::eDepthStencilAttachment);
 
@@ -176,7 +187,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 		}
 
 
-		void vkUtil::SwapChainFrame::writeGbufferDescriptor(vk::DescriptorSet descriptorSet, vk::Device logicalDevice)
+void vkUtil::SwapChainFrame::writeGbufferDescriptor(vk::DescriptorSet descriptorSet, vk::Device logicalDevice)
 		{
 			vk::DescriptorImageInfo imageDescriptorPos;
 			imageDescriptorPos.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
@@ -302,47 +313,53 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 
 		}
 
-		void vkUtil::SwapChainFrame::particleDescripotrsWrite()
+void vkUtil::SwapChainFrame::writeParticleDescriptor(vk::DescriptorBufferInfo &particleBufferDescriptor)
 		{
-			vk::WriteDescriptorSet writeInfo;
-			/*
-			typedef struct VkWriteDescriptorSet {
-				VkStructureType                  sType;
-				const void* pNext;
-				VkDescriptorSet                  dstSet;
-				uint32_t                         dstBinding;
-				uint32_t                         dstArrayElement;
-				uint32_t                         descriptorCount;
-				VkDescriptorType                 descriptorType;
-				const VkDescriptorImageInfo* pImageInfo;
-				const VkDescriptorBufferInfo* pBufferInfo;
-				const VkBufferView* pTexelBufferView;
-			} VkWriteDescriptorSet;
-			*/
 
-			writeInfo.dstSet = particleDescriptorSet;
-			writeInfo.dstBinding = 0;
-			writeInfo.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
-			writeInfo.descriptorCount = 1;
-			writeInfo.descriptorType = vk::DescriptorType::eUniformBuffer;
-			writeInfo.pBufferInfo = &uniformBufferDescriptor;
+	/*
+	typedef struct VkWriteDescriptorSet {
+		VkStructureType                  sType;
+		const void* pNext;
+		VkDescriptorSet                  dstSet;
+		uint32_t                         dstBinding;
+		uint32_t                         dstArrayElement;
+		uint32_t                         descriptorCount;
+		VkDescriptorType                 descriptorType;
+		const VkDescriptorImageInfo* pImageInfo;
+		const VkDescriptorBufferInfo* pBufferInfo;
+		const VkBufferView* pTexelBufferView;
+	} VkWriteDescriptorSet;
+	*/
+	vk::WriteDescriptorSet writeInfo;
+	
 
-			logicalDevice.updateDescriptorSets(writeInfo, nullptr);
+	writeInfo.dstSet = particleDescriptorSet;
+	writeInfo.dstBinding = 0;
+	writeInfo.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+	writeInfo.descriptorCount = 1;
+	writeInfo.descriptorType = vk::DescriptorType::eUniformBuffer;
+	writeInfo.pBufferInfo = &particleUBOBufferDescriptor;
 
-			vk::WriteDescriptorSet writeInfo2;
-			writeInfo2.dstSet = particleDescriptorSet;
-			writeInfo2.dstBinding = 1;
-			writeInfo2.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
-			writeInfo2.descriptorCount = 1;
-			writeInfo2.descriptorType = vk::DescriptorType::eStorageBuffer;
-			writeInfo2.pBufferInfo = &modelBufferDescriptor;
+	logicalDevice.updateDescriptorSets(writeInfo, nullptr);
 
-			logicalDevice.updateDescriptorSets(writeInfo2, nullptr);
+	vk::WriteDescriptorSet writeInfo2;
+	writeInfo2.dstSet = particleDescriptorSet;
+	writeInfo2.dstBinding = 1;
+	writeInfo2.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+	writeInfo2.descriptorCount = 1;
+	writeInfo2.descriptorType = vk::DescriptorType::eStorageBuffer;
+	writeInfo2.pBufferInfo = &particleBufferDescriptor;
+
+	logicalDevice.updateDescriptorSets(writeInfo2, nullptr);
+
 
 
 		}
 
-		void vkUtil::SwapChainFrame::destroy()
+
+
+
+void vkUtil::SwapChainFrame::destroy()
 		{
 			logicalDevice.destroyImageView(imageView);
 			logicalDevice.destroyFramebuffer(framebuffer);
@@ -358,6 +375,10 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			logicalDevice.unmapMemory(camPosBuffer.bufferMemory);
 			logicalDevice.freeMemory(camPosBuffer.bufferMemory);
 			logicalDevice.destroyBuffer(camPosBuffer.buffer);
+
+			logicalDevice.unmapMemory(particleUBOBuffer.bufferMemory);
+			logicalDevice.freeMemory(particleUBOBuffer.bufferMemory);
+			logicalDevice.destroyBuffer(particleUBOBuffer.buffer);
 
 			logicalDevice.unmapMemory(cameraDataBuffer.bufferMemory);
 			logicalDevice.freeMemory(cameraDataBuffer.bufferMemory);

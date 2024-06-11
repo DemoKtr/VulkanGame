@@ -6,7 +6,8 @@ class App
 	GraphicsEngine* graphicsEngine;
 	GLFWwindow* window;
 	Scene* scene;
-
+	float deltaTime = 0.0f;
+	float lastFrame = 0.0f;
 	double lastTime, currentTime;
 	int numFrames;
 	float frameTime;

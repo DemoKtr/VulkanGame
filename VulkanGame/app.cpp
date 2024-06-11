@@ -62,8 +62,12 @@ App::~App()
 void App::run()
 {
 	while (!glfwWindowShouldClose(window)) {
+		float currentFrame = static_cast<float>(glfwGetTime());
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
 		glfwPollEvents();
-		graphicsEngine->render(scene,verticesCounter);
+		graphicsEngine->render(scene,verticesCounter,deltaTime);
 		calculateFrameRate();
 	}
 }

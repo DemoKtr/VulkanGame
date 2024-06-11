@@ -103,6 +103,7 @@ void GraphicsEngine::make_assets(Scene* scene)
 		particles->consume();
 	}
 	particles->finalization(finalizationChunk);
+	particles->make_descriptors_resources();
 }
 
 void GraphicsEngine::prepare_scene(vk::CommandBuffer commandBuffer)
@@ -637,7 +638,7 @@ void GraphicsEngine::render_shadows_objects(vk::CommandBuffer commandBuffer, mes
 	starInstance += instanceCount;
 }
 
-void GraphicsEngine::render(Scene *scene,int &verticesCounter)
+void GraphicsEngine::render(Scene *scene,int &verticesCounter,float deltaTime)
 {
 	verticesCounter = verticesonScene;
 	
@@ -675,7 +676,7 @@ void GraphicsEngine::render(Scene *scene,int &verticesCounter)
 	commandBuffer.reset();
 	computeParticleCommandBuffer.reset();
 	
-	prepare_frame(imageIndex, scene);
+	prepare_frame(imageIndex, scene,deltaTime);
 
 
 	record_draw_commands(commandBuffer, imageIndex,scene);
@@ -801,7 +802,7 @@ void GraphicsEngine::create_frame_resources()
 		frame.descriptorSet = vkInit::allocate_descriptor_set(device, frameDescriptorPool, frameSetLayout);
 		frame.deferedDescriptorSet = vkInit::allocate_descriptor_set(device, deferedDescriptorPool, deferedSetLayout);
 		frame.shadowDescriptorSet = vkInit::allocate_descriptor_set(device, shadowDescriptorPool, shadowSetLayout);
-		//frame.particleDescriptorSet = vkInit::allocate_descriptor_set(device, shadowDescriptorPool, particleSetLayout);
+		frame.particleDescriptorSet = vkInit::allocate_descriptor_set(device, particleDescriptorPool, particleSetLayout);
 		
 
 	}
@@ -821,7 +822,8 @@ void GraphicsEngine::create_framebuffers()
 }
 
 
-void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
+
+void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float deltaTime)
 {
 
 	vkUtil::SwapChainFrame& _frame = swapchainFrames[imageIndex];
@@ -851,7 +853,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 	for(std::pair<meshTypes,std::vector<SceneObject*>> pair: models)
  {
 		for (SceneObject* obj : pair.second) {
-			obj->getTransform().rotate(glm::vec3(0, 1,0), 0.0001f);
+			obj->getTransform().rotate(glm::vec3(0, 1,0), 0.1f* deltaTime);
 			obj->getTransform().computeModelMatrix();
 			//_frame.shadowData.modelPos[i] = glm::vec4(obj->getTransform().getGlobalPosition(), 1.0f);
 			_frame.modelTransforms[i++] = obj->getTransform().getModelMatrix();
@@ -883,14 +885,22 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene)
 		//std::cout << light->transform.getGlobalPosition().x<< light->transform.getGlobalPosition().y<< light->transform.getGlobalPosition().z << std::endl;
 	}
 	
+	_frame.particleUBOData.deltaT = 2.5f * deltaTime;
+	_frame.particleUBOData.destX = sin(glm::radians(deltaTime * 360.0f)) * 0.75f;
+	_frame.particleUBOData.destY = cos(glm::radians(deltaTime * 360.0f)) * 0.75f;
+	_frame.particleUBOData.destZ = cos(glm::radians(deltaTime * 360.0f)) * 0.75f - sin(glm::radians(deltaTime * 360.0f)) * 0.75f;
+	_frame.particleUBOData.particleCount = particles->burstParticleCount * particles->numberOfEmiter;
+	
 	
 	memcpy(_frame.cameraDataWriteLocation, &(_frame.cameraData), sizeof(vkUtil::UBO));
 	memcpy(_frame.camPosWriteLoacation, &(_frame.camPos), sizeof(glm::vec4));
+	memcpy(_frame.particleUBOWriteLoacation, &(_frame.particleUBOData), sizeof(vkUtil::particleUBO));
+
 	memcpy(_frame.lightDataWriteLocation, (_frame.LightTransforms.data()), j * sizeof(vkUtil::PointLight));
 	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), i * sizeof(glm::mat4));
 	
 	_frame.write_descriptor_set();
 	_frame.writeGbufferDescriptor(_frame.deferedDescriptorSet, device);
 	_frame.shadowDescripotrsWrite();
-	//vkGbuffer::writeGbufferDescriptor(_frame.deferedDescriptorSet,device,_frame.gbuffer);
+	_frame.writeParticleDescriptor(particles->particleBufferDescriptor);
 }

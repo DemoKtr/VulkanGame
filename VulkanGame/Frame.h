@@ -22,6 +22,16 @@ namespace vkUtil {
 
 	};
 
+	struct particleUBO {
+		float deltaT = {0};							//		Frame delta time
+		float destX{0};							//		x position of the attractor
+		float destY{0};							//		y position of the attractor
+		float destZ{0};							//		y position of the attractor
+		int32_t particleCount{0};
+	};
+
+
+
 	/**
 		Holds the data structures associated with a "Frame"
 	*/
@@ -83,8 +93,11 @@ namespace vkUtil {
 		vk::DescriptorBufferInfo camPosBufferDescriptor;
 		
 		
-		vk::DescriptorBufferInfo particleBufferDescriptor;
-		void* particleWriteLoacation;
+		particleUBO particleUBOData;
+		Buffer particleUBOBuffer;
+		void* particleUBOWriteLoacation;
+		vk::DescriptorBufferInfo particleUBOBufferDescriptor;
+
 
 
 		vk::DescriptorSet descriptorSet;
@@ -94,11 +107,13 @@ namespace vkUtil {
 		vk::DescriptorSet shadowDescriptorSet;
 
 		void shadowDescripotrsWrite();
-		void particleDescripotrsWrite();
+		
 		void make_descriptor_resources();
+	
 		void make_depth_resources();
 		void write_descriptor_set();
 		void writeGbufferDescriptor(vk::DescriptorSet descriptorSet, vk::Device logicalDevice);
+		void writeParticleDescriptor(vk::DescriptorBufferInfo &particleBufferDescriptor);
 		void destroy();
 
 	};

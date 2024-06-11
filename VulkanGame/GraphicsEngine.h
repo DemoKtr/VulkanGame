@@ -93,7 +93,7 @@ class GraphicsEngine
 
 	void make_assets(Scene* scene);
 	void prepare_scene(vk::CommandBuffer commandBuffer);
-	void prepare_frame(uint32_t imageIndex, Scene* scene);
+	void prepare_frame(uint32_t imageIndex, Scene* scene, float deltaTime);
 
 
 	//Scene
@@ -120,7 +120,7 @@ class GraphicsEngine
 	void render_shadows_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& starInstance, uint32_t instanceCount);
 public:
 	GraphicsEngine(ivec2 screenSize, GLFWwindow* window,Scene* scene ,bool debugMode);
-	void render(Scene *scene,int &verticesCounter);
+	void render(Scene *scene,int &verticesCounter,float deltaTime);
 	~GraphicsEngine();
 };
 
