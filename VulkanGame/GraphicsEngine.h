@@ -50,6 +50,13 @@ class GraphicsEngine
 	vk::RenderPass shadowRenderPass;
 	vk::PipelineLayout shadowLayout;
 
+
+	//Particles
+	vk::Pipeline particleGraphicPipeline;
+	vk::PipelineLayout   particleGraphicsLayout;
+	vk::Pipeline particleComputePipeline;
+	vk::PipelineLayout   particleComputeLayout;
+	vk::RenderPass particleRenderPass;
 	//command
 	vk::CommandPool commandPool;
 	vk::CommandBuffer maincommandBuffer;

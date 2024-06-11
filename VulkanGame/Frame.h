@@ -61,6 +61,7 @@ namespace vkUtil {
 
 		vk::CommandBuffer commandBuffer;
 		vk::CommandBuffer computeCommandBuffer;
+		vk::CommandBuffer particleSeccondaryCommandBuffer;
 
 
 		//Sync objects

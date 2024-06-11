@@ -163,18 +163,18 @@ vkInit::SwapChainBundle vkInit::create_swapchain(vk::PhysicalDevice physicalDevi
 	createInfo.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
 	createInfo.presentMode = presentMode;
 	createInfo.clipped = VK_TRUE;
-
 	createInfo.oldSwapchain = vk::SwapchainKHR(nullptr);
-	
 	SwapChainBundle bundle{};
 	try {
 		bundle.swapchain = logicalDevice.createSwapchainKHR(createInfo);
+		
 	}
 	catch (vk::SystemError err) {
 		throw std::runtime_error("failed to create swap chain!");
 	}
 
 	std::vector<vk::Image> images = logicalDevice.getSwapchainImagesKHR(bundle.swapchain);
+	
 	bundle.frames.resize(images.size());
 
 	for (size_t i = 0; i < images.size();  i++) {

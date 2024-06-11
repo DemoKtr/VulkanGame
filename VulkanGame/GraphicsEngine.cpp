@@ -186,6 +186,24 @@ void GraphicsEngine::create_pipeline()
 	shadowRenderPass = out.shadowRenderPass;
 	shadowPipeline = out.shadowPipeline;
 	shadowLayout = out.shadowPipelineLayout;
+
+	vkInit::ParticleGraphicsPipelineInBundle particleInput;
+	particleInput.computeFilePath = "shaders/particleCompute.spv";
+	particleInput.vertexFilePath = "shaders/particleVert.spv";
+	particleInput.fragmentFilePath = "shaders/particleFrag.spv";
+	particleInput.depthFormat = swapchainFrames[0].depthFormat;
+	particleInput.device = device;
+	particleInput.swapchainExtent = swapchainExtent;
+	particleInput.particleComputeDescriptorSetLayout = { particleSetLayout };
+	particleInput.particleAttachment = swapchainFrames[0].particleAttachment;
+	particleInput.particleGraphicDescriptorSetLayout = {};
+
+	vkInit::ParticleGraphicsPipelineOutBundle particleOutput = vkInit::createParticlePipeline(particleInput,debugMode);
+	particleGraphicPipeline = particleOutput.particleGrphicPipeline;
+	particleGraphicsLayout = particleOutput.particlePipelineLayout;
+	particleComputeLayout = particleOutput.particleComputePipelineLayout;
+	particleComputePipeline = particleOutput.particleComputePipeline;
+	particleRenderPass = particleOutput.particleRenderPass;
 }
 void GraphicsEngine::create_swapchain()
 {
@@ -243,11 +261,16 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyPipeline(graphicsPipeline);
 	device.destroyPipeline(deferedGraphicsPipeline);
 	device.destroyPipeline(shadowPipeline);
+	device.destroyPipeline(particleGraphicPipeline);
+	device.destroyPipeline(particleComputePipeline);
 	device.destroyPipelineLayout(layout);
 	device.destroyPipelineLayout(deferedLayout);
 	device.destroyPipelineLayout(shadowLayout);
+	device.destroyPipelineLayout(particleComputeLayout);
+	device.destroyPipelineLayout(particleGraphicsLayout);
 	device.destroyRenderPass(renderpass);
 	device.destroyRenderPass(shadowRenderPass);
+	device.destroyRenderPass(particleRenderPass);
 	
 	this->cleanup_swapchain();
 	
@@ -672,9 +695,11 @@ void GraphicsEngine::render(Scene *scene,int &verticesCounter,float deltaTime)
 	
 	vk::CommandBuffer commandBuffer = swapchainFrames[frameNumber].commandBuffer;
 	vk::CommandBuffer computeParticleCommandBuffer = swapchainFrames[frameNumber].computeCommandBuffer;
+	//vk::CommandBuffer graphicParticleCommandBuffer = swapchainFrames[frameNumber].particleSeccondaryCommandBuffer;
 
 	commandBuffer.reset();
 	computeParticleCommandBuffer.reset();
+	//graphicParticleCommandBuffer.reset();
 	
 	prepare_frame(imageIndex, scene,deltaTime);
 

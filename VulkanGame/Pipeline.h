@@ -937,17 +937,20 @@ namespace vkInit {
         vk::ShaderModule geometryShader = vkUtil::createModule(specification.fragmentFilePath, specification.device, debugMode);
         vk::PipelineShaderStageCreateInfo geometryShaderInfo = make_shader_info(geometryShader, vk::ShaderStageFlagBits::eFragment);
         shaderStages[1] = geometryShaderInfo;
-
         pipelineInfo.stageCount = shaderStages.size();
         pipelineInfo.pStages = shaderStages.data();
         pipelineInfo.subpass = 0;
-
+        pipelineInfo.pColorBlendState = &colorBlendState;
+        pipelineInfo.pVertexInputState = &vertexInputInfo;
         vk::Pipeline particlePipeline = {};
+
+        if (debugMode) std::cout << "Creating particle Graphics Pipeline " << std::endl;
+
         try {
             vk::Pipeline particlePipeline = specification.device.createGraphicsPipeline(nullptr, pipelineInfo).value;
         }
         catch (vk::SystemError err) {
-            if (debugMode) std::cout << "Failed create particle Compute Pipeline!" << std::endl;
+            if (debugMode) std::cout << "Failed create particle Graphic Pipeline!" << std::endl;
         }
 
 
@@ -968,6 +971,7 @@ namespace vkInit {
         cxomputeshaderStages = (computeShaderInfo);
         computePipelineCreateInfo.stage = cxomputeshaderStages;
         vk::Pipeline computePipeline = {};
+        if (debugMode) std::cout << "Creating compute particle Pipeline " << std::endl;
         try {
             vk::Pipeline computePipeline = specification.device.createComputePipeline(nullptr, computePipelineCreateInfo).value;
         }
