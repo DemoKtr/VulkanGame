@@ -310,6 +310,7 @@ void GraphicsEngine::cleanup_swapchain()
 {
 	for (vkUtil::SwapChainFrame& frame : swapchainFrames) {
 		frame.destroy();
+	
 
 	}
 	device.destroySwapchainKHR(swapchain);
@@ -463,10 +464,12 @@ void GraphicsEngine::recreate_swapchain()
 	
 }
 
-void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,uint32_t imageIndex)
+void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::CommandBuffer particleCommandBuffer, uint32_t imageIndex)
 {
+
+
 	vk::CommandBufferBeginInfo beginInfo = {};
-	
+
 	try {
 		commandBuffer.begin(beginInfo);
 	}
@@ -475,6 +478,29 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer,uint32
 			std::cout << "Failed to begin recording command buffer!" << std::endl;
 		}
 	}
+
+	vk::ClearValue cC;
+	std::array<float, 4> c = { 1.0f, 0.5f, 0.25f, 1.0f };
+	cC.color = vk::ClearColorValue(c);
+	vk::ClearValue dC;
+	dC.depthStencil = vk::ClearDepthStencilValue({ 1.0f, 0 });
+	std::vector<vk::ClearValue> cV = { {cC,dC} };
+	vk::RenderPassBeginInfo particleGraphicRenderPass = {};
+	particleGraphicRenderPass.renderPass = particleRenderPass;
+	particleGraphicRenderPass.framebuffer = swapchainFrames[imageIndex].particleFramebuffer;
+	particleGraphicRenderPass.renderArea.offset.x = 0;
+	particleGraphicRenderPass.renderArea.offset.y = 0;
+	particleGraphicRenderPass.renderArea.extent = swapchainExtent;
+	particleGraphicRenderPass.clearValueCount = cV.size();
+	particleGraphicRenderPass.pClearValues = cV.data();
+
+	commandBuffer.beginRenderPass(&particleGraphicRenderPass,vk::SubpassContents::eSecondaryCommandBuffers);
+	commandBuffer.executeCommands(particleCommandBuffer);
+	commandBuffer.endRenderPass();
+
+	
+
+	//commandBuffer.executeCommands(particleCommandBuffer);
 
 	vk::ClearValue dClear;
 	dClear.depthStencil = vk::ClearDepthStencilValue({ 1.0f, 0 });
@@ -672,6 +698,43 @@ void GraphicsEngine::record_compute_commands(vk::CommandBuffer commandBuffer, ui
 	//vkEndCommandBuffer(compute.commandBuffer);
 }
 
+void GraphicsEngine::record_particle_draw_commands(vk::CommandBuffer commandBuffer ,uint32_t imageIndex)
+{
+
+
+	
+
+	vk::CommandBufferInheritanceInfo inh = {};
+	inh.renderPass = particleRenderPass;
+	inh.subpass = 0;
+	inh.framebuffer = swapchainFrames[imageIndex].particleFramebuffer;
+
+
+	vk::CommandBufferBeginInfo beginInfo;
+	beginInfo.flags = vk::CommandBufferUsageFlagBits::eRenderPassContinue | vk::CommandBufferUsageFlagBits::eSimultaneousUse;
+	beginInfo.pInheritanceInfo = &inh;
+	try {
+		commandBuffer.begin(beginInfo);
+	}
+	catch (vk::SystemError err) {
+		if (debugMode) {
+			std::cout << "Failed to begin recording shadow command buffer!" << std::endl;
+		}
+	}
+	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, particleGraphicPipeline);
+	//commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, particleGraphicsLayout, 0,nullptr, nullptr);
+	
+	try {
+		commandBuffer.end();
+	}
+	catch (vk::SystemError err) {
+
+		if (debugMode) {
+			std::cout << "failed to record command buffer!" << std::endl;
+		}
+	}
+}
+
 
 
 
@@ -787,8 +850,9 @@ void GraphicsEngine::render(Scene *scene,int &verticesCounter,float deltaTime)
 	prepare_frame(imageIndex, scene,deltaTime);
 
 	record_compute_commands(computeParticleCommandBuffer,imageIndex);
-	record_draw_commands(commandBuffer,imageIndex);
-
+	
+	record_particle_draw_commands(graphicParticleCommandBuffer, imageIndex);
+	record_draw_commands(commandBuffer,graphicParticleCommandBuffer ,imageIndex);
 	/*
 
 	// Set up pipeline barrier to synchronize between render passes
@@ -952,6 +1016,8 @@ void GraphicsEngine::create_framebuffers()
 	vkInit::make_framebuffers_withGbuffer(frameBufferInput, swapchainFrames, debugMode);
 	frameBufferInput.renderpass = shadowRenderPass;
 	vkInit::make_shadow_framebuffers(frameBufferInput, swapchainFrames, debugMode);
+	frameBufferInput.renderpass = particleRenderPass;
+	vkInit::make_particle_framebuffers(frameBufferInput, swapchainFrames, debugMode);
 }
 
 

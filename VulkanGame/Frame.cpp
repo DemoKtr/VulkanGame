@@ -162,8 +162,14 @@ void vkUtil::SwapChainFrame::make_depth_resources()
 			imageInfo.format = depthFormat;
 			imageInfo.arrayCount = 1;
 			depthBuffer = vkImage::make_image(imageInfo);
+			particledepthBuffer = vkImage::make_image(imageInfo);
+			
 			depthBufferMemory = vkImage::make_image_memory(imageInfo, depthBuffer);
+			particledepthBufferMemory = vkImage::make_image_memory(imageInfo, particledepthBuffer);
 			depthBufferView = vkImage::make_image_view(
+				logicalDevice, particledepthBuffer, depthFormat, vk::ImageAspectFlagBits::eDepth, vk::ImageViewType::e2D, 1
+			);
+			particledepthBufferView = vkImage::make_image_view(
 				logicalDevice, depthBuffer, depthFormat, vk::ImageAspectFlagBits::eDepth, vk::ImageViewType::e2D, 1
 			);
 			shadowMapBuffer.height = 1024;
@@ -364,13 +370,20 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.destroyImageView(imageView);
 			logicalDevice.destroyFramebuffer(framebuffer);
 			logicalDevice.destroyFramebuffer(shadowFramebuffer);
+			logicalDevice.destroyFramebuffer(particleFramebuffer);
 			
 
-			logicalDevice.destroySemaphore(imageAvailable);
-			logicalDevice.destroySemaphore(computeFinished);
+			try {
+				logicalDevice.destroySemaphore(imageAvailable);
+				logicalDevice.destroySemaphore(computeFinished);
+
+
+				logicalDevice.destroySemaphore(renderFinished);
+			}
+			catch (vk::SystemError err) {
+				 std::cout << "Failed delete semaphores!" << std::endl;
+			}
 			
-			
-			logicalDevice.destroySemaphore(renderFinished);
 			logicalDevice.destroyFence(inFlight);
 
 			logicalDevice.unmapMemory(camPosBuffer.bufferMemory);
@@ -396,6 +409,7 @@ void vkUtil::SwapChainFrame::destroy()
 
 
 			logicalDevice.destroyImage(depthBuffer);
+			logicalDevice.destroyImage(particledepthBuffer);
 			logicalDevice.destroyImage(gbuffer.position.image);
 			logicalDevice.destroyImage(gbuffer.normal.image);
 			logicalDevice.destroyImage(gbuffer.albedo.image);
@@ -405,6 +419,7 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.destroyImage(particleAttachment.image);
 			logicalDevice.destroyImage(shadowMapBuffer.shadowBufferDepthAttachment.image);
 			logicalDevice.freeMemory(depthBufferMemory);
+			logicalDevice.freeMemory(particledepthBufferMemory);
 			logicalDevice.freeMemory(gbuffer.position.mem);
 			logicalDevice.freeMemory(gbuffer.normal.mem);
 			logicalDevice.freeMemory(gbuffer.albedo.mem);
@@ -414,6 +429,7 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.freeMemory(particleAttachment.mem);
 			logicalDevice.freeMemory(shadowMapBuffer.shadowBufferDepthAttachment.mem);
 			logicalDevice.destroyImageView(depthBufferView);
+			logicalDevice.destroyImageView(particledepthBufferView);
 			logicalDevice.destroyImageView(gbuffer.position.view);
 			logicalDevice.destroyImageView(gbuffer.normal.view);
 			logicalDevice.destroyImageView(gbuffer.albedo.view);

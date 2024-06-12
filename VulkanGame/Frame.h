@@ -46,6 +46,7 @@ namespace vkUtil {
 		vk::ImageView imageView;
 		vk::Framebuffer framebuffer;
 		vk::Framebuffer shadowFramebuffer;
+		vk::Framebuffer particleFramebuffer;
 
 		//zBuffer
 		vk::Image depthBuffer;
@@ -53,6 +54,10 @@ namespace vkUtil {
 		vk::ImageView depthBufferView;
 		vk::Format depthFormat;
 		int width, height;
+		//particleZ
+		vk::Image particledepthBuffer;
+		vk::DeviceMemory particledepthBufferMemory;
+		vk::ImageView particledepthBufferView;
 
 		//gBuffer
 		vkUtil::Gbuffer gbuffer;

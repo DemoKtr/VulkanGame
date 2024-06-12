@@ -119,7 +119,7 @@ class GraphicsEngine
 	void create_framebuffers();
 	void cleanup_swapchain();
 
-	void record_draw_commands(vk::CommandBuffer commandBuffer,uint32_t imageIndex);
+	void record_draw_commands(vk::CommandBuffer commandBuffer, vk::CommandBuffer particleCommandBuffer, uint32_t imageIndex);
 	void record_compute_commands(vk::CommandBuffer commandBuffer,uint32_t imageIndex);
 	void record_particle_draw_commands(vk::CommandBuffer commandBuffer,uint32_t imageIndex);
 	void record_shadow_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex);
