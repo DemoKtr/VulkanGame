@@ -721,7 +721,10 @@ void GraphicsEngine::record_particle_draw_commands(vk::CommandBuffer commandBuff
 			std::cout << "Failed to begin recording shadow command buffer!" << std::endl;
 		}
 	}
+	vk::DeviceSize offset[1] = { 0 };
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, particleGraphicPipeline);
+	commandBuffer.bindVertexBuffers(0,1,&particles->particleBuffer.buffer, offset);
+	commandBuffer.draw(particles->burstParticleCount * particles->numberOfEmiter,1,0,0);
 	//commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, particleGraphicsLayout, 0,nullptr, nullptr);
 	
 	try {
