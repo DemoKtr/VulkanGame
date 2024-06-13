@@ -30,7 +30,10 @@ void vkGbuffer::createAttachment(attachmentBundle attachmentDescription)
 	imageInfo.samples = vk::SampleCountFlagBits::e1;
 	imageInfo.tiling = vk::ImageTiling::eOptimal;
 	imageInfo.extent.depth = 1;
+	if(!attachmentDescription.canUseAsSampledImage)
 	imageInfo.usage = attachmentDescription.usage | vk::ImageUsageFlagBits::eInputAttachment;
+	else
+	imageInfo.usage = attachmentDescription.usage | vk::ImageUsageFlagBits::eSampled;
 	
 	attachmentDescription.attachment->image = attachmentDescription.logicalDevice.createImage(imageInfo);
 	vk::MemoryRequirements requirements = attachmentDescription.logicalDevice.getImageMemoryRequirements(attachmentDescription.attachment->image);
@@ -64,6 +67,7 @@ void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::De
 	attachmentDescription.attachment = &gbuffer->position;
 	attachmentDescription.format = vk::Format::eR16G16B16A16Sfloat;
 	attachmentDescription.usage = vk::ImageUsageFlagBits::eColorAttachment;
+	attachmentDescription.canUseAsSampledImage = false;
 	createAttachment(attachmentDescription);
 	attachmentDescription.attachment = &gbuffer->normal;
 	createAttachment(attachmentDescription);
@@ -73,8 +77,10 @@ void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::De
 	createAttachment(attachmentDescription);
 	attachmentDescription.attachment = &gbuffer->worldPos;
 	createAttachment(attachmentDescription);
+	attachmentDescription.canUseAsSampledImage = true;
 	attachmentDescription.attachment = attachmnent;
 	createAttachment(attachmentDescription);
+	attachmentDescription.canUseAsSampledImage = false;
 	attachmentDescription.attachment = &gbuffer->albedo;
 	attachmentDescription.format = vk::Format::eR8G8B8A8Unorm;
 	createAttachment(attachmentDescription);

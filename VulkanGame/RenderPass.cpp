@@ -272,7 +272,7 @@ vk::RenderPass vkInit::create_particle_renderpass(vk::Device logicalDevice, vk::
 	attachment[0].samples = vk::SampleCountFlagBits::e1;
 	attachment[0].loadOp = vk::AttachmentLoadOp::eClear;
 	attachment[0].storeOp = vk::AttachmentStoreOp::eDontCare;
-	attachment[0].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+	attachment[0].stencilLoadOp = vk::AttachmentLoadOp::eClear;
 	attachment[0].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
 	attachment[0].initialLayout = vk::ImageLayout::eUndefined;
 	attachment[0].finalLayout = vk::ImageLayout::eColorAttachmentOptimal;
@@ -310,10 +310,13 @@ vk::RenderPass vkInit::create_particle_renderpass(vk::Device logicalDevice, vk::
 	dependencies[1].srcSubpass = 0;
 	dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
 	dependencies[1].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-	dependencies[1].dstStageMask = vk::PipelineStageFlagBits::eBottomOfPipe;
+	dependencies[1].dstStageMask = vk::PipelineStageFlagBits::eFragmentShader;
 	dependencies[1].srcAccessMask = vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite;
-	dependencies[1].dstAccessMask = vk::AccessFlagBits::eMemoryRead;
+	dependencies[1].dstAccessMask = vk::AccessFlagBits::eShaderRead;
 	dependencies[1].dependencyFlags = vk::DependencyFlagBits::eByRegion;
+
+
+
 
 	vk::RenderPassCreateInfo renderPassCreateInfo = {};
 	renderPassCreateInfo.sType = vk::StructureType::eRenderPassCreateInfo;

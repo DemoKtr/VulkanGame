@@ -335,7 +335,7 @@ void GraphicsEngine::create_descriptor_set_layouts()
 
 	frameSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
-	bindings.count = 9;
+	bindings.count = 10;
 	bindings.indices[0] = 0;
 	bindings.indices[1] = 1;
 	bindings.types[0] = vk::DescriptorType::eInputAttachment;
@@ -374,6 +374,10 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
 	bindings.indices.push_back(8);
 	bindings.types.push_back(vk::DescriptorType::eInputAttachment);
+	bindings.counts.push_back(1);
+	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
+	bindings.indices.push_back(9);
+	bindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
 	bindings.counts.push_back(1);
 	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
 	deferedSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
@@ -480,7 +484,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 	}
 
 	vk::ClearValue cC;
-	std::array<float, 4> c = { 1.0f, 0.5f, 0.25f, 1.0f };
+	std::array<float, 4> c = { 0.0f, 0.0f, 0.0f, 1.0f };
 	cC.color = vk::ClearColorValue(c);
 	vk::ClearValue dC;
 	dC.depthStencil = vk::ClearDepthStencilValue({ 1.0f, 0 });
@@ -494,9 +498,51 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 	particleGraphicRenderPass.clearValueCount = cV.size();
 	particleGraphicRenderPass.pClearValues = cV.data();
 
+
+	vk::BufferMemoryBarrier bufferBarrier = {  // sType                                  // pNext
+	vk::AccessFlagBits::eMemoryRead,          // srcAccessMask
+	vk::AccessFlagBits::eVertexAttributeRead,           // dstAccessMask
+	vk::QueueFamilyIgnored,                   // srcQueueFamilyIndex
+	vk::QueueFamilyIgnored,                   // dstQueueFamilyIndex
+	particles->particleBuffer.buffer,                 // buffer
+	0,                                         // offset
+	particles->getBufferSize()
+	};
+
+	// Pipeline barrier to ensure the proper ordering of buffer accesses
+	commandBuffer.pipelineBarrier(
+		vk::PipelineStageFlagBits::eComputeShader,     // srcStageMask
+		vk::PipelineStageFlagBits::eVertexInput, // dstStageMask
+		vk::DependencyFlags(),                     // dependencyFlags
+		nullptr,                                   // memoryBarriers
+		bufferBarrier,                             // bufferBarriers
+		nullptr                                    // imageBarriers
+	);
+
+
 	commandBuffer.beginRenderPass(&particleGraphicRenderPass,vk::SubpassContents::eSecondaryCommandBuffers);
 	commandBuffer.executeCommands(particleCommandBuffer);
 	commandBuffer.endRenderPass();
+
+	vk::BufferMemoryBarrier bufferBarrierparticle = {  // sType                                  // pNext
+	vk::AccessFlagBits::eVertexAttributeRead,          // srcAccessMask
+	vk::AccessFlagBits::eMemoryRead,           // dstAccessMask
+	vk::QueueFamilyIgnored,                   // srcQueueFamilyIndex
+	vk::QueueFamilyIgnored,                   // dstQueueFamilyIndex
+	particles->particleBuffer.buffer,                 // buffer
+	0,                                         // offset
+	particles->getBufferSize()
+	};
+	// Pipeline barrier to ensure the proper ordering of buffer accesses
+	commandBuffer.pipelineBarrier(
+		vk::PipelineStageFlagBits::eVertexInput,     // srcStageMask
+		vk::PipelineStageFlagBits::eComputeShader, // dstStageMask
+		vk::DependencyFlags(),                     // dependencyFlags
+		nullptr,                                   // memoryBarriers
+		bufferBarrierparticle,                             // bufferBarriers
+		nullptr                                    // imageBarriers
+	);
+
 
 	
 
@@ -574,6 +620,29 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 	commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eVertexInput, vk::PipelineStageFlagBits::eVertexInput, vk::DependencyFlags(), nullptr, vboBarrier,nullptr);
 	*/
 
+
+
+	vk::ImageMemoryBarrier barrier;
+	barrier.oldLayout = vk::ImageLayout::eColorAttachmentOptimal;
+	barrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	barrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+	barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+	barrier.image = swapchainFrames[imageIndex].particleAttachment.image; // Twoje vk::Image
+	barrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+	barrier.subresourceRange.baseMipLevel = 0;
+	barrier.subresourceRange.levelCount = 1;
+	barrier.subresourceRange.baseArrayLayer = 0;
+	barrier.subresourceRange.layerCount = 1;
+
+	commandBuffer.pipelineBarrier(
+		vk::PipelineStageFlagBits::eColorAttachmentOutput, // source stage
+		vk::PipelineStageFlagBits::eFragmentShader, // destination stage
+		{}, // dependency flags
+		nullptr, // memory barriers
+		nullptr, // buffer memory barriers
+		barrier // image memory barriers
+	);
+
 	vk::RenderPassBeginInfo renderPassInfo = {};
 	renderPassInfo.renderPass = renderpass;
 	renderPassInfo.framebuffer = swapchainFrames[imageIndex].framebuffer;
@@ -604,9 +673,13 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 		render_objects(commandBuffer,pair.first, startInstance, static_cast<uint32_t>(pair.second.size()));
 	}
 	
+
+
+	
 	// W tym miejscu bym chcia³ postawiæ bariere 
 	commandBuffer.nextSubpass(vk::SubpassContents::eInline);
 
+	
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, deferedGraphicsPipeline);
 
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, deferedLayout, 0, swapchainFrames[imageIndex].deferedDescriptorSet, nullptr);
@@ -614,6 +687,9 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 
 	commandBuffer.draw(3, 1, 0, 0);
 	commandBuffer.endRenderPass();
+
+
+	
 
 	try {
 		commandBuffer.end();
@@ -639,9 +715,9 @@ void GraphicsEngine::record_compute_commands(vk::CommandBuffer commandBuffer, ui
 			std::cout << "Failed to begin recording compute command buffer!" << std::endl;
 		}
 	}
-
+	
 	vk::BufferMemoryBarrier bufferBarrier = {  // sType                                  // pNext
-	vk::AccessFlagBits::eShaderWrite,          // srcAccessMask
+	vk::AccessFlagBits::eMemoryRead,          // srcAccessMask
 	vk::AccessFlagBits::eShaderRead,           // dstAccessMask
 	vk::QueueFamilyIgnored,                   // srcQueueFamilyIndex
 	vk::QueueFamilyIgnored,                   // dstQueueFamilyIndex
@@ -652,7 +728,7 @@ void GraphicsEngine::record_compute_commands(vk::CommandBuffer commandBuffer, ui
 	
 	// Pipeline barrier to ensure the proper ordering of buffer accesses
 	commandBuffer.pipelineBarrier(
-		vk::PipelineStageFlagBits::eAllCommands,     // srcStageMask
+		vk::PipelineStageFlagBits::eVertexInput,     // srcStageMask
 		vk::PipelineStageFlagBits::eComputeShader, // dstStageMask
 		vk::DependencyFlags(),                     // dependencyFlags
 		nullptr,                                   // memoryBarriers
@@ -660,17 +736,17 @@ void GraphicsEngine::record_compute_commands(vk::CommandBuffer commandBuffer, ui
 		nullptr                                    // imageBarriers
 	);
 	
-
+	
 	// Dispatch the compute job
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eCompute, particleComputePipeline);
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eCompute, particleComputeLayout, 0, swapchainFrames[imageIndex].particleDescriptorSet, nullptr);
-	commandBuffer.dispatch(1024,1,1);
+	commandBuffer.dispatch(particles->burstParticleCount/256*particles->numberOfEmiter,1,1);
 
 	// Add barrier to ensure that compute shader has finished writing to the buffer
 	// Without this the (rendering) vertex shader may display incomplete results (partial data from last frame)
 	
 
-
+	
 	vk::BufferMemoryBarrier bufferBarrier2 = {  // sType                                  // pNext
 	vk::AccessFlagBits::eShaderRead,          // srcAccessMask
 	vk::AccessFlagBits::eMemoryRead,           // dstAccessMask
@@ -684,14 +760,14 @@ void GraphicsEngine::record_compute_commands(vk::CommandBuffer commandBuffer, ui
 	// Pipeline barrier to ensure the proper ordering of buffer accesses
 	commandBuffer.pipelineBarrier(
 		vk::PipelineStageFlagBits::eComputeShader,     // srcStageMask
-		vk::PipelineStageFlagBits::eBottomOfPipe, // dstStageMask
+		vk::PipelineStageFlagBits::eVertexInput, // dstStageMask
 		vk::DependencyFlags(),                     // dependencyFlags
 		nullptr,                                   // memoryBarriers
 		bufferBarrier2,                             // bufferBarriers
 		nullptr                                    // imageBarriers
 	);
 
-
+	
 
 
 	commandBuffer.end();
@@ -727,6 +803,9 @@ void GraphicsEngine::record_particle_draw_commands(vk::CommandBuffer commandBuff
 	commandBuffer.draw(particles->burstParticleCount * particles->numberOfEmiter,1,0,0);
 	//commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, particleGraphicsLayout, 0,nullptr, nullptr);
 	
+
+	
+
 	try {
 		commandBuffer.end();
 	}
@@ -963,7 +1042,7 @@ void GraphicsEngine::create_frame_resources()
 	
 
 	vkInit::descriptorSetLayoutData gbindings;
-	gbindings.count = 9;
+	gbindings.count = 10;
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //pos
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //normals
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //albedo
@@ -973,6 +1052,7 @@ void GraphicsEngine::create_frame_resources()
 	gbindings.types.push_back(vk::DescriptorType::eUniformBuffer); //camPos
 	gbindings.types.push_back(vk::DescriptorType::eCombinedImageSampler); //camPos
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //worldPos
+	gbindings.types.push_back(vk::DescriptorType::eCombinedImageSampler); //particles
 	
 
 	vkInit::descriptorSetLayoutData shadowBindings;
@@ -1087,10 +1167,10 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 		//std::cout << light->transform.getGlobalPosition().x<< light->transform.getGlobalPosition().y<< light->transform.getGlobalPosition().z << std::endl;
 	}
 	
-	_frame.particleUBOData.deltaT = 2.5f * deltaTime;
-	_frame.particleUBOData.destX = sin(glm::radians(deltaTime * 360.0f)) * 0.75f;
-	_frame.particleUBOData.destY = cos(glm::radians(deltaTime * 360.0f)) * 0.75f;
-	_frame.particleUBOData.destZ = cos(glm::radians(deltaTime * 360.0f)) * 0.75f - sin(glm::radians(deltaTime * 360.0f)) * 0.75f;
+	_frame.particleUBOData.deltaT =  deltaTime;
+	_frame.particleUBOData.destX = 0.0f;//sin(glm::radians(deltaTime * 360.0f)) * 0.1f;
+	_frame.particleUBOData.destY = 0.0f;//cos(glm::radians(deltaTime * 360.0f)) * 0.1f;
+	_frame.particleUBOData.destZ = 0.0f;//cos(glm::radians(deltaTime * 360.0f)) * 0.1f - sin(glm::radians(deltaTime * 360.0f)) * 0.1f;
 	_frame.particleUBOData.particleCount = particles->burstParticleCount * particles->numberOfEmiter;
 	
 	

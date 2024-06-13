@@ -311,8 +311,22 @@ void vkUtil::SwapChainFrame::writeGbufferDescriptor(vk::DescriptorSet descriptor
 			descriptorWriteworldPos.descriptorCount = 1;
 			descriptorWriteworldPos.pImageInfo = &imageDescriptorworldPos;
 
+
+			vk::DescriptorImageInfo imageDescriptorParticle;
+			imageDescriptorParticle.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+			imageDescriptorParticle.imageView = particleAttachment.view;
+			imageDescriptorParticle.sampler = shadowMapBuffer.sampler;
+			vk::WriteDescriptorSet imageParticle;
+			imageParticle.dstSet = deferedDescriptorSet;
+			imageParticle.dstBinding = 9;
+			imageParticle.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+			imageParticle.descriptorCount = 1;
+			imageParticle.descriptorType = vk::DescriptorType::eCombinedImageSampler;
+			imageParticle.pImageInfo = &imageDescriptorParticle;
+
+
 			std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {
-				descriptorWritePos,descriptorWriteNormal,descriptorWriteAlbedo,descriptorWritearm,descriptorWriteT,writeInfo,camPosWriteInfo,imageShadow,descriptorWriteworldPos,
+				descriptorWritePos,descriptorWriteNormal,descriptorWriteAlbedo,descriptorWritearm,descriptorWriteT,writeInfo,camPosWriteInfo,imageShadow,descriptorWriteworldPos,imageParticle,
 			};
 
 			logicalDevice.updateDescriptorSets(writeDescriptorSets, nullptr);

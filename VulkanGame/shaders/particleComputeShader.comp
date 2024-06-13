@@ -2,8 +2,8 @@
 
 struct Particle
 {
-	vec3 pos;
-	vec3 vel;
+	vec2 pos;
+	vec2 vel;
 	vec4 gradientPos;
 };
 
@@ -24,22 +24,7 @@ layout (binding = 0) uniform UBO
 	int particleCount;
 } ubo;
 
-vec3 attraction(vec3 pos, vec3 attractPos) 
-{
-    vec3 delta = attractPos - pos;
-	const float damp = 0.5;
-    float dDampedDot = dot(delta, delta) + damp;
-    float invDist = 1.0f / sqrt(dDampedDot);
-    float invDistCubed = invDist*invDist*invDist;
-    return delta * invDistCubed * 0.0035;
-}
 
-vec3 repulsion(vec3 pos, vec3 attractPos)
-{
-	vec3 delta = attractPos - pos;
-	float targetDistance = sqrt(dot(delta, delta));
-	return delta * (1.0 / (targetDistance * targetDistance * targetDistance)) * -0.000035;
-}
 
 void main() 
 {
@@ -49,28 +34,8 @@ void main()
     if (index >= ubo.particleCount) 
 		return;	
 
-    // Read position and velocity
-    vec3 vVel = particles[index].vel.xyz;
-    vec3 vPos = particles[index].pos.xyz;
-
-    vec3 destPos = vec3(ubo.destX, ubo.destY, ubo.destZ);
-
-    vec3 delta = destPos - vPos;
-    float targetDistance = sqrt(dot(delta, delta));
-    vVel += repulsion(vPos, destPos.xyz) * 0.05;
-
-    // Move by velocity
-    vPos += vVel * ubo.deltaT;
-
-    // collide with boundary
-    if ((vPos.x < -1.0) || (vPos.x > 1.0) || (vPos.y < -1.0) || (vPos.y > 1.0) || (vPos.z < -1.0) || (vPos.z > 1.0))
-    	vVel = (-vVel * 0.1) + attraction(vPos, destPos) * 12;
-    else
-    	particles[index].pos.xyz = vPos;
-
-    // Write back
-    particles[index].vel.xyz = vVel;
-	particles[index].gradientPos.x += 0.02 * ubo.deltaT;
-	if (particles[index].gradientPos.x > 1.0)
-		particles[index].gradientPos.x -= 1.0;
+    particles[index].pos.x += ubo.deltaT*0.01f;
+    particles[index].vel = vec2(1.0f);
+    particles[index].gradientPos = vec4(0.0f);
+   
 }

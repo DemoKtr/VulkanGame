@@ -9,6 +9,7 @@ struct attachmentBundle {
 	int32_t width, height;
 	vk::Device logicalDevice;
 	vk::PhysicalDevice physicalDevice;
+	bool canUseAsSampledImage;
 };
 
 namespace vkGbuffer {

@@ -19,7 +19,7 @@ vk::VertexInputBindingDescription vkParticle::getParticleVBO(){
 		vk::VertexInputBindingDescription bindingDescription;
 		bindingDescription.binding = 0;
 		// xy rgb uv
-		bindingDescription.stride = 7*sizeof(float);
+		bindingDescription.stride = 8*sizeof(float);
 		bindingDescription.inputRate = vk::VertexInputRate::eVertex; // einstance do instancjonowania
 		return bindingDescription;
 		}
@@ -40,6 +40,7 @@ std::vector<vk::VertexInputAttributeDescription> vkParticle::getParticleVAO()
 	vk::VertexInputAttributeDescription dummy;
 	attributes.push_back(dummy);
 	attributes.push_back(dummy);
+	attributes.push_back(dummy);
 
 
 	//Pos
@@ -48,11 +49,18 @@ std::vector<vk::VertexInputAttributeDescription> vkParticle::getParticleVAO()
 	attributes[0].format = vk::Format::eR32G32Sfloat;
 	attributes[0].offset = 0;
 
-	//vertexColor
+
+	//vel
 	attributes[1].binding = 0;
 	attributes[1].location = 1;
-	attributes[1].format = vk::Format::eR32G32B32A32Sfloat;
-	attributes[1].offset = 6 * sizeof(float);
+	attributes[1].format = vk::Format::eR32G32Sfloat;
+	attributes[1].offset = 2* sizeof(float);
+
+	//gradient
+	attributes[2].binding = 0;
+	attributes[2].location = 2;
+	attributes[2].format = vk::Format::eR32G32B32A32Sfloat;
+	attributes[2].offset = 4 * sizeof(float);
 
 	return attributes;
 }

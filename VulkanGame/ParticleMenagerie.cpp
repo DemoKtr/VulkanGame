@@ -17,12 +17,12 @@ void ParticleMenagerie::finalization(FinalizationChunk finalizationChunk)
 {
 	logicalDevice = finalizationChunk.logicalDevice;
 	std::default_random_engine randomizer(benchmark ? 0 : (unsigned)time(nullptr));
-	std::uniform_real_distribution<float> rndDist(-1.0f, 1.0f);
+	std::uniform_real_distribution<float> rndDist(-0.5f, 0.5f);
 	std::vector<vkParticle::Particle> particles(numberOfEmiter * burstParticleCount);
 	for (auto& particle : particles) {
-		particle.pos = glm::vec3(rndDist(randomizer), rndDist(randomizer), rndDist(randomizer));
-		particle.vel = glm::vec3(0.0f);
-		particle.gradientPos.x = particle.pos.x / 2.0f;
+		particle.pos = glm::vec2(rndDist(randomizer), rndDist(randomizer));
+		particle.vel = glm::vec2(0.0f);
+		particle.gradientPos.x = 0.0f;// particle.pos.x / 2.0f;
 	}
 	vk::DeviceSize storageBufferSize = particles.size() * sizeof(vkParticle::Particle);
 	size = storageBufferSize;

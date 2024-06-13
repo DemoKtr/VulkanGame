@@ -144,6 +144,9 @@
     <ClCompile Include="ParticleMenagerie.cpp">
       <Filter>Source Files\vkParticle</Filter>
     </ClCompile>
+    <ClCompile Include="ParticleTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GraphicsEngine.h">
@@ -256,6 +259,9 @@
     </ClInclude>
     <ClInclude Include="ParticleMenagerie.h">
       <Filter>Header Files\vkParticle</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleTexture.h">
+      <Filter>Header Files\vkImage</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
