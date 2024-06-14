@@ -1168,8 +1168,8 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	}
 	
 	_frame.particleUBOData.deltaT =  deltaTime;
-	_frame.particleUBOData.destX = 0.0f;//sin(glm::radians(deltaTime * 360.0f)) * 0.1f;
-	_frame.particleUBOData.destY = 0.0f;//cos(glm::radians(deltaTime * 360.0f)) * 0.1f;
+	_frame.particleUBOData.destX = sin(glm::radians(deltaTime)) * 1.0f;
+	_frame.particleUBOData.destY = cos(glm::radians(deltaTime * 360.0f)) * 1.0f;
 	_frame.particleUBOData.destZ = 0.0f;//cos(glm::radians(deltaTime * 360.0f)) * 0.1f - sin(glm::radians(deltaTime * 360.0f)) * 0.1f;
 	_frame.particleUBOData.particleCount = particles->burstParticleCount * particles->numberOfEmiter;
 	

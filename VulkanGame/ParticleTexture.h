@@ -3,11 +3,26 @@
 #include "Image.h"
 
 
+
 namespace vkImage{
+
+	struct ParticleTextureInputChunk {
+		vk::Device logicalDevice;
+		vk::PhysicalDevice physicalDevice;
+		const char* colorfilenames;
+		const char* gradientfilenames;
+		vk::CommandBuffer commandBuffer;
+		vk::Queue queue;
+		vk::DescriptorSetLayout layout;
+		vk::DescriptorPool descriptorPool;
+
+	};
+
 class ParticleTexture
 {
 	int colorwidth, colorheight, colorchannels, gradientchannels, gradientwidth, gradientheight;
 	vk::PhysicalDevice physicalDevice;
+	vk::Device logicalDevice;
 
 	stbi_uc* colorpixels;
 	stbi_uc* gradientpixels;
@@ -50,7 +65,7 @@ public:
 	const char* colorfilename;
 	const char* gradientfilename;
 
-	ParticleTexture(TextureInputChunk info);
+	ParticleTexture(ParticleTextureInputChunk info);
 
 	void useTexture(vk::CommandBuffer commandBuffer, vk::PipelineLayout pipelineLayout);
 	~ParticleTexture();

@@ -4,6 +4,9 @@
 
 
 namespace vkImage {
+
+	
+
 	class Texture
 	{
 		int width, height, channels, normalchannels, normalwidth, normalheight, armchannels,armheight,armwidth, depthchannels, depthheight, depthwidth;

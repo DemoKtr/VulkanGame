@@ -145,7 +145,7 @@
       <Filter>Source Files\vkParticle</Filter>
     </ClCompile>
     <ClCompile Include="ParticleTexture.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\vkImage</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

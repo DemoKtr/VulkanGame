@@ -19,7 +19,7 @@ vk::VertexInputBindingDescription vkParticle::getParticleVBO(){
 		vk::VertexInputBindingDescription bindingDescription;
 		bindingDescription.binding = 0;
 		// xy rgb uv
-		bindingDescription.stride = 8*sizeof(float);
+		bindingDescription.stride = 12*sizeof(float);
 		bindingDescription.inputRate = vk::VertexInputRate::eVertex; // einstance do instancjonowania
 		return bindingDescription;
 		}

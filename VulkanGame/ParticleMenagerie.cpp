@@ -17,12 +17,20 @@ void ParticleMenagerie::finalization(FinalizationChunk finalizationChunk)
 {
 	logicalDevice = finalizationChunk.logicalDevice;
 	std::default_random_engine randomizer(benchmark ? 0 : (unsigned)time(nullptr));
-	std::uniform_real_distribution<float> rndDist(-0.5f, 0.5f);
+	std::uniform_real_distribution<float> rndDistX(-0.2f, 0.2f);
+	std::uniform_real_distribution<float> rndDistY(-0.0f, 0.25f);
+	std::uniform_real_distribution<float> rndVelDistX(-0.25f, 0.25f);
+	std::uniform_real_distribution<float> rndVelDistZ(-0.15f, 0.15f);
+	std::uniform_real_distribution<float> rndVelDistY(0.1f,0.4f);
+	std::uniform_real_distribution<float> rndLifetimeDist(0.2f, 2.5f);
 	std::vector<vkParticle::Particle> particles(numberOfEmiter * burstParticleCount);
 	for (auto& particle : particles) {
-		particle.pos = glm::vec2(rndDist(randomizer), rndDist(randomizer));
-		particle.vel = glm::vec2(0.0f);
-		particle.gradientPos.x = 0.0f;// particle.pos.x / 2.0f;
+		particle.pos = glm::vec2(rndDistX(randomizer), rndDistY(randomizer));
+		particle.vel = glm::vec2(rndVelDistX(randomizer),rndVelDistY(randomizer));
+		particle.gradientPos.x = abs(particle.pos.x/2.0f);// particle.pos.x / 2.0f;
+		particle.initialPos = particle.pos;
+		particle.lifeTime = rndLifetimeDist(randomizer);
+		particle.currentLifeTime = particle.lifeTime;
 	}
 	vk::DeviceSize storageBufferSize = particles.size() * sizeof(vkParticle::Particle);
 	size = storageBufferSize;
