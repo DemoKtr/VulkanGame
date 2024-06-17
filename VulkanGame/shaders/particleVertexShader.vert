@@ -32,7 +32,11 @@ void main ()
 {
   gl_PointSize = 8.0;
 
-  gl_Position = vec4(inPos,0.0f ,1.0);
+	vec3 cameraDirection = normalize(vec3(inPos,0.0f) - cameraData.camPos.xyz);
+	vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), cameraDirection));
+    vec3 up = cross(cameraDirection, right);
+	vec3 billboardPos = vec3(inPos,0.0f) + (inPos.x * right) + (inPos.y * up);
+	gl_Position = cameraData.projection * cameraData.view * vec4(billboardPos, 1.0);
   outVel = inVel;
   outGradientPosX = inGradientPos.x;
   outGradientPosY = inGradientPos.y;

@@ -302,10 +302,12 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyDescriptorSetLayout(particleComputeSetLayout);
 	device.destroyDescriptorSetLayout(meshSetLayout);
 	device.destroyDescriptorSetLayout(particleCameraGraphicSetLayout);
+	device.destroyDescriptorSetLayout(particleTextureGraphicSetLayout);
 	device.destroyDescriptorPool(meshDescriptorPool);
 	device.destroyDescriptorPool(particleTextureGraphicDescriptorPool);
 	device.destroyDescriptorPool(particleComputeDescriptorPool);
 	device.destroyDescriptorPool(particleCameraGraphicDescriptorPool);
+	
 	device.destroyDescriptorPool(shadowDescriptorPool);
 	
 	delete meshes;

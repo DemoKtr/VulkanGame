@@ -424,6 +424,11 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.freeMemory(camPosBuffer.bufferMemory);
 			logicalDevice.destroyBuffer(camPosBuffer.buffer);
 
+
+			logicalDevice.unmapMemory(particleCameraUBOBuffer.bufferMemory);
+			logicalDevice.freeMemory(particleCameraUBOBuffer.bufferMemory);
+			logicalDevice.destroyBuffer(particleCameraUBOBuffer.buffer);
+
 			logicalDevice.unmapMemory(particleUBOBuffer.bufferMemory);
 			logicalDevice.freeMemory(particleUBOBuffer.bufferMemory);
 			logicalDevice.destroyBuffer(particleUBOBuffer.buffer);
