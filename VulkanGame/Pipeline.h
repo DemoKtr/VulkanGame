@@ -902,12 +902,8 @@ namespace vkInit {
         vk::PipelineViewportStateCreateInfo viewportState = make_viewport_state(viewport, scissor);
         
 
-        vk::PipelineMultisampleStateCreateInfo multisampling = {};
-        multisampling.flags = vk::PipelineMultisampleStateCreateFlags();
-        multisampling.sampleShadingEnable = VK_TRUE;
-        multisampling.rasterizationSamples = vk::SampleCountFlagBits::e1;
-        multisampling.minSampleShading = 0.2f;
-        multisampling.pSampleMask = nullptr;
+        vk::PipelineMultisampleStateCreateInfo multisampling = make_multisampling_info();
+        
        
 
 
