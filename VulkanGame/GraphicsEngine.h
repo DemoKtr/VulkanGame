@@ -9,6 +9,7 @@
 #include "Texture.h"
 #include "Cubemap.h"
 #include "ParticleMenagerie.h"
+#include "ParticleTexture.h"
 
 class GraphicsEngine
 {
@@ -72,6 +73,7 @@ class GraphicsEngine
 	ParticleMenagerie* particles;
 
 	std::unordered_map<meshTypes, vkImage::Texture*>  materials;
+	vkImage::ParticleTexture*  particleTexture;
 	std::unordered_map<meshTypes, int> instanceCounter;
 	std::unordered_map<meshTypes, std::vector<SceneObject*>> models;
 	
@@ -85,8 +87,17 @@ class GraphicsEngine
 	vk::DescriptorSetLayout deferedSetLayout;
 	vk::DescriptorPool deferedDescriptorPool;
 
-	vk::DescriptorSetLayout particleSetLayout;
-	vk::DescriptorPool particleDescriptorPool;
+	vk::DescriptorSetLayout particleComputeSetLayout;
+	vk::DescriptorPool particleComputeDescriptorPool;
+
+
+	///Particle Graphic
+	vk::DescriptorSetLayout particleTextureGraphicSetLayout;
+	vk::DescriptorPool particleTextureGraphicDescriptorPool;
+
+	///Particle Graphic
+	vk::DescriptorSetLayout particleCameraGraphicSetLayout;
+	vk::DescriptorPool particleCameraGraphicDescriptorPool;
 
 
 	vk::DescriptorSetLayout shadowSetLayout;

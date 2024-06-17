@@ -39,14 +39,22 @@ void main()
 
 	particles[index].currentLifeTime -= ubo.deltaT;
 	if(particles[index].currentLifeTime > 0.0f){
-	particles[index].pos.x += ubo.deltaT * particles[index].vel.x * ubo.destX;
+	if(particles[index].pos.y >0.20)particles[index].pos.x += ubo.deltaT * particles[index].vel.x * ubo.destX* 10.0f;
+	else if(particles[index].pos.y >0.15)particles[index].pos.x += ubo.deltaT * particles[index].vel.x * ubo.destX* 10.0f;
+	else if(particles[index].pos.y >0.10)particles[index].pos.x += ubo.deltaT * particles[index].vel.x * ubo.destX* 1.0f;
+	else particles[index].pos.x += ubo.deltaT * particles[index].vel.x * ubo.destX * 5.5f;
 	particles[index].pos.y -= ubo.deltaT*particles[index].vel.y * ubo.destY;
-    particles[index].gradientPos.x += 0.2 * ubo.deltaT;
+    particles[index].gradientPos.x -= 0.0001 * ubo.deltaT;
+    particles[index].gradientPos.y -= 0.0001 * ubo.deltaT;
+    particles[index].gradientPos.zw = vec2(normalize(particles[index].pos))* 1.0f;
+	
 	}
 	else{
 	particles[index].pos = particles[index].initialPos;
 	particles[index].currentLifeTime = particles[index].lifeTime;
-	particles[index].gradientPos.x = particles[index].pos.x/2.0f;
+	
+	particles[index].gradientPos.y = 1.0f;
+	particles[index].gradientPos.x = 0.9f;
 	}
 
     

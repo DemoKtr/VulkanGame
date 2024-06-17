@@ -5,7 +5,22 @@ layout (location = 1) in vec2 inVel;
 layout (location = 2) in vec4 inGradientPos;
 
 layout (location = 0) out vec2 outVel;
-layout (location = 1) out float outGradientPos;
+layout (location = 1) out float outGradientPosX;
+layout (location = 2) out float outGradientPosY;
+layout (location = 3) out float outGradientPosZ;
+layout (location = 4) out float outGradientPosW;
+
+
+
+layout(set = 0,binding = 0) uniform UBO {
+	mat4 view;
+	mat4 projection;
+	mat4 viewProjection;
+	vec4 heightScale;
+	vec4 camPos;
+} cameraData;
+
+
 
 out gl_PerVertex
 {
@@ -19,5 +34,8 @@ void main ()
 
   gl_Position = vec4(inPos,0.0f ,1.0);
   outVel = inVel;
-  outGradientPos = inGradientPos.x;
+  outGradientPosX = inGradientPos.x;
+  outGradientPosY = inGradientPos.y;
+  outGradientPosZ = inGradientPos.z;
+  outGradientPosW = inGradientPos.w;
 }

@@ -70,6 +70,17 @@ void GraphicsEngine::make_assets(Scene* scene)
 	meshDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(filenames.size()) + 1, bindings);
 
 
+
+	std::vector<const char*> particlefilenames = {"res/textures/fire.png","res/textures/gradient.png" };
+	
+
+
+	bindings.count = 2;
+	bindings.types[0] = vk::DescriptorType::eCombinedImageSampler;
+	bindings.types[1] = vk::DescriptorType::eCombinedImageSampler;
+	particleTextureGraphicDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(particlefilenames.size()) + 1, bindings);
+
+
 	vkImage::TextureInputChunk textureInfo;
 
 	textureInfo.commandBuffer = maincommandBuffer;
@@ -104,6 +115,18 @@ void GraphicsEngine::make_assets(Scene* scene)
 	}
 	particles->finalization(finalizationChunk);
 	particles->make_descriptors_resources();
+	vkImage::ParticleTextureInputChunk particleTextureInfo;
+	particleTextureInfo.commandBuffer = maincommandBuffer;
+	particleTextureInfo.queue = graphicsQueue;
+	particleTextureInfo.logicalDevice = device;
+	particleTextureInfo.physicalDevice = physicalDevice;
+	particleTextureInfo.layout = particleTextureGraphicSetLayout;
+	particleTextureInfo.descriptorPool = particleTextureGraphicDescriptorPool;
+	particleTextureInfo.colorfilenames = particlefilenames[0];
+	particleTextureInfo.gradientfilenames = particlefilenames[1];
+	particleTexture = new vkImage::ParticleTexture(particleTextureInfo);
+
+
 }
 
 void GraphicsEngine::prepare_scene(vk::CommandBuffer commandBuffer)
@@ -194,9 +217,9 @@ void GraphicsEngine::create_pipeline()
 	particleInput.depthFormat = swapchainFrames[0].depthFormat;
 	particleInput.device = device;
 	particleInput.swapchainExtent = swapchainExtent;
-	particleInput.particleComputeDescriptorSetLayout = { particleSetLayout };
+	particleInput.particleComputeDescriptorSetLayout = { particleComputeSetLayout };
 	particleInput.particleAttachment = swapchainFrames[0].particleAttachment;
-	particleInput.particleGraphicDescriptorSetLayout = {};
+	particleInput.particleGraphicDescriptorSetLayout = {particleCameraGraphicSetLayout,particleTextureGraphicSetLayout};
 
 	vkInit::ParticleGraphicsPipelineOutBundle particleOutput = vkInit::createParticlePipeline(particleInput,debugMode);
 	particleGraphicPipeline = particleOutput.particleGrphicPipeline;
@@ -276,14 +299,18 @@ GraphicsEngine::~GraphicsEngine()
 	
 	device.destroyDescriptorSetLayout(frameSetLayout);
 	device.destroyDescriptorSetLayout(shadowSetLayout);
-	device.destroyDescriptorSetLayout(particleSetLayout);
+	device.destroyDescriptorSetLayout(particleComputeSetLayout);
 	device.destroyDescriptorSetLayout(meshSetLayout);
+	device.destroyDescriptorSetLayout(particleCameraGraphicSetLayout);
 	device.destroyDescriptorPool(meshDescriptorPool);
-	device.destroyDescriptorPool(particleDescriptorPool);
+	device.destroyDescriptorPool(particleTextureGraphicDescriptorPool);
+	device.destroyDescriptorPool(particleComputeDescriptorPool);
+	device.destroyDescriptorPool(particleCameraGraphicDescriptorPool);
 	device.destroyDescriptorPool(shadowDescriptorPool);
 	
 	delete meshes;
 	delete particles;
+	delete particleTexture;
 	for (const auto& [key, texture] : materials) delete texture;
 	for (const auto& [key, SceneObjects] : models) {
 		for (SceneObject* obj : SceneObjects) delete obj;
@@ -417,6 +444,21 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	bindings.count = 2;
 	bindings.indices[0] = 0;
 	bindings.indices[1] = 1;
+	bindings.types[0] = vk::DescriptorType::eCombinedImageSampler;
+	bindings.types[1] = vk::DescriptorType::eCombinedImageSampler;
+	bindings.counts[0] = 1;
+	bindings.counts[1] = 1;
+	bindings.stages[0] = vk::ShaderStageFlagBits::eFragment;
+	bindings.stages[1] = vk::ShaderStageFlagBits::eFragment;
+
+
+
+	particleTextureGraphicSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+
+
+	bindings.count = 2;
+	bindings.indices[0] = 0;
+	bindings.indices[1] = 1;
 	bindings.types[0] = vk::DescriptorType::eUniformBuffer;
 	bindings.types[1] = vk::DescriptorType::eStorageBuffer;
 	bindings.counts[0] = 1;
@@ -426,8 +468,16 @@ void GraphicsEngine::create_descriptor_set_layouts()
 
 
 
-	particleSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+	particleComputeSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+	
 
+
+	bindings.count = 1;
+	bindings.indices[0] = 0;
+	bindings.types[0] = vk::DescriptorType::eUniformBuffer;
+	bindings.counts[0] = 1;
+	bindings.stages[0] = vk::ShaderStageFlagBits::eVertex;
+	particleCameraGraphicSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
 }
 
@@ -521,6 +571,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 
 
 	commandBuffer.beginRenderPass(&particleGraphicRenderPass,vk::SubpassContents::eSecondaryCommandBuffers);
+	
 	commandBuffer.executeCommands(particleCommandBuffer);
 	commandBuffer.endRenderPass();
 
@@ -800,6 +851,8 @@ void GraphicsEngine::record_particle_draw_commands(vk::CommandBuffer commandBuff
 	vk::DeviceSize offset[1] = { 0 };
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, particleGraphicPipeline);
 	commandBuffer.bindVertexBuffers(0,1,&particles->particleBuffer.buffer, offset);
+	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, particleGraphicsLayout, 0, swapchainFrames[imageIndex].particleCameraDescriptorSet, nullptr);
+	particleTexture->useTexture(commandBuffer, particleGraphicsLayout);
 	commandBuffer.draw(particles->burstParticleCount * particles->numberOfEmiter,1,0,0);
 	//commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, particleGraphicsLayout, 0,nullptr, nullptr);
 	
@@ -1060,13 +1113,18 @@ void GraphicsEngine::create_frame_resources()
 	shadowBindings.types.push_back(vk::DescriptorType::eStorageBuffer);
 	shadowBindings.types.push_back(vk::DescriptorType::eStorageBuffer);
 
+	vkInit::descriptorSetLayoutData particleCameraBindings;
+	particleCameraBindings.count = 1;
+	particleCameraBindings.types.push_back(vk::DescriptorType::eUniformBuffer);
+	
 	
 
 
 	frameDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);
 	deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
 	shadowDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), shadowBindings);
-	particleDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);
+	particleComputeDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);
+	particleCameraGraphicDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), particleCameraBindings);
 	
 	//deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
 	
@@ -1082,7 +1140,8 @@ void GraphicsEngine::create_frame_resources()
 		frame.descriptorSet = vkInit::allocate_descriptor_set(device, frameDescriptorPool, frameSetLayout);
 		frame.deferedDescriptorSet = vkInit::allocate_descriptor_set(device, deferedDescriptorPool, deferedSetLayout);
 		frame.shadowDescriptorSet = vkInit::allocate_descriptor_set(device, shadowDescriptorPool, shadowSetLayout);
-		frame.particleDescriptorSet = vkInit::allocate_descriptor_set(device, particleDescriptorPool, particleSetLayout);
+		frame.particleDescriptorSet = vkInit::allocate_descriptor_set(device, particleComputeDescriptorPool, particleComputeSetLayout);
+		frame.particleCameraDescriptorSet = vkInit::allocate_descriptor_set(device, particleCameraGraphicDescriptorPool, particleCameraGraphicSetLayout);
 		
 
 	}
@@ -1175,6 +1234,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	
 	
 	memcpy(_frame.cameraDataWriteLocation, &(_frame.cameraData), sizeof(vkUtil::UBO));
+	memcpy(_frame.particleCameraUBOWriteLoacation, &(_frame.cameraData), sizeof(vkUtil::UBO));
 	memcpy(_frame.camPosWriteLoacation, &(_frame.camPos), sizeof(glm::vec4));
 	memcpy(_frame.particleUBOWriteLoacation, &(_frame.particleUBOData), sizeof(vkUtil::particleUBO));
 

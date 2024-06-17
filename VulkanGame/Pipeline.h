@@ -909,11 +909,11 @@ namespace vkInit {
         blendAttachmentState.colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA;;
         blendAttachmentState.blendEnable = VK_TRUE;
         blendAttachmentState.colorBlendOp = vk::BlendOp::eAdd;
-        blendAttachmentState.srcColorBlendFactor = vk::BlendFactor::eOne;
-        blendAttachmentState.dstColorBlendFactor = vk::BlendFactor::eOne;
+        blendAttachmentState.srcColorBlendFactor = vk::BlendFactor::eSrcAlpha;
+        blendAttachmentState.dstColorBlendFactor = vk::BlendFactor::eOneMinusSrcAlpha;
         blendAttachmentState.alphaBlendOp = vk::BlendOp::eAdd;
-        blendAttachmentState.srcAlphaBlendFactor = vk::BlendFactor::eSrcAlpha;
-        blendAttachmentState.dstAlphaBlendFactor = vk::BlendFactor::eDstAlpha;
+        blendAttachmentState.srcAlphaBlendFactor = vk::BlendFactor::eZero;
+        blendAttachmentState.dstAlphaBlendFactor = vk::BlendFactor::eOne;
 
         vk::PipelineColorBlendStateCreateInfo colorBlendState = make_color_blend_attachment_stage(blendAttachmentState);
         

@@ -97,6 +97,7 @@ namespace vkUtil {
 		vk::DescriptorBufferInfo uniformlightBufferDescriptor;
 		vk::DescriptorBufferInfo modelBufferDescriptor;
 		vk::DescriptorBufferInfo camPosBufferDescriptor;
+		vk::DescriptorBufferInfo camParticlePosBufferDescriptor;
 		
 		
 		particleUBO particleUBOData;
@@ -104,11 +105,15 @@ namespace vkUtil {
 		void* particleUBOWriteLoacation;
 		vk::DescriptorBufferInfo particleUBOBufferDescriptor;
 
+		Buffer particleCameraUBOBuffer;
+		void* particleCameraUBOWriteLoacation;
+		vk::DescriptorBufferInfo particleCameraUBOBufferDescriptor;
 
 
 		vk::DescriptorSet descriptorSet;
 		vk::DescriptorSet deferedDescriptorSet;
 		vk::DescriptorSet particleDescriptorSet;
+		vk::DescriptorSet particleCameraDescriptorSet;
 
 		vk::DescriptorSet shadowDescriptorSet;
 

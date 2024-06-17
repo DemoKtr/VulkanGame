@@ -34,11 +34,13 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			input.size = sizeof(UBO);
 			input.usage = vk::BufferUsageFlagBits::eUniformBuffer;
 			cameraDataBuffer = createBuffer(input);
+			particleCameraUBOBuffer = createBuffer(input);
 			input.size = sizeof(glm::vec4);
 			camPosBuffer  = createBuffer(input);
 
 			
 			cameraDataWriteLocation = logicalDevice.mapMemory(cameraDataBuffer.bufferMemory, 0, sizeof(UBO));
+			particleCameraUBOWriteLoacation = logicalDevice.mapMemory(particleCameraUBOBuffer.bufferMemory, 0, sizeof(UBO));
 			camPosWriteLoacation = logicalDevice.mapMemory(camPosBuffer.bufferMemory, 0, sizeof(glm::vec4));
 			
 			////////////
@@ -81,6 +83,11 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			camPosBufferDescriptor.buffer = camPosBuffer.buffer;
 			camPosBufferDescriptor.offset = 0;
 			camPosBufferDescriptor.range = sizeof(glm::vec4);
+
+			particleCameraUBOBufferDescriptor.buffer = particleCameraUBOBuffer.buffer;
+			particleCameraUBOBufferDescriptor.offset = 0;
+			particleCameraUBOBufferDescriptor.range = sizeof(UBO);
+
 
 			uniformBufferDescriptor.buffer = cameraDataBuffer.buffer;
 			uniformBufferDescriptor.offset = 0;
@@ -350,6 +357,17 @@ void vkUtil::SwapChainFrame::writeParticleDescriptor(vk::DescriptorBufferInfo &p
 		const VkBufferView* pTexelBufferView;
 	} VkWriteDescriptorSet;
 	*/
+
+	vk::WriteDescriptorSet particleCameraWriteInfo;
+	particleCameraWriteInfo.dstSet = particleCameraDescriptorSet;
+	particleCameraWriteInfo.dstBinding = 0;
+	particleCameraWriteInfo.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+	particleCameraWriteInfo.descriptorCount = 1;
+	particleCameraWriteInfo.descriptorType = vk::DescriptorType::eUniformBuffer;
+	particleCameraWriteInfo.pBufferInfo = &particleCameraUBOBufferDescriptor;
+
+	logicalDevice.updateDescriptorSets(particleCameraWriteInfo, nullptr);
+
 	vk::WriteDescriptorSet writeInfo;
 	
 
@@ -372,6 +390,8 @@ void vkUtil::SwapChainFrame::writeParticleDescriptor(vk::DescriptorBufferInfo &p
 
 	logicalDevice.updateDescriptorSets(writeInfo2, nullptr);
 
+	
+	
 
 
 		}
