@@ -872,7 +872,10 @@ namespace vkInit {
         vk::PipelineLayout particleGraphicPipelineLayout = create_pipeline_layout(specification.device, specification.particleGraphicDescriptorSetLayout, debugMode);
        
         
-        vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState = make_input_assembly_info();
+        //vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState = make_input_assembly_info();
+        vk::PipelineInputAssemblyStateCreateInfo inputAssemblyInfo = {};
+        inputAssemblyInfo.flags = vk::PipelineInputAssemblyStateCreateFlags();
+        inputAssemblyInfo.topology = vk::PrimitiveTopology::ePointList;
         vk::PipelineRasterizationStateCreateInfo rasterizationState = make_rasterizer_info();
        
        
@@ -897,7 +900,17 @@ namespace vkInit {
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
         vk::PipelineViewportStateCreateInfo viewportState = make_viewport_state(viewport, scissor);
-        vk::PipelineMultisampleStateCreateInfo multisampleState = make_multisampling_info();
+        
+
+        vk::PipelineMultisampleStateCreateInfo multisampling = {};
+        multisampling.flags = vk::PipelineMultisampleStateCreateFlags();
+        multisampling.sampleShadingEnable = VK_TRUE;
+        multisampling.rasterizationSamples = vk::SampleCountFlagBits::e1;
+        multisampling.minSampleShading = 0.2f;
+        multisampling.pSampleMask = nullptr;
+       
+
+
 
         vk::VertexInputBindingDescription bindingDescription = vkParticle::getParticleVBO();
         std::vector <vk::VertexInputAttributeDescription> attributeDescriptions = vkParticle::getParticleVAO();
@@ -918,12 +931,12 @@ namespace vkInit {
         vk::PipelineColorBlendStateCreateInfo colorBlendState = make_color_blend_attachment_stage(blendAttachmentState);
         
         vk::RenderPass renderpass = vkInit::create_particle_renderpass(specification.device, specification.depthFormat, specification.particleAttachment);
-        pipelineInfo.pInputAssemblyState = &inputAssemblyState;
+        pipelineInfo.pInputAssemblyState = &inputAssemblyInfo;
         pipelineInfo.renderPass = renderpass;
         pipelineInfo.layout = particleGraphicPipelineLayout;
         pipelineInfo.pRasterizationState = &rasterizationState;
 
-        pipelineInfo.pMultisampleState = &multisampleState;
+        pipelineInfo.pMultisampleState = &multisampling;
         pipelineInfo.pViewportState = &viewportState;
         pipelineInfo.pDepthStencilState = &depthStageInfo;
         rasterizationState.depthBiasEnable = VK_TRUE;

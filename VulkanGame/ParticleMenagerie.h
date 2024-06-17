@@ -12,7 +12,7 @@ public:
 	std::vector<vkParticle::Particle> particleData;
 	vk::Device logicalDevice;
 	bool benchmark = true;
-	int burstParticleCount = 2048;
+	int burstParticleCount = 512;
 	int numberOfEmiter = { 0 };
 	Buffer particleBuffer;
 	void finalization(FinalizationChunk finalizationChunk);

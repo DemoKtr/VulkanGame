@@ -71,7 +71,7 @@ void GraphicsEngine::make_assets(Scene* scene)
 
 
 
-	std::vector<const char*> particlefilenames = {"res/textures/fire.png","res/textures/gradient.png" };
+	std::vector<const char*> particlefilenames = {"res/textures/fir.jpg","res/textures/gradient.png" };
 	
 
 

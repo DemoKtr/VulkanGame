@@ -23,7 +23,7 @@ void main ()
 	vec2 texCoords2 = vec2(outGradientPosX,outGradientPosY);
 	vec4 col = texture(samplerColorMap, texCoords);
 	vec4 color = texture(samplerGradientRamp, texCoords2);
-	if(col.r==0.05f || col.g<0.05f,col.b<0.05f) col.a =0.0f;
+	if(col.r<0.05f || col.g<0.05f,col.b<0.05f) discard;
     // Pobierz kolor z tekstury
-    outFragColor = col* color;
+    outFragColor = col;
 }
