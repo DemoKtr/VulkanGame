@@ -12,6 +12,7 @@
 #include "Gbuffer.h"
 #include <set>
 
+
 void GraphicsEngine::make_assets(Scene* scene)
 {
 	meshes = new VertexMenagerie();
@@ -936,7 +937,7 @@ void GraphicsEngine::render_shadows_objects(vk::CommandBuffer commandBuffer, mes
 	starInstance += instanceCount;
 }
 
-void GraphicsEngine::render(Scene *scene,int &verticesCounter,float deltaTime)
+void GraphicsEngine::render(Scene *scene,int &verticesCounter,float deltaTime,Camera::Camera camera)
 {
 	verticesCounter = verticesonScene;
 	
@@ -984,7 +985,7 @@ void GraphicsEngine::render(Scene *scene,int &verticesCounter,float deltaTime)
 	computeParticleCommandBuffer.reset();
 	graphicParticleCommandBuffer.reset();
 	
-	prepare_frame(imageIndex, scene,deltaTime);
+	prepare_frame(imageIndex, scene,deltaTime,camera);
 
 	record_compute_commands(computeParticleCommandBuffer,imageIndex);
 	
@@ -1182,7 +1183,7 @@ void GraphicsEngine::create_framebuffers()
 
 
 
-void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float deltaTime)
+void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float deltaTime,Camera::Camera camera)
 {
 
 	vkUtil::SwapChainFrame& _frame = swapchainFrames[imageIndex];
@@ -1195,11 +1196,11 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), static_cast<float>(swapchainExtent.width) / static_cast<float>(swapchainExtent.height), 0.1f, 10214.0f);
 	projection[1][1] *= -1;
 
-	_frame.cameraData.view = view;
+	_frame.cameraData.view = camera.GetViewMatrix();
 	_frame.cameraData.projection = projection;
-	_frame.cameraData.viewProjection = projection * view;
+	_frame.cameraData.viewProjection = projection * camera.GetViewMatrix();
 	_frame.cameraData.heightScale = glm::vec4( 0.0001f);
-	_frame.camPos = glm::vec4(eye, 1.0f);
+	_frame.camPos = glm::vec4(camera.Position, 1.0f);
 	
 
 	

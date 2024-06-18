@@ -10,6 +10,8 @@
 #include "Cubemap.h"
 #include "ParticleMenagerie.h"
 #include "ParticleTexture.h"
+#include "Camera.h"
+
 
 class GraphicsEngine
 {
@@ -111,7 +113,7 @@ class GraphicsEngine
 
 	void make_assets(Scene* scene);
 	void prepare_scene(vk::CommandBuffer commandBuffer);
-	void prepare_frame(uint32_t imageIndex, Scene* scene, float deltaTime);
+	void prepare_frame(uint32_t imageIndex, Scene* scene, float deltaTime, Camera::Camera camera);
 
 
 	//Scene
@@ -140,7 +142,7 @@ class GraphicsEngine
 	void render_shadows_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& starInstance, uint32_t instanceCount);
 public:
 	GraphicsEngine(ivec2 screenSize, GLFWwindow* window,Scene* scene ,bool debugMode);
-	void render(Scene *scene,int &verticesCounter,float deltaTime);
+	void render(Scene *scene,int &verticesCounter,float deltaTime,Camera::Camera camera);
 	~GraphicsEngine();
 };
 

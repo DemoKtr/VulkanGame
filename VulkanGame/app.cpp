@@ -11,7 +11,7 @@ void App::build_glfw_window(ivec2 screenSize, bool debugMode)
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	//resizing breaks the swapchain, we'll disable it for now
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	glfwSetWindowUserPointer(window, this);
+	
 	//GLFWwindow* glfwCreateWindow (int width, int height, const char *title, GLFWmonitor *monitor, GLFWwindow *share)
 	if (window = glfwCreateWindow(screenSize.x, screenSize.y, "VulkanGame", nullptr, nullptr)) {
 		if (debugMode) {
@@ -23,6 +23,10 @@ void App::build_glfw_window(ivec2 screenSize, bool debugMode)
 			std::cout << "GLFW window creation failed\n";
 		}
 	}
+	glfwSetWindowUserPointer(window, this);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void App::calculateFrameRate()
@@ -67,11 +71,12 @@ void App::run()
 {
 	while (!glfwWindowShouldClose(window)) {
 		float currentFrame = static_cast<float>(glfwGetTime());
+		
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
-
+		processInput(window);
 		glfwPollEvents();
-		graphicsEngine->render(scene,verticesCounter,deltaTime);
+		graphicsEngine->render(scene,verticesCounter,deltaTime,camera);
 		calculateFrameRate();
 	}
 }
