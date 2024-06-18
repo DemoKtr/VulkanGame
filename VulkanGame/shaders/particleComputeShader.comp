@@ -40,15 +40,8 @@ void main()
 	particles[index].currentLifeTime -= ubo.deltaT;
 	if(particles[index].currentLifeTime > 0.0f){
 	
-	//if(particles[index].pos.y <-0.20)particles[index].pos.x += ubo.deltaT * particles[index].vel.x * 1.0f;
-	if(particles[index].pos.y <-0.15)particles[index].pos.x += ubo.deltaT * particles[index].vel.x * 5.0f;
-	else if(particles[index].pos.y <-0.1)particles[index].pos.x += ubo.deltaT * particles[index].vel.x * 4.0f;
-	else if(particles[index].pos.y <-0.05)particles[index].pos.x += ubo.deltaT * particles[index].vel.x * 3.0f;
-	else if(particles[index].pos.y <0.0)particles[index].pos.x += ubo.deltaT * particles[index].vel.x  * 2.0f;
-	else if(particles[index].pos.y <0.05)particles[index].pos.x += ubo.deltaT * particles[index].vel.x  * 1.0f;
-	else if(particles[index].pos.y <0.1)particles[index].pos.x += ubo.deltaT * particles[index].vel.x  * 0.5f;
-	else if(particles[index].pos.y <0.15)particles[index].pos.x += ubo.deltaT * particles[index].vel.x  * 0.25f;
-	else particles[index].pos.x += ubo.deltaT * particles[index].vel.x * 0.1f;
+	
+	particles[index].pos.x += ubo.deltaT * particles[index].vel.x * 1.0f;
 	particles[index].pos.y += ubo.deltaT*particles[index].vel.y ;
     particles[index].gradientPos.x -= 0.0001 * ubo.deltaT;
     particles[index].gradientPos.y -= 0.0001 * ubo.deltaT;

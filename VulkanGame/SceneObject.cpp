@@ -60,10 +60,10 @@ Light::Light()
 
 void Light::move()
 {
-	angle += 0.001f;
-	transform.setLocalPosition(glm::vec3(glm::cos(angle)*0.5f,1,glm::sin(angle)));
+	angle += 0.0001f;
+	//transform.setLocalPosition(glm::vec3(glm::cos(angle)*0.5f,1,glm::sin(angle)));
 //	std::cout << glm::cos(angle) << std::endl;
-	transform.computeModelMatrix();
+	//transform.computeModelMatrix();
 }
 
 Light::~Light()

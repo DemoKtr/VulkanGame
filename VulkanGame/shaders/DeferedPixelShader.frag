@@ -196,6 +196,6 @@ void main() {
 	col.b = texture(particleMap,inUV.xy).b;
 	col.r = texture(particleMap,inUV.xy).r;
 	col.g = texture(particleMap,inUV.xy).g;
-    outColor = vec4(col, 1.0f);
+    outColor = vec4(color, 1.0f);
 	
 }

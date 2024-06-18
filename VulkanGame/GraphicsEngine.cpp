@@ -1089,6 +1089,7 @@ void GraphicsEngine::render(Scene *scene,int &verticesCounter,float deltaTime)
 
 void GraphicsEngine::create_frame_resources()
 {
+
 	vkInit::descriptorSetLayoutData bindings;
 	bindings.count = 2;
 	bindings.types.push_back(vk::DescriptorType::eUniformBuffer);
@@ -1120,30 +1121,38 @@ void GraphicsEngine::create_frame_resources()
 	particleCameraBindings.types.push_back(vk::DescriptorType::eUniformBuffer);
 	
 	
-
-
+	
 	frameDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);
+	
 	deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
+	
 	shadowDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), shadowBindings);
 	particleComputeDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);
 	particleCameraGraphicDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), particleCameraBindings);
+
 	
 	//deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
 	
 	for (vkUtil::SwapChainFrame& frame : swapchainFrames) //referencja 
 	{
+		
 		frame.imageAvailable = vkInit::make_semaphore(device, debugMode);
 		frame.renderFinished = vkInit::make_semaphore(device, debugMode);
 		frame.computeFinished = vkInit::make_semaphore(device, debugMode);
 		frame.inFlight = vkInit::make_fence(device, debugMode);
-
+		
 		frame.make_descriptor_resources();
-
+		
 		frame.descriptorSet = vkInit::allocate_descriptor_set(device, frameDescriptorPool, frameSetLayout);
+	
 		frame.deferedDescriptorSet = vkInit::allocate_descriptor_set(device, deferedDescriptorPool, deferedSetLayout);
+		
 		frame.shadowDescriptorSet = vkInit::allocate_descriptor_set(device, shadowDescriptorPool, shadowSetLayout);
+		
 		frame.particleDescriptorSet = vkInit::allocate_descriptor_set(device, particleComputeDescriptorPool, particleComputeSetLayout);
+		
 		frame.particleCameraDescriptorSet = vkInit::allocate_descriptor_set(device, particleCameraGraphicDescriptorPool, particleCameraGraphicSetLayout);
+		
 		
 
 	}
@@ -1153,15 +1162,22 @@ void GraphicsEngine::create_frame_resources()
 
 void GraphicsEngine::create_framebuffers()
 {
+	
+	
 	vkInit::framebufferInput frameBufferInput;
 	frameBufferInput.device = device;
 	frameBufferInput.renderpass = renderpass;
 	frameBufferInput.swapchainExtent = swapchainExtent;
 	vkInit::make_framebuffers_withGbuffer(frameBufferInput, swapchainFrames, debugMode);
+	
 	frameBufferInput.renderpass = shadowRenderPass;
 	vkInit::make_shadow_framebuffers(frameBufferInput, swapchainFrames, debugMode);
+	
 	frameBufferInput.renderpass = particleRenderPass;
 	vkInit::make_particle_framebuffers(frameBufferInput, swapchainFrames, debugMode);
+	
+	
+	
 }
 
 
@@ -1196,7 +1212,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	for(std::pair<meshTypes,std::vector<SceneObject*>> pair: models)
  {
 		for (SceneObject* obj : pair.second) {
-			obj->getTransform().rotate(glm::vec3(0, 1,0), 0.1f* deltaTime);
+			//obj->getTransform().rotate(glm::vec3(0, 1,0), 0.1f* deltaTime);
 			obj->getTransform().computeModelMatrix();
 			//_frame.shadowData.modelPos[i] = glm::vec4(obj->getTransform().getGlobalPosition(), 1.0f);
 			_frame.modelTransforms[i++] = obj->getTransform().getModelMatrix();
@@ -1215,7 +1231,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	size_t j = 0;
 	for (Light* light : scene->lights) {
 		
-		if(j==0)light->move();
+		//if(j==0)light->move();
 		_frame.LightTransforms[j].mvp[5] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 		_frame.LightTransforms[j].mvp[0] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 		_frame.LightTransforms[j].mvp[1] = (shadowProj * glm::lookAt(light->transform.getGlobalPosition(), light->transform.getGlobalPosition() + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
