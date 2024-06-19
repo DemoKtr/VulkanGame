@@ -18,5 +18,6 @@ public:
 	std::vector<SceneObject*> sceneObjects;
 	std::vector<Light*> lights;
 	std::vector<ParticleEmiter*> particleEmiters;
+	void updateScene(float deltaTime);
 };
 

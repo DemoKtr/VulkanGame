@@ -76,6 +76,7 @@ void App::run()
 		lastFrame = currentFrame;
 		processInput(window);
 		glfwPollEvents();
+		scene->updateScene(deltaTime);
 		graphicsEngine->render(scene,verticesCounter,deltaTime,camera);
 		calculateFrameRate();
 	}

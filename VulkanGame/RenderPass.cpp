@@ -332,3 +332,8 @@ vk::RenderPass vkInit::create_particle_renderpass(vk::Device logicalDevice, vk::
 
 	return particleRenderPass;
 }
+
+vk::RenderPass vkInit::create_final_renderpass(vk::Device logicalDevice, vk::Format depthFormat, vk::Format swapchainImageFormat)
+{
+	return vk::RenderPass();
+}

@@ -45,7 +45,7 @@ protected:
 	Transform transform;
 public:
 	 virtual void draw() = 0;
-	 virtual void update() =0;
+	 virtual void update(float deltaTime) =0;
 	 Transform& getTransform();
 	 objectMaterial objMaterial;
 };
@@ -67,7 +67,7 @@ class Box : public SceneObject {
 	// Inherited via StaticSceneObject
 public:
 	void draw() override;
-	void update() override;
+	void update(float deltaTime) override;
 
 	Box();
 	~Box();
@@ -78,7 +78,7 @@ class Floor : public SceneObject {
 	// Inherited via StaticSceneObject
 public:
 	void draw() override;
-	void update() override;
+	void update(float deltaTime) override;
 
 	Floor();
 	~Floor();

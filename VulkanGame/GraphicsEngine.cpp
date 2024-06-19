@@ -1213,9 +1213,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	for(std::pair<meshTypes,std::vector<SceneObject*>> pair: models)
  {
 		for (SceneObject* obj : pair.second) {
-			//obj->getTransform().rotate(glm::vec3(0, 1,0), 0.1f* deltaTime);
-			obj->getTransform().computeModelMatrix();
-			//_frame.shadowData.modelPos[i] = glm::vec4(obj->getTransform().getGlobalPosition(), 1.0f);
+			
 			_frame.modelTransforms[i++] = obj->getTransform().getModelMatrix();
 		}
 		

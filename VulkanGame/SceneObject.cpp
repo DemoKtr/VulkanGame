@@ -4,7 +4,7 @@
 
 
 
-void SceneObject::update()
+void SceneObject::update(float deltaTime)
 {
 	
 }
@@ -18,8 +18,10 @@ void Box::draw()
 {
 }
 
-void Box::update()
+void Box::update(float deltaTime)
 {
+	transform.rotate(glm::vec3(1.0f,1.0f,0.0f),0.1*deltaTime);
+	transform.computeModelMatrix();
 }
 
 Box::Box()
@@ -37,8 +39,9 @@ void Floor::draw()
 {
 }
 
-void Floor::update()
+void Floor::update(float deltaTime)
 {
+	
 }
 
 Floor::Floor()
@@ -61,9 +64,9 @@ Light::Light()
 void Light::move()
 {
 	angle += 0.0001f;
-	//transform.setLocalPosition(glm::vec3(glm::cos(angle)*0.5f,1,glm::sin(angle)));
-//	std::cout << glm::cos(angle) << std::endl;
-	//transform.computeModelMatrix();
+	transform.setLocalPosition(glm::vec3(glm::cos(angle)*0.5f,1,glm::sin(angle)*0.5f));
+	
+	transform.computeModelMatrix();
 }
 
 Light::~Light()
