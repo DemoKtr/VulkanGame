@@ -22,5 +22,5 @@ void main() {
 	//if(zParticle == 1.0f)
 	//outColor = vec4(vec3(0.0f,0.0f,0.0f),1.0f);
 	//else outColor = vec4((texture(particleMap,inUV.xy).rgb),1.0f);
-	outColor = vec4((texture(albedoMap,inUV.xy).rgb),1.0f);
+	outColor = vec4((texture(particleMap,inUV.xy).rgb),1.0f);
 }
