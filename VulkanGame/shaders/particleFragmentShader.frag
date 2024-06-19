@@ -25,5 +25,5 @@ void main ()
 	vec4 color = texture(samplerGradientRamp, texCoords2);
 	if(col.r<0.05f || col.g<0.05f,col.b<0.05f) discard;
     // Pobierz kolor z tekstury
-    outFragColor = col;
+    outFragColor = vec4(col.xyz, gl_FragCoord.z);
 }

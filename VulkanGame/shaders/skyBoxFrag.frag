@@ -14,11 +14,13 @@ void main() {
 	vec3 color = vec3 (0.0f,0.0f,0.0f);
 	float zAlbedo = texture(albedoMap,inUV.xy).a;
 	float zParticle = texture(particleMap,inUV.xy).a;
-	if(zAlbedo < 1.0f && zParticle < 1.0f){
-		if(zParticle > zAlbedo) color = texture(albedoMap,inUV.xy).rgb;
-		else color = texture(particleMap,inUV.xy).rgb;
-	}
-	else color = texture(material, forwards).rgb;
-	outColor = vec4(color,1.0f);
-	//outColor = vec4(0.0, 1.0, 0.0, 1.0);
+	//if(zAlbedo < 1.0f && zParticle < 1.0f){
+		//if(zParticle < zAlbedo) color = texture(particleMap,inUV.xy).rgb;
+		//else color = texture(albedoMap,inUV.xy).rgb;
+	//}
+	//else color = texture(material, forwards).rgb;
+	if(zParticle == 1.0f)
+	outColor = vec4(vec3(0.0f,0.0f,0.0f),1.0f);
+	else outColor = vec4((texture(particleMap,inUV.xy).rgb),1.0f);
+	
 }

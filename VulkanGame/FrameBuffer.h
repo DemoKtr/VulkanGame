@@ -94,6 +94,42 @@ namespace vkInit {
 
 
 
+	void make_postprocess_framebuffers(framebufferInput inputChunk, std::vector<vkUtil::SwapChainFrame>& frames, bool debug) {
+
+
+		for (int i = 0; i < frames.size(); ++i) {
+
+			std::vector<vk::ImageView> attachments = {
+				frames[i].imageView,
+			};
+
+			vk::FramebufferCreateInfo framebufferInfo;
+			framebufferInfo.flags = vk::FramebufferCreateFlags();
+			framebufferInfo.renderPass = inputChunk.renderpass;
+			framebufferInfo.attachmentCount = attachments.size();
+			framebufferInfo.pAttachments = attachments.data();
+			framebufferInfo.width = inputChunk.swapchainExtent.width;
+			framebufferInfo.height = inputChunk.swapchainExtent.height;
+			framebufferInfo.layers = 1;
+
+			try {
+				frames[i].postProcessFramebuffer = inputChunk.device.createFramebuffer(framebufferInfo);
+
+				if (debug) {
+					std::cout << "Created postprocess framebuffer for frame " << i << std::endl;
+				}
+			}
+			catch (vk::SystemError err) {
+				if (debug) {
+					std::cout << "Failed to create postprocess framebuffer for frame " << i << std::endl;
+				}
+			}
+		}
+	}
+
+
+
+
 	void make_shadow_framebuffers(framebufferInput inputChunk, std::vector<vkUtil::SwapChainFrame>& frames, bool debug) {
 
 
@@ -131,10 +167,9 @@ namespace vkInit {
 	void make_framebuffers_withGbuffer(framebufferInput inputChunk, std::vector<vkUtil::SwapChainFrame>& frames, bool debug) {
 
 		for (int i = 0; i < frames.size(); ++i) {
-
+			
 			std::vector<vk::ImageView> attachments = {
-				frames[i].imageView, frames[i].gbuffer.position.view,frames[i].gbuffer.normal.view,frames[i].gbuffer.albedo.view,frames[i].gbuffer.arm.view, frames[i].gbuffer.T.view, frames[i].gbuffer.worldPos.view ,frames[i].depthBufferView,
-				//, frames[i].gbuffer.position.view, frames[i].gbuffer.normal.view, frames[i].gbuffer.albedo.view
+			frames[i].postProcessInputAttachment.view, frames[i].gbuffer.position.view,frames[i].gbuffer.normal.view,frames[i].gbuffer.albedo.view,frames[i].gbuffer.arm.view, frames[i].gbuffer.T.view, frames[i].gbuffer.worldPos.view ,frames[i].depthBufferView,
 			};
 
 			vk::FramebufferCreateInfo framebufferInfo;

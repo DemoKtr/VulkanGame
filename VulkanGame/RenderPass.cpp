@@ -1,6 +1,6 @@
 #include "RenderPass.h"
 
-vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil::Gbuffer gBuffer, vk::Format swapchainImageFormat, vk::Format depthFormat)
+vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil::Gbuffer gBuffer, vk::Format swapchainImageFormat, vk::Format depthFormat, vkUtil::FrameBufferAttachment postProcessImageInput)
 {
 
 
@@ -9,14 +9,16 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 
 
 	attachments[0].flags = vk::AttachmentDescriptionFlags();
-	attachments[0].format = swapchainImageFormat;
 	attachments[0].samples = vk::SampleCountFlagBits::e1;
 	attachments[0].loadOp = vk::AttachmentLoadOp::eClear;
 	attachments[0].storeOp = vk::AttachmentStoreOp::eStore;
-	attachments[0].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+	attachments[0].stencilLoadOp = vk::AttachmentLoadOp::eClear;
 	attachments[0].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
 	attachments[0].initialLayout = vk::ImageLayout::eUndefined;
-	attachments[0].finalLayout = vk::ImageLayout::ePresentSrcKHR;
+	attachments[0].finalLayout = vk::ImageLayout::eColorAttachmentOptimal;
+
+	attachments[0].format = postProcessImageInput.format;
+
 	//Define a general attachment, with its load/store operations
 
 	
@@ -151,9 +153,9 @@ vk::RenderPass vkInit::create_defered_renderpass(vk::Device logicalDevice,vkUtil
 	dependencies[2].srcSubpass = 1;
 	dependencies[2].dstSubpass = vk::SubpassExternal;
 	dependencies[2].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-	dependencies[2].dstStageMask = vk::PipelineStageFlagBits::eBottomOfPipe;
+	dependencies[2].dstStageMask = vk::PipelineStageFlagBits::eFragmentShader;
 	dependencies[2].srcAccessMask = vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite;
-	dependencies[2].dstAccessMask = vk::AccessFlagBits::eMemoryRead;
+	dependencies[2].dstAccessMask = vk::AccessFlagBits::eShaderRead;
 	dependencies[2].dependencyFlags = vk::DependencyFlagBits::eByRegion;
 
 
@@ -333,7 +335,7 @@ vk::RenderPass vkInit::create_particle_renderpass(vk::Device logicalDevice, vk::
 	return particleRenderPass;
 }
 
-vk::RenderPass vkInit::create_final_renderpass(vk::Device logicalDevice, vk::Format depthFormat, vk::Format swapchainImageFormat)
+vk::RenderPass vkInit::create_final_renderpass(vk::Device logicalDevice, vk::Format swapchainImageFormat)
 {
 	std::array<vk::AttachmentDescription,1> attachments;
 	vk::AttachmentReference attachmentRefertences[1];
@@ -349,9 +351,6 @@ vk::RenderPass vkInit::create_final_renderpass(vk::Device logicalDevice, vk::For
 	attachments[0].initialLayout = vk::ImageLayout::eUndefined;
 	attachments[0].finalLayout = vk::ImageLayout::ePresentSrcKHR;
 	//Define a general attachment, with its load/store operations
-
-
-
 
 	/*
 	attachments[1].flags = vk::AttachmentDescriptionFlags();
@@ -429,6 +428,18 @@ vk::RenderPass vkInit::create_final_renderpass(vk::Device logicalDevice, vk::For
 	renderPassInfo.pSubpasses = subpassDescriptions.data();
 	renderPassInfo.dependencyCount = 2;
 	renderPassInfo.pDependencies = dependencies.data();
-	vk::RenderPass renderpass = logicalDevice.createRenderPass(renderPassInfo);
+	vk::RenderPass renderpass = {};
+	
+	try {
+		
+		renderpass = logicalDevice.createRenderPass(renderPassInfo);
+	
+		
+	}
+	catch (vk::SystemError err) {
+		
+			std::cout << "Failed create renderpass " << std::endl;
+		
+	}
 	return renderpass;
 }

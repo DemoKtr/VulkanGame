@@ -213,6 +213,7 @@ void GraphicsEngine::create_pipeline()
 	specification.geometryDescriptorSetLayouts = { frameSetLayout,meshSetLayout };
 	specification.deferedDescriptorSetLayouts = { deferedSetLayout};
 	specification.gbuffer = swapchainFrames[0].gbuffer;
+	specification.postProcessImageInput = swapchainFrames[0].postProcessInputAttachment;
 
 	vkInit::GraphicsPipelineOutBundle output = vkInit::create_defered_pipelines(specification,debugMode);
 	layout = output.layout;
@@ -251,6 +252,22 @@ void GraphicsEngine::create_pipeline()
 	particleComputeLayout = particleOutput.particleComputePipelineLayout;
 	particleComputePipeline = particleOutput.particleComputePipeline;
 	particleRenderPass = particleOutput.particleRenderPass;
+
+
+
+	vkInit::PostProcessPipelineInBundle postProcessPipelineInput;
+	postProcessPipelineInput.device = device;
+	postProcessPipelineInput.vertexFilePath = "shaders/skyBoxVert.spv";
+	postProcessPipelineInput.fragmentFilePath = "shaders/skyBoxFrag.spv";
+	postProcessPipelineInput.skyBoxSetLayout = {skyBoxDescriptorSetLayout,skyBoxTextureSetLayout};
+	postProcessPipelineInput.swapchainExtent = swapchainExtent;
+	postProcessPipelineInput.swapchainImageFormat = swapchainFormat;
+	vkInit::PostProcessGraphicsPipelineOutBundle postProcessOutput = vkInit::create_postprocess_pipelines(postProcessPipelineInput,debugMode);
+	skyBoxRenderPass = postProcessOutput.renderpass;
+    skyBoxPipelineLayout = postProcessOutput.skyBoxPipelineLayout;
+	skyBoxPipeline = postProcessOutput.skyBoxgraphicsPipeline;
+
+
 }
 void GraphicsEngine::create_swapchain()
 {
@@ -392,7 +409,7 @@ void GraphicsEngine::create_descriptor_set_layouts()
 
 	frameSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
-	bindings.count = 10;
+	bindings.count = 9;
 	bindings.indices[0] = 0;
 	bindings.indices[1] = 1;
 	bindings.types[0] = vk::DescriptorType::eInputAttachment;
@@ -434,9 +451,6 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	bindings.counts.push_back(1);
 	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
 	bindings.indices.push_back(9);
-	bindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
-	bindings.counts.push_back(1);
-	bindings.stages.push_back(vk::ShaderStageFlagBits::eFragment);
 	deferedSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
 	bindings.count = 2;
@@ -687,69 +701,11 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 	
 	commandBuffer.endRenderPass();
 	
-	/*
-	vk::ImageMemoryBarrier barrier = {};
-	barrier.sType = vk::StructureType::eImageMemoryBarrier;
-	barrier.srcAccessMask = vk::AccessFlagBits::eHostWrite;
-	barrier.dstAccessMask = vk::AccessFlagBits::eMemoryRead;
-	barrier.oldLayout = vk::ImageLayout::eUndefined;
-	barrier.newLayout = vk::ImageLayout::eDepthStencilReadOnlyOptimal;
-	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	barrier.image = swapchainFrames[frameNumber].shadowMapBuffer.shadowBufferDepthAttachment.image;
-	barrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eDepth;
-	barrier.subresourceRange.baseMipLevel = 0;
-	barrier.subresourceRange.levelCount = 1;
-	barrier.subresourceRange.baseArrayLayer = 0;
-	barrier.subresourceRange.layerCount = 12;
-
-	vk::BufferMemoryBarrier vaoBarrier = {};
-	vaoBarrier.sType = vk::StructureType::eBufferMemoryBarrier;
-	vaoBarrier.srcAccessMask = vk::AccessFlagBits::eVertexAttributeRead; // Odczyt pamiêci Ÿród³owej
-	vaoBarrier.dstAccessMask = vk::AccessFlagBits::eVertexAttributeRead; // Odczyt pamiêci docelowej
-	vaoBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	vaoBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	vaoBarrier.buffer = meshes->indexBuffer.buffer; // Twój bufor wierzcho³ków
-	vaoBarrier.offset = 0;
-	vaoBarrier.size = VK_WHOLE_SIZE;
-	vk::BufferMemoryBarrier vboBarrier = {};
-	vboBarrier.sType = vk::StructureType::eBufferMemoryBarrier;
-	vboBarrier.srcAccessMask = vk::AccessFlagBits::eVertexAttributeRead; // Odczyt pamiêci Ÿród³owej
-	vboBarrier.dstAccessMask = vk::AccessFlagBits::eVertexAttributeRead; // Odczyt pamiêci docelowej
-	vboBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	vboBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	vboBarrier.buffer = meshes->vertexBuffer.buffer; // Twój bufor wierzcho³ków
-	vboBarrier.offset = 0;
-	vboBarrier.size = VK_WHOLE_SIZE;
 	
 
-	commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eHost, vk::PipelineStageFlagBits::eBottomOfPipe, vk::DependencyFlags(), nullptr, nullptr, barrier);
-	commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eVertexInput, vk::PipelineStageFlagBits::eVertexInput, vk::DependencyFlags(), nullptr, vaoBarrier,nullptr);
-	commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eVertexInput, vk::PipelineStageFlagBits::eVertexInput, vk::DependencyFlags(), nullptr, vboBarrier,nullptr);
-	*/
 
 
-
-	vk::ImageMemoryBarrier barrier;
-	barrier.oldLayout = vk::ImageLayout::eColorAttachmentOptimal;
-	barrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-	barrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
-	barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
-	barrier.image = swapchainFrames[imageIndex].particleAttachment.image; // Twoje vk::Image
-	barrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
-	barrier.subresourceRange.baseMipLevel = 0;
-	barrier.subresourceRange.levelCount = 1;
-	barrier.subresourceRange.baseArrayLayer = 0;
-	barrier.subresourceRange.layerCount = 1;
-
-	commandBuffer.pipelineBarrier(
-		vk::PipelineStageFlagBits::eColorAttachmentOutput, // source stage
-		vk::PipelineStageFlagBits::eFragmentShader, // destination stage
-		{}, // dependency flags
-		nullptr, // memory barriers
-		nullptr, // buffer memory barriers
-		barrier // image memory barriers
-	);
+	
 
 	vk::RenderPassBeginInfo renderPassInfo = {};
 	renderPassInfo.renderPass = renderpass;
@@ -792,6 +748,73 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, deferedLayout, 0, swapchainFrames[imageIndex].deferedDescriptorSet, nullptr);
 	
+
+	commandBuffer.draw(3, 1, 0, 0);
+	commandBuffer.endRenderPass();
+	vk::ImageMemoryBarrier particlebarrier;
+	particlebarrier.oldLayout = vk::ImageLayout::eColorAttachmentOptimal;
+	particlebarrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	particlebarrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+	particlebarrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+	particlebarrier.image = swapchainFrames[imageIndex].particleAttachment.image; // Twoje vk::Image
+	particlebarrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+	particlebarrier.subresourceRange.baseMipLevel = 0;
+	particlebarrier.subresourceRange.levelCount = 1;
+	particlebarrier.subresourceRange.baseArrayLayer = 0;
+	particlebarrier.subresourceRange.layerCount = 1;
+
+	commandBuffer.pipelineBarrier(
+		vk::PipelineStageFlagBits::eColorAttachmentOutput, // source stage
+		vk::PipelineStageFlagBits::eFragmentShader, // destination stage
+		{}, // dependency flags
+		nullptr, // memory barriers
+		nullptr, // buffer memory barriers
+		particlebarrier // image memory barriers
+	);
+	vk::ImageMemoryBarrier lightbarrier;
+	lightbarrier.oldLayout = vk::ImageLayout::eColorAttachmentOptimal;
+	lightbarrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	lightbarrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+	lightbarrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+	lightbarrier.image = swapchainFrames[imageIndex].postProcessInputAttachment.image; // Twoje vk::Image
+	lightbarrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+	lightbarrier.subresourceRange.baseMipLevel = 0;
+	lightbarrier.subresourceRange.levelCount = 1;
+	lightbarrier.subresourceRange.baseArrayLayer = 0;
+	lightbarrier.subresourceRange.layerCount = 1;
+
+	commandBuffer.pipelineBarrier(
+		vk::PipelineStageFlagBits::eColorAttachmentOutput, // source stage
+		vk::PipelineStageFlagBits::eFragmentShader, // destination stage
+		{}, // dependency flags
+		nullptr, // memory barriers
+		nullptr, // buffer memory barriers
+		lightbarrier // image memory barriers
+	);
+
+
+
+
+	vk::RenderPassBeginInfo skyBoxRenderpassInfo = {};
+	skyBoxRenderpassInfo.renderPass = skyBoxRenderPass;
+	skyBoxRenderpassInfo.framebuffer = swapchainFrames[imageIndex].postProcessFramebuffer;
+	skyBoxRenderpassInfo.renderArea.offset.x = 0;
+	skyBoxRenderpassInfo.renderArea.offset.y = 0;
+	skyBoxRenderpassInfo.renderArea.extent = swapchainExtent;
+
+	
+
+	std::vector<vk::ClearValue> PostProcessclearValues = { {colorClear} };
+
+	skyBoxRenderpassInfo.clearValueCount = PostProcessclearValues.size();
+	skyBoxRenderpassInfo.pClearValues = PostProcessclearValues.data();
+
+	commandBuffer.beginRenderPass(&skyBoxRenderpassInfo, vk::SubpassContents::eInline);
+	if (skyBoxPipeline == VK_NULL_HANDLE) std::cout << "KURWWWWWWWWWWWWWWWWYUYUYUYUYUYUYUYUYUYUYUYUYUYUYUYUYU"<<std::endl;
+	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, skyBoxPipeline);
+	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, skyBoxPipelineLayout, 0, swapchainFrames[imageIndex].skyBoxDescriptorSet, nullptr);
+	cubemap->use(commandBuffer,skyBoxPipelineLayout);
+
 
 	commandBuffer.draw(3, 1, 0, 0);
 	commandBuffer.endRenderPass();
@@ -1153,7 +1176,7 @@ void GraphicsEngine::create_frame_resources()
 	
 
 	vkInit::descriptorSetLayoutData gbindings;
-	gbindings.count = 10;
+	gbindings.count = 9;
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //pos
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //normals
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //albedo
@@ -1163,7 +1186,6 @@ void GraphicsEngine::create_frame_resources()
 	gbindings.types.push_back(vk::DescriptorType::eUniformBuffer); //camPos
 	gbindings.types.push_back(vk::DescriptorType::eCombinedImageSampler); //camPos
 	gbindings.types.push_back(vk::DescriptorType::eInputAttachment); //worldPos
-	gbindings.types.push_back(vk::DescriptorType::eCombinedImageSampler); //particles
 	
 
 	vkInit::descriptorSetLayoutData shadowBindings;
@@ -1238,6 +1260,8 @@ void GraphicsEngine::create_framebuffers()
 	
 	frameBufferInput.renderpass = particleRenderPass;
 	vkInit::make_particle_framebuffers(frameBufferInput, swapchainFrames, debugMode);
+	frameBufferInput.renderpass = skyBoxRenderPass;
+	vkInit::make_postprocess_framebuffers(frameBufferInput, swapchainFrames, debugMode);
 	
 	
 	
@@ -1311,11 +1335,15 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	_frame.particleUBOData.destZ = 0.0f;//cos(glm::radians(deltaTime * 360.0f)) * 0.1f - sin(glm::radians(deltaTime * 360.0f)) * 0.1f;
 	_frame.particleUBOData.particleCount = particles->burstParticleCount * particles->numberOfEmiter;
 	
+	_frame.skyboxData.forwards = glm::vec4(camera.Front,1.0f);
+	_frame.skyboxData.right = glm::vec4(camera.Right,1.0f);
+	_frame.skyboxData.up = glm::vec4(camera.Up,1.0f);
 	
 	memcpy(_frame.cameraDataWriteLocation, &(_frame.cameraData), sizeof(vkUtil::UBO));
 	memcpy(_frame.particleCameraUBOWriteLoacation, &(_frame.cameraData), sizeof(vkUtil::UBO));
 	memcpy(_frame.camPosWriteLoacation, &(_frame.camPos), sizeof(glm::vec4));
 	memcpy(_frame.particleUBOWriteLoacation, &(_frame.particleUBOData), sizeof(vkUtil::particleUBO));
+	memcpy(_frame.skyboxUBOWriteLoacation, &(_frame.skyboxData), sizeof(vkUtil::SkyBoxUBO));
 
 	memcpy(_frame.lightDataWriteLocation, (_frame.LightTransforms.data()), j * sizeof(vkUtil::PointLight));
 	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), i * sizeof(glm::mat4));
@@ -1324,4 +1352,5 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	_frame.writeGbufferDescriptor(_frame.deferedDescriptorSet, device);
 	_frame.shadowDescripotrsWrite();
 	_frame.writeParticleDescriptor(particles->particleBufferDescriptor);
+	_frame.write_skybox_descriptor();
 }

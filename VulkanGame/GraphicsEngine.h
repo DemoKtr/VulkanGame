@@ -68,6 +68,14 @@ class GraphicsEngine
 	vk::CommandPool computeCommandPool;
 	
 
+
+	//shadows
+	vk::Pipeline skyBoxPipeline;
+	vk::RenderPass skyBoxRenderPass;
+	vk::PipelineLayout skyBoxPipelineLayout;
+
+
+
 	//synchronizers 
 	int maxFramesInFlight, frameNumber;
 

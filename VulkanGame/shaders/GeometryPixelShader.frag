@@ -54,7 +54,7 @@ void main() {
 	texCoords = (ParallaxMapping(fs_in.TexCoords,  viewDir));  
 	
 	normal = normalize(normal*2.0f-1.0f);
-	gPosition = vec4(fs_in.TangentFragPos,1.0f);
+	gPosition = vec4(fs_in.TangentFragPos, gl_FragCoord.z);
 	gNormal.rgb = normal;
 	vec3 arm = texture(armMap,texCoords).rgb;
 	gAlbedoSpec.rgb =pow((texture(albedo,texCoords).rgb),vec3(2.2f));

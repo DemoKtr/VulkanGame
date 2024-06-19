@@ -30,7 +30,7 @@ out gl_PerVertex
 
 void main () 
 {
-  gl_PointSize = 1.0;
+  gl_PointSize = 4.0;
 
 	vec3 cameraDirection = normalize(vec3(inPos,0.0f) - cameraData.camPos.xyz);
 	vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), cameraDirection));

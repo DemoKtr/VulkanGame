@@ -57,7 +57,7 @@ void vkGbuffer::createAttachment(attachmentBundle attachmentDescription)
 
 }
 
-void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::Device logicalDevice,vkUtil::Gbuffer* gbuffer, vkUtil::FrameBufferAttachment* attachmnent)
+void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::Device logicalDevice,vkUtil::Gbuffer* gbuffer, vkUtil::FrameBufferAttachment* attachmnent, vkUtil::FrameBufferAttachment* postProcessInputAttachment)
 {
 	attachmentBundle attachmentDescription;
 	attachmentDescription.logicalDevice = logicalDevice;
@@ -79,6 +79,8 @@ void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::De
 	createAttachment(attachmentDescription);
 	attachmentDescription.canUseAsSampledImage = true;
 	attachmentDescription.attachment = attachmnent;
+	createAttachment(attachmentDescription);
+	attachmentDescription.attachment = postProcessInputAttachment;
 	createAttachment(attachmentDescription);
 	attachmentDescription.canUseAsSampledImage = false;
 	attachmentDescription.attachment = &gbuffer->albedo;

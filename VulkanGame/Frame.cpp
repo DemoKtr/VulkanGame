@@ -38,11 +38,15 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			input.size = sizeof(glm::vec4);
 			camPosBuffer  = createBuffer(input);
 
+			input.size = sizeof(SkyBoxUBO);
+			skyboxUBOBuffer = createBuffer(input);
+
 			
 			cameraDataWriteLocation = logicalDevice.mapMemory(cameraDataBuffer.bufferMemory, 0, sizeof(UBO));
+			
 			particleCameraUBOWriteLoacation = logicalDevice.mapMemory(particleCameraUBOBuffer.bufferMemory, 0, sizeof(UBO));
 			camPosWriteLoacation = logicalDevice.mapMemory(camPosBuffer.bufferMemory, 0, sizeof(glm::vec4));
-			
+			skyboxUBOWriteLoacation = logicalDevice.mapMemory(skyboxUBOBuffer.bufferMemory,0,sizeof(SkyBoxUBO));
 			////////////
 
 			input.size = sizeof(particleUBO);
@@ -83,6 +87,11 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			camPosBufferDescriptor.buffer = camPosBuffer.buffer;
 			camPosBufferDescriptor.offset = 0;
 			camPosBufferDescriptor.range = sizeof(glm::vec4);
+
+
+			skyboxUBOBufferDescriptor.buffer = skyboxUBOBuffer.buffer;
+			skyboxUBOBufferDescriptor.offset = 0;
+			skyboxUBOBufferDescriptor.range = sizeof(SkyBoxUBO);
 
 			particleCameraUBOBufferDescriptor.buffer = particleCameraUBOBuffer.buffer;
 			particleCameraUBOBufferDescriptor.offset = 0;
@@ -319,21 +328,9 @@ void vkUtil::SwapChainFrame::writeGbufferDescriptor(vk::DescriptorSet descriptor
 			descriptorWriteworldPos.pImageInfo = &imageDescriptorworldPos;
 
 
-			vk::DescriptorImageInfo imageDescriptorParticle;
-			imageDescriptorParticle.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-			imageDescriptorParticle.imageView = particleAttachment.view;
-			imageDescriptorParticle.sampler = shadowMapBuffer.sampler;
-			vk::WriteDescriptorSet imageParticle;
-			imageParticle.dstSet = deferedDescriptorSet;
-			imageParticle.dstBinding = 9;
-			imageParticle.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
-			imageParticle.descriptorCount = 1;
-			imageParticle.descriptorType = vk::DescriptorType::eCombinedImageSampler;
-			imageParticle.pImageInfo = &imageDescriptorParticle;
-
 
 			std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {
-				descriptorWritePos,descriptorWriteNormal,descriptorWriteAlbedo,descriptorWritearm,descriptorWriteT,writeInfo,camPosWriteInfo,imageShadow,descriptorWriteworldPos,imageParticle,
+				descriptorWritePos,descriptorWriteNormal,descriptorWriteAlbedo,descriptorWritearm,descriptorWriteT,writeInfo,camPosWriteInfo,imageShadow,descriptorWriteworldPos,
 			};
 
 			logicalDevice.updateDescriptorSets(writeDescriptorSets, nullptr);
@@ -396,6 +393,50 @@ void vkUtil::SwapChainFrame::writeParticleDescriptor(vk::DescriptorBufferInfo &p
 
 		}
 
+void vkUtil::SwapChainFrame::write_skybox_descriptor()
+{
+	vk::WriteDescriptorSet skyboxCameraDescriptor;
+	skyboxCameraDescriptor.dstSet = skyBoxDescriptorSet;
+	skyboxCameraDescriptor.dstBinding = 0;
+	skyboxCameraDescriptor.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+	skyboxCameraDescriptor.descriptorCount = 1;
+	skyboxCameraDescriptor.descriptorType = vk::DescriptorType::eUniformBuffer;
+	skyboxCameraDescriptor.pBufferInfo = &skyboxUBOBufferDescriptor;
+
+
+
+	vk::DescriptorImageInfo postProcessInputAttachmentImage;
+	postProcessInputAttachmentImage.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	postProcessInputAttachmentImage.imageView = postProcessInputAttachment.view;
+	postProcessInputAttachmentImage.sampler = shadowMapBuffer.sampler;
+	vk::WriteDescriptorSet postProcessInputDescriptor;
+	postProcessInputDescriptor.dstSet = skyBoxDescriptorSet;
+	postProcessInputDescriptor.dstBinding = 1;
+	postProcessInputDescriptor.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+	postProcessInputDescriptor.descriptorCount = 1;
+	postProcessInputDescriptor.descriptorType = vk::DescriptorType::eCombinedImageSampler;
+	postProcessInputDescriptor.pImageInfo = &postProcessInputAttachmentImage;
+
+	vk::DescriptorImageInfo particleImage;
+	particleImage.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	particleImage.imageView = particleAttachment.view;
+	particleImage.sampler = shadowMapBuffer.sampler;
+	vk::WriteDescriptorSet particleDescriptor;
+	particleDescriptor.dstSet = skyBoxDescriptorSet;
+	particleDescriptor.dstBinding = 2;
+	particleDescriptor.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+	particleDescriptor.descriptorCount = 1;
+	particleDescriptor.descriptorType = vk::DescriptorType::eCombinedImageSampler;
+	particleDescriptor.pImageInfo = &particleImage;
+
+
+	std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {
+				skyboxCameraDescriptor, postProcessInputDescriptor, particleDescriptor
+	};
+
+	logicalDevice.updateDescriptorSets(writeDescriptorSets, nullptr);
+}
+
 
 
 
@@ -424,6 +465,10 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.freeMemory(camPosBuffer.bufferMemory);
 			logicalDevice.destroyBuffer(camPosBuffer.buffer);
 
+
+			logicalDevice.unmapMemory(skyboxUBOBuffer.bufferMemory);
+			logicalDevice.freeMemory(skyboxUBOBuffer.bufferMemory);
+			logicalDevice.destroyBuffer(skyboxUBOBuffer.buffer);
 
 			logicalDevice.unmapMemory(particleCameraUBOBuffer.bufferMemory);
 			logicalDevice.freeMemory(particleCameraUBOBuffer.bufferMemory);

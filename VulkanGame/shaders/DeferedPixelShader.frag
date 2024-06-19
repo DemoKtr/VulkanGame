@@ -8,7 +8,6 @@ layout (input_attachment_index = 4, binding = 4) uniform subpassInput inputT;
 layout (input_attachment_index = 5, binding = 8) uniform subpassInput inputWorldPos;
 
 layout(set=0,binding=7) uniform sampler2DArray depthMap;
-layout(set=0,binding=9) uniform sampler2D particleMap;
 
 struct PointLight{
 		vec4 position;
@@ -188,14 +187,6 @@ void main() {
     // gamma correct
     color = pow(color, vec3(1.0/2.2)); 
 
-	//vec3 c =  vec3(0.0f);
-	//c.r = texture(depthMap,vec3(inUV.xy,1)).r;
-	//c.g = texture(depthMap,vec3(inUV.xy,7)).r;
-	//c.b = texture(depthMap,vec3(inUV.xy,3)).r;
-	vec3 col = vec3(0.0f);
-	col.b = texture(particleMap,inUV.xy).b;
-	col.r = texture(particleMap,inUV.xy).r;
-	col.g = texture(particleMap,inUV.xy).g;
-    outColor = vec4(color, 1.0f);
+    outColor = vec4(color,subpassLoad(inputPosition).a);
 	
 }

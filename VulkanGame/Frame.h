@@ -30,6 +30,11 @@ namespace vkUtil {
 		int32_t particleCount{0};
 	};
 
+	struct SkyBoxUBO {
+		glm::vec4 forwards;
+		glm::vec4 right;
+		glm::vec4 up;
+	};
 
 
 	/**
@@ -47,6 +52,7 @@ namespace vkUtil {
 		vk::Framebuffer framebuffer;
 		vk::Framebuffer shadowFramebuffer;
 		vk::Framebuffer particleFramebuffer;
+		vk::Framebuffer postProcessFramebuffer;
 
 		//zBuffer
 		vk::Image depthBuffer;
@@ -83,6 +89,7 @@ namespace vkUtil {
 
 	
 		FrameBufferAttachment particleAttachment;
+		FrameBufferAttachment postProcessInputAttachment;
 
 		std::vector<glm::mat4> modelTransforms;
 		std::vector<PointLight> LightTransforms;
@@ -119,7 +126,10 @@ namespace vkUtil {
 
 		vk::DescriptorSet skyBoxDescriptorSet;
 
-
+		SkyBoxUBO	skyboxData;
+		Buffer skyboxUBOBuffer;
+		void* skyboxUBOWriteLoacation;
+		vk::DescriptorBufferInfo skyboxUBOBufferDescriptor;
 
 		void shadowDescripotrsWrite();
 		
@@ -129,6 +139,7 @@ namespace vkUtil {
 		void write_descriptor_set();
 		void writeGbufferDescriptor(vk::DescriptorSet descriptorSet, vk::Device logicalDevice);
 		void writeParticleDescriptor(vk::DescriptorBufferInfo &particleBufferDescriptor);
+		void write_skybox_descriptor();
 		void destroy();
 
 	};
