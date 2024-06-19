@@ -18,6 +18,17 @@ namespace vkImage {
 		vk::DescriptorPool descriptorPool;
 
 	};
+
+	struct skyBoxTextureInputChunk {
+		vk::Device logicalDevice;
+		vk::PhysicalDevice physicalDevice;
+		std::vector<const char*> filenames;
+		vk::CommandBuffer commandBuffer;
+		vk::Queue queue;
+		vk::DescriptorSetLayout layout;
+		vk::DescriptorPool descriptorPool;
+	};
+
 	struct ImageInputChunk {
 		vk::Device logicalDevice;
 		vk::PhysicalDevice physicalDevice;
@@ -29,6 +40,8 @@ namespace vkImage {
 		uint32_t arrayCount;
 		vk::ImageCreateFlags flags;
 	};
+
+
 
 	struct BufferImageCopyJob {
 		vk::CommandBuffer commandBuffer;

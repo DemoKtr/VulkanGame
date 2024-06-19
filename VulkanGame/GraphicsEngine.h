@@ -106,7 +106,11 @@ class GraphicsEngine
 	vk::DescriptorPool shadowDescriptorPool;
 
 
-	
+	vk::DescriptorSetLayout skyBoxDescriptorSetLayout;
+	vk::DescriptorPool skyBoxDescriptorPool;
+
+	vk::DescriptorSetLayout skyBoxTextureSetLayout;
+	vk::DescriptorPool skyBoxTextureDescriptorPool;
 
 
 	vkImage::Cubemap* cubemap;

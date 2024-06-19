@@ -1,10 +1,10 @@
 #include "Cubemap.h"
 #include "Memory.h"
 #include "Descrpitors.h"
-vkImage::Cubemap::Cubemap(TextureInputChunk input) {
+vkImage::Cubemap::Cubemap(skyBoxTextureInputChunk input) {
 	logicalDevice = input.logicalDevice;
 	physicalDevice = input.physicalDevice;
-	filenames = input.diffusefilenames;
+	filenames = input.filenames;
 	commandBuffer = input.commandBuffer;
 	queue = input.queue;
 	layout = input.layout;
@@ -45,7 +45,7 @@ vkImage::Cubemap::~Cubemap() {
 void vkImage::Cubemap::load() {
 
 	for (int i = 0; i < 6; ++i) {
-		pixels[i] = stbi_load(filenames, &width, &height, &channels, STBI_rgb_alpha);
+		pixels[i] = stbi_load(filenames[i], &width, &height, &channels, STBI_rgb_alpha);
 		if (!pixels) {
 			std::cout << "Unable to load: " << filenames[i] << std::endl;
 		}

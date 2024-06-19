@@ -128,6 +128,29 @@ void GraphicsEngine::make_assets(Scene* scene)
 	particleTexture = new vkImage::ParticleTexture(particleTextureInfo);
 
 
+
+
+	bindings.count = 1;
+	bindings.types[0] = vk::DescriptorType::eCombinedImageSampler;
+	skyBoxTextureDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(filenames.size()) + 1, bindings);
+
+	vkImage::skyBoxTextureInputChunk skyBoxTextureInput;
+	skyBoxTextureInput.commandBuffer = maincommandBuffer;
+	skyBoxTextureInput.queue = graphicsQueue;
+	skyBoxTextureInput.logicalDevice = device;
+	skyBoxTextureInput.physicalDevice = physicalDevice;
+	skyBoxTextureInput.layout = skyBoxTextureSetLayout;
+	skyBoxTextureInput.descriptorPool = skyBoxTextureDescriptorPool;
+	skyBoxTextureInput.filenames = { {
+			"tex/front.bmp",  //x+
+			"tex/back.bmp",   //x-
+			"tex/left.bmp",   //y+
+			"tex/right.bmp",  //y-
+			"tex/bottom.bmp", //z+
+			"tex/top.bmp",    //z-
+	} };
+	cubemap = new vkImage::Cubemap(skyBoxTextureInput);
+
 }
 
 void GraphicsEngine::prepare_scene(vk::CommandBuffer commandBuffer)
@@ -304,10 +327,14 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyDescriptorSetLayout(meshSetLayout);
 	device.destroyDescriptorSetLayout(particleCameraGraphicSetLayout);
 	device.destroyDescriptorSetLayout(particleTextureGraphicSetLayout);
+	device.destroyDescriptorSetLayout(skyBoxDescriptorSetLayout);
+	device.destroyDescriptorSetLayout(skyBoxTextureSetLayout);
 	device.destroyDescriptorPool(meshDescriptorPool);
 	device.destroyDescriptorPool(particleTextureGraphicDescriptorPool);
 	device.destroyDescriptorPool(particleComputeDescriptorPool);
 	device.destroyDescriptorPool(particleCameraGraphicDescriptorPool);
+	device.destroyDescriptorPool(skyBoxDescriptorPool);
+	device.destroyDescriptorPool(skyBoxTextureDescriptorPool);
 	
 	device.destroyDescriptorPool(shadowDescriptorPool);
 	
@@ -481,6 +508,33 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	bindings.counts[0] = 1;
 	bindings.stages[0] = vk::ShaderStageFlagBits::eVertex;
 	particleCameraGraphicSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+
+
+	bindings.count = 3;
+	bindings.indices[0] = 0;
+	bindings.indices[1] = 1;
+	bindings.indices[2] = 2;
+	bindings.types[0] = vk::DescriptorType::eUniformBuffer;
+	bindings.types[1] = vk::DescriptorType::eCombinedImageSampler;
+	bindings.types[2] = vk::DescriptorType::eCombinedImageSampler;
+	bindings.counts[0] = 1;
+	bindings.counts[1] = 1;
+	bindings.counts[2] = 1;
+	bindings.stages[0] = vk::ShaderStageFlagBits::eVertex;
+	bindings.stages[1] = vk::ShaderStageFlagBits::eFragment;
+	bindings.stages[2] = vk::ShaderStageFlagBits::eFragment;
+
+
+	skyBoxDescriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+
+
+	bindings.count = 1;
+	bindings.indices[0] = 0;
+	bindings.types[0] = vk::DescriptorType::eCombinedImageSampler;
+	bindings.counts[0] = 1;
+	bindings.stages[0] = vk::ShaderStageFlagBits::eFragment;
+	skyBoxTextureSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+
 
 }
 
@@ -1117,10 +1171,9 @@ void GraphicsEngine::create_frame_resources()
 	shadowBindings.types.push_back(vk::DescriptorType::eStorageBuffer);
 	shadowBindings.types.push_back(vk::DescriptorType::eStorageBuffer);
 
-	vkInit::descriptorSetLayoutData particleCameraBindings;
-	particleCameraBindings.count = 1;
-	particleCameraBindings.types.push_back(vk::DescriptorType::eUniformBuffer);
-	
+	vkInit::descriptorSetLayoutData CameraBindings;
+	CameraBindings.count = 1;
+	CameraBindings.types.push_back(vk::DescriptorType::eUniformBuffer);
 	
 	
 	frameDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);
@@ -1129,7 +1182,14 @@ void GraphicsEngine::create_frame_resources()
 	
 	shadowDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), shadowBindings);
 	particleComputeDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);
-	particleCameraGraphicDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), particleCameraBindings);
+	particleCameraGraphicDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), CameraBindings);
+
+	vkInit::descriptorSetLayoutData skyBoxBindings;
+	skyBoxBindings.count = 3;
+	skyBoxBindings.types.push_back(vk::DescriptorType::eUniformBuffer);
+	skyBoxBindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
+	skyBoxBindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
+	skyBoxDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), skyBoxBindings);
 
 	
 	//deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
@@ -1153,6 +1213,8 @@ void GraphicsEngine::create_frame_resources()
 		frame.particleDescriptorSet = vkInit::allocate_descriptor_set(device, particleComputeDescriptorPool, particleComputeSetLayout);
 		
 		frame.particleCameraDescriptorSet = vkInit::allocate_descriptor_set(device, particleCameraGraphicDescriptorPool, particleCameraGraphicSetLayout);
+
+		frame.skyBoxDescriptorSet = vkInit::allocate_descriptor_set(device, skyBoxDescriptorPool, skyBoxDescriptorSetLayout);
 		
 		
 

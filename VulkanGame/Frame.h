@@ -117,6 +117,10 @@ namespace vkUtil {
 
 		vk::DescriptorSet shadowDescriptorSet;
 
+		vk::DescriptorSet skyBoxDescriptorSet;
+
+
+
 		void shadowDescripotrsWrite();
 		
 		void make_descriptor_resources();

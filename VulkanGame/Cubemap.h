@@ -6,7 +6,7 @@ class Cubemap {
 
 public:
 
-	Cubemap(TextureInputChunk input);
+	Cubemap(skyBoxTextureInputChunk input);
 
 	void use(vk::CommandBuffer commandBuffer, vk::PipelineLayout pipelineLayout);
 
@@ -17,7 +17,7 @@ private:
 	int width, height, channels;
 	vk::Device logicalDevice;
 	vk::PhysicalDevice physicalDevice;
-	const char* filenames;
+	std::vector<const char*> filenames;
 	stbi_uc* pixels[6];
 
 	//Resources
