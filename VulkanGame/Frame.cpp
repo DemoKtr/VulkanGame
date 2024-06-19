@@ -446,6 +446,7 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.destroyFramebuffer(framebuffer);
 			logicalDevice.destroyFramebuffer(shadowFramebuffer);
 			logicalDevice.destroyFramebuffer(particleFramebuffer);
+			logicalDevice.destroyFramebuffer(postProcessFramebuffer);
 			
 
 			try {
@@ -493,6 +494,7 @@ void vkUtil::SwapChainFrame::destroy()
 
 
 			logicalDevice.destroyImage(depthBuffer);
+			logicalDevice.destroyImage(postProcessInputAttachment.image);
 			logicalDevice.destroyImage(particledepthBuffer);
 			logicalDevice.destroyImage(gbuffer.position.image);
 			logicalDevice.destroyImage(gbuffer.normal.image);
@@ -503,6 +505,7 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.destroyImage(particleAttachment.image);
 			logicalDevice.destroyImage(shadowMapBuffer.shadowBufferDepthAttachment.image);
 			logicalDevice.freeMemory(depthBufferMemory);
+			logicalDevice.freeMemory(postProcessInputAttachment.mem);
 			logicalDevice.freeMemory(particledepthBufferMemory);
 			logicalDevice.freeMemory(gbuffer.position.mem);
 			logicalDevice.freeMemory(gbuffer.normal.mem);
@@ -513,6 +516,7 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.freeMemory(particleAttachment.mem);
 			logicalDevice.freeMemory(shadowMapBuffer.shadowBufferDepthAttachment.mem);
 			logicalDevice.destroyImageView(depthBufferView);
+			logicalDevice.destroyImageView(postProcessInputAttachment.view);
 			logicalDevice.destroyImageView(particledepthBufferView);
 			logicalDevice.destroyImageView(gbuffer.position.view);
 			logicalDevice.destroyImageView(gbuffer.normal.view);

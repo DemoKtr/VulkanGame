@@ -325,6 +325,7 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyPipeline(particleGraphicPipeline);
 	device.destroyPipeline(particleComputePipeline);
 	device.destroyPipeline(graphicsPipeline);
+	device.destroyPipeline(skyBoxPipeline);
 	device.destroyPipeline(deferedGraphicsPipeline);
 	device.destroyPipeline(shadowPipeline);
 	device.destroyPipelineLayout(layout);
@@ -332,9 +333,11 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyPipelineLayout(shadowLayout);
 	device.destroyPipelineLayout(particleComputeLayout);
 	device.destroyPipelineLayout(particleGraphicsLayout);
+	device.destroyPipelineLayout(skyBoxPipelineLayout);
 	device.destroyRenderPass(renderpass);
 	device.destroyRenderPass(shadowRenderPass);
 	device.destroyRenderPass(particleRenderPass);
+	device.destroyRenderPass(skyBoxRenderPass);
 	
 	this->cleanup_swapchain();
 	
@@ -810,7 +813,6 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 	skyBoxRenderpassInfo.pClearValues = PostProcessclearValues.data();
 
 	commandBuffer.beginRenderPass(&skyBoxRenderpassInfo, vk::SubpassContents::eInline);
-	if (skyBoxPipeline == VK_NULL_HANDLE) std::cout << "KURWWWWWWWWWWWWWWWWYUYUYUYUYUYUYUYUYUYUYUYUYUYUYUYUYU"<<std::endl;
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, skyBoxPipeline);
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, skyBoxPipelineLayout, 0, swapchainFrames[imageIndex].skyBoxDescriptorSet, nullptr);
 	cubemap->use(commandBuffer,skyBoxPipelineLayout);
@@ -1279,7 +1281,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	glm::vec3 up = { 0.0f, 1.0f, 0.0f };
 	glm::mat4 view = glm::lookAt(eye, center, up);
 
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), static_cast<float>(swapchainExtent.width) / static_cast<float>(swapchainExtent.height), 0.1f, 10214.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), static_cast<float>(swapchainExtent.width) / static_cast<float>(swapchainExtent.height), 0.1f, 1024.0f);
 	projection[1][1] *= -1;
 
 	_frame.cameraData.view = camera.GetViewMatrix();
