@@ -55,7 +55,7 @@ Scene::Scene()
 	lights.push_back(pointLight2);
 
 
-	ParticleEmiter *p1;
+	ParticleEmiter *p1 = new ParticleEmiter(glm::vec3(0.7f,0.0f,0.6f));
 
 	particleEmiters.push_back(p1);
 
@@ -66,6 +66,10 @@ Scene::~Scene()
 {
 	for (SceneObject* obj : sceneObjects) ;
 	for (Light* light : lights) ;
+
+	for (ParticleEmiter* obj : particleEmiters) {
+		delete obj;
+	}
 	
 }
 

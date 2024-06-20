@@ -9,6 +9,7 @@ layout(location = 0) in VS_OUT{
 	vec3 T;
 	vec3 N;
 	vec3 worldPos;
+	float distanceToCamera;
 } fs_in;
 
 

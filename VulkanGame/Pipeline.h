@@ -898,13 +898,14 @@ namespace vkInit {
         inputAssemblyInfo.flags = vk::PipelineInputAssemblyStateCreateFlags();
         inputAssemblyInfo.topology = vk::PrimitiveTopology::ePointList;
         vk::PipelineRasterizationStateCreateInfo rasterizationState = make_rasterizer_info();
-       
+        rasterizationState.polygonMode = vk::PolygonMode::ePoint;
+
        
         vk::PipelineDepthStencilStateCreateInfo depthStageInfo;
         depthStageInfo.flags = vk::PipelineDepthStencilStateCreateFlags();
         depthStageInfo.depthTestEnable = true;
         depthStageInfo.depthWriteEnable = true;
-        depthStageInfo.depthCompareOp = vk::CompareOp::eLessOrEqual;
+        depthStageInfo.depthCompareOp = vk::CompareOp::eLess;
         depthStageInfo.depthBoundsTestEnable = false;
         depthStageInfo.stencilTestEnable = false;
         //Viewport and Scissor
@@ -956,7 +957,6 @@ namespace vkInit {
         pipelineInfo.pMultisampleState = &multisampling;
         pipelineInfo.pViewportState = &viewportState;
         pipelineInfo.pDepthStencilState = &depthStageInfo;
-        rasterizationState.depthBiasEnable = VK_TRUE;
         /////////////////////////////////////////////////////////////
         std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
 

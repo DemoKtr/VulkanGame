@@ -29,6 +29,7 @@ layout(location = 0) out VS_OUT{
 	vec3 T;
 	vec3 N;
 	vec3 worldPos;
+	float distanceToCamera;
 } vs_out;
 
 
@@ -49,5 +50,7 @@ void main() {
 	vs_out.TangentViewPos = TBN * vec3(cameraData.camPos.xyz);
 	vs_out.T = T;
 	vs_out.N = N;
-	gl_Position = cameraData.viewProjection * ObjectData.model[gl_InstanceIndex] * vec4(vertexPosition, 1.0);
+	vec4 modelViewPos = cameraData.view * ObjectData.model[gl_InstanceIndex] * vec4(vertexPosition, 1.0);
+	vs_out.distanceToCamera = length(modelViewPos);
+	gl_Position = cameraData.projection * modelViewPos;
 }

@@ -20,5 +20,5 @@ void main() {
 	gl_Position = vec4(outUV * 2.0f - 1.0f, 0.0f, 1.0f);
 	// Obliczanie kierunku "forwards"
 	forwards = normalize(cameraData.forwards.xyz + (outUV.x * 2.0f - 1.0f) * cameraData.right.xyz - (outUV.y * 2.0f - 1.0f) * cameraData.up.xyz);
-	//gl_FragDepth = 1.0f;
+	
 }

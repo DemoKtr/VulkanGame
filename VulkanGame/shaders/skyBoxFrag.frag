@@ -11,17 +11,25 @@ layout(location = 0) in vec2 inUV;
 layout(location = 1) in vec3 forwards;
 
 void main() {
+
 	vec3 color = vec3 (0.0f,0.0f,0.0f);
 	float zAlbedo = texture(albedoMap,inUV.xy).a;
 	float zParticle = texture(particleMap,inUV.xy).a;
-	//if(zAlbedo < 1.0f && zParticle < 1.0f){
-		//if(zParticle < zAlbedo) color = texture(particleMap,inUV.xy).rgb;
-		//else color = texture(albedoMap,inUV.xy).rgb;
-	//}
-	//else color = texture(material, forwards).rgb;
+	/*
+	
+	else color = texture(material, forwards).rgb;
 	//if(zParticle == 1.0f)
-	//outColor = vec4(vec3(0.0f,0.0f,0.0f),1.0f);
-	//else 
-	outColor = vec4(vec3(0.0f,0.0f,zParticle),1.0f);
-	//outColor = vec4((texture(particleMap,inUV.xy).rgb),1.0f);
+	outColor.xyz = color;
+	*/
+	//
+		
+	//}
+	
+	//if(zAlbedo != 0.0f && zParticle != 0.0f){
+	//if(zParticle >= zAlbedo) color = texture(albedoMap,inUV.xy).rgb;
+	//else color = texture(particleMap,inUV.xy).rgb;
+	//}else color = vec3(1.0f);
+	//if(zAlbedo == 1.0f && zParticle == 1.0f) vec3(1.0f);
+	color = texture(material, forwards).rgb;
+	outColor = vec4(color,1.0f);
 }

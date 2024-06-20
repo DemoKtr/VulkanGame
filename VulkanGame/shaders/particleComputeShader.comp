@@ -2,12 +2,11 @@
 
 struct Particle
 {
-	vec2 pos;
-	vec2 vel;
+	vec4 pos;
 	vec4 gradientPos;
-	vec2 initialPos;
-	float lifeTime;
-	float currentLifeTime;
+	vec4 initialPos;
+	
+
 };
 
 // Binding 0 : Position storage buffer
@@ -34,24 +33,23 @@ void main()
     if (index >= ubo.particleCount) 
 		return;	
 
-	particles[index].currentLifeTime -= ubo.deltaT;
-	if(particles[index].currentLifeTime > 0.0f){
+	particles[index].initialPos.z -= ubo.deltaT;
+	if(particles[index].initialPos.z  > 0.0f){
 	
 	
-	particles[index].pos.x += ubo.deltaT * particles[index].vel.x * 1.0f;
-	particles[index].pos.y += ubo.deltaT*particles[index].vel.y ;
-	particles[index].gradientPos.z += 0.0001 * ubo.deltaT * particles[index].vel.x * 1.0f;
+	particles[index].pos.x += ubo.deltaT * particles[index].pos.z * 1.0f;
+	particles[index].pos.y += ubo.deltaT*particles[index].pos.w;
+	particles[index].gradientPos.z += particles[index].pos.z * ubo.deltaT * 1.0f;
     particles[index].gradientPos.x -= 0.0001 * ubo.deltaT;
     particles[index].gradientPos.y -= 0.0001 * ubo.deltaT;
     
-	
-    //particles[index].gradientPos.zw = vec2(normalize(particles[index].pos))* 1.0f;
+
 	
 	}
 	else{
-	particles[index].pos = particles[index].initialPos;
+	particles[index].pos.xy = particles[index].initialPos.xy;
 	
-	particles[index].currentLifeTime = particles[index].lifeTime;
+	particles[index].initialPos.z  = particles[index].initialPos.w;
 	
 	particles[index].gradientPos.y = 0.0f;
 	particles[index].gradientPos.x = 0.9f;

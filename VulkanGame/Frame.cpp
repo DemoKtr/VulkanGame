@@ -34,6 +34,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			input.size = sizeof(UBO);
 			input.usage = vk::BufferUsageFlagBits::eUniformBuffer;
 			cameraDataBuffer = createBuffer(input);
+			input.size = sizeof(UBOCameraParticle);
 			particleCameraUBOBuffer = createBuffer(input);
 			input.size = sizeof(glm::vec4);
 			camPosBuffer  = createBuffer(input);
@@ -44,7 +45,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			
 			cameraDataWriteLocation = logicalDevice.mapMemory(cameraDataBuffer.bufferMemory, 0, sizeof(UBO));
 			
-			particleCameraUBOWriteLoacation = logicalDevice.mapMemory(particleCameraUBOBuffer.bufferMemory, 0, sizeof(UBO));
+			particleCameraUBOWriteLoacation = logicalDevice.mapMemory(particleCameraUBOBuffer.bufferMemory, 0, sizeof(UBOCameraParticle));
 			camPosWriteLoacation = logicalDevice.mapMemory(camPosBuffer.bufferMemory, 0, sizeof(glm::vec4));
 			skyboxUBOWriteLoacation = logicalDevice.mapMemory(skyboxUBOBuffer.bufferMemory,0,sizeof(SkyBoxUBO));
 			////////////
@@ -95,7 +96,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 
 			particleCameraUBOBufferDescriptor.buffer = particleCameraUBOBuffer.buffer;
 			particleCameraUBOBufferDescriptor.offset = 0;
-			particleCameraUBOBufferDescriptor.range = sizeof(UBO);
+			particleCameraUBOBufferDescriptor.range = sizeof(UBOCameraParticle);
 
 
 			uniformBufferDescriptor.buffer = cameraDataBuffer.buffer;
@@ -182,6 +183,8 @@ void vkUtil::SwapChainFrame::make_depth_resources()
 			
 			depthBufferMemory = vkImage::make_image_memory(imageInfo, depthBuffer);
 			particledepthBufferMemory = vkImage::make_image_memory(imageInfo, particledepthBuffer);
+
+
 			depthBufferView = vkImage::make_image_view(
 				logicalDevice, depthBuffer, depthFormat, vk::ImageAspectFlagBits::eDepth, vk::ImageViewType::e2D, 1
 			);

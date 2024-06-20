@@ -33,7 +33,12 @@ namespace vkUtil {
 		glm::vec4 up;
 	};
 
-
+	struct UBOCameraParticle {
+		glm::mat4 model;
+		glm::mat4 view;
+		glm::mat4 projection;
+		
+	};
 	/**
 		Holds the data structures associated with a "Frame"
 	*/
@@ -78,6 +83,7 @@ namespace vkUtil {
 
 		//Resources
 		UBO cameraData;
+		UBOCameraParticle particleCameraUBOData;
 		PointLight lightData;
 		Buffer cameraDataBuffer;
 		Buffer lightDataBuffer;

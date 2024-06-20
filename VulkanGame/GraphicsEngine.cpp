@@ -608,7 +608,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 	}
 
 	vk::ClearValue cC;
-	std::array<float, 4> c = { 0.0f, 0.0f, 0.0f, 0.0f };
+	std::array<float, 4> c = { 0.0f, 0.0f, 0.0f, 1.0f };
 	cC.color = vk::ClearColorValue(c);
 	vk::ClearValue dC;
 	dC.depthStencil = vk::ClearDepthStencilValue({ 1.0f, 0 });
@@ -719,7 +719,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 
 	vk::ClearValue colorClear;
 	std::array<float, 4> colors = { 1.0f, 0.5f, 0.25f, 1.0f };
-	std::array<float, 4> colorsd = { 0.0f, 0.0f, .0f, 0.0f };
+	std::array<float, 4> colorsd = { 0.0f, 0.0f, .0f, 1.0f };
 	colorClear.color = vk::ClearColorValue(colors);
 	vk::ClearValue depthClear;
 
@@ -1290,7 +1290,10 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	_frame.cameraData.heightScale = glm::vec4( 0.0001f);
 	_frame.camPos = glm::vec4(camera.Position, 1.0f);
 	
-
+	_frame.particleCameraUBOData.model = scene->particleEmiters[0]->transform.getModelMatrix();
+	_frame.particleCameraUBOData.view = camera.GetViewMatrix();
+	_frame.particleCameraUBOData.projection = projection;
+	
 	
 
 
@@ -1334,12 +1337,12 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	_frame.particleUBOData.deltaT =  deltaTime;
 	_frame.particleUBOData.particleCount = particles->burstParticleCount * particles->numberOfEmiter;
 	
-	_frame.skyboxData.forwards = glm::vec4(camera.Front,1.0f);
-	_frame.skyboxData.right = glm::vec4(camera.Right,1.0f);
-	_frame.skyboxData.up = glm::vec4(camera.Up,1.0f);
+	_frame.skyboxData.forwards = glm::vec4(glm::normalize(camera.Front),1.0f);
+	_frame.skyboxData.right = glm::vec4(glm::normalize(camera.Right),1.0f);
+	_frame.skyboxData.up = glm::vec4(glm::normalize(camera.Up),1.0f);
 	
 	memcpy(_frame.cameraDataWriteLocation, &(_frame.cameraData), sizeof(vkUtil::UBO));
-	memcpy(_frame.particleCameraUBOWriteLoacation, &(_frame.cameraData), sizeof(vkUtil::UBO));
+	memcpy(_frame.particleCameraUBOWriteLoacation, &(_frame.particleCameraUBOData), sizeof(vkUtil::UBOCameraParticle));
 	memcpy(_frame.camPosWriteLoacation, &(_frame.camPos), sizeof(glm::vec4));
 	memcpy(_frame.particleUBOWriteLoacation, &(_frame.particleUBOData), sizeof(vkUtil::particleUBO));
 	memcpy(_frame.skyboxUBOWriteLoacation, &(_frame.skyboxData), sizeof(vkUtil::SkyBoxUBO));

@@ -6,12 +6,9 @@
 namespace vkParticle {
 	struct Particle
 	{
-		glm::vec2 pos;								// Particle position
-		glm::vec2 vel;								// Particle velocity
+		glm::vec4 pos;								// Particle position								// Particle velocity
 		glm::vec4 gradientPos;
-		glm::vec2 initialPos;
-		float lifeTime;
-		float currentLifeTime;
+		glm::vec4 initialPos;
 
 	};
 	vk::VertexInputBindingDescription getParticleVBO();
