@@ -904,7 +904,7 @@ namespace vkInit {
         depthStageInfo.flags = vk::PipelineDepthStencilStateCreateFlags();
         depthStageInfo.depthTestEnable = true;
         depthStageInfo.depthWriteEnable = true;
-        depthStageInfo.depthCompareOp = vk::CompareOp::eLess;
+        depthStageInfo.depthCompareOp = vk::CompareOp::eLessOrEqual;
         depthStageInfo.depthBoundsTestEnable = false;
         depthStageInfo.stencilTestEnable = false;
         //Viewport and Scissor
@@ -936,14 +936,14 @@ namespace vkInit {
         
         vk::PipelineColorBlendAttachmentState blendAttachmentState = make_color_blend_attachment_state();
         // Additive blending
-        blendAttachmentState.colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA;;
-        blendAttachmentState.blendEnable = VK_TRUE;
-        blendAttachmentState.colorBlendOp = vk::BlendOp::eAdd;
-        blendAttachmentState.srcColorBlendFactor = vk::BlendFactor::eSrcAlpha;
-        blendAttachmentState.dstColorBlendFactor = vk::BlendFactor::eOneMinusSrcAlpha;
-        blendAttachmentState.alphaBlendOp = vk::BlendOp::eAdd;
-        blendAttachmentState.srcAlphaBlendFactor = vk::BlendFactor::eZero;
-        blendAttachmentState.dstAlphaBlendFactor = vk::BlendFactor::eOne;
+        //blendAttachmentState.colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA;;
+       // blendAttachmentState.blendEnable = VK_TRUE;
+       // blendAttachmentState.colorBlendOp = vk::BlendOp::eAdd;
+       // blendAttachmentState.srcColorBlendFactor = vk::BlendFactor::eSrcAlpha;
+      //  blendAttachmentState.dstColorBlendFactor = vk::BlendFactor::eOneMinusSrcAlpha;
+      //  blendAttachmentState.alphaBlendOp = vk::BlendOp::eAdd;
+      //  blendAttachmentState.srcAlphaBlendFactor = vk::BlendFactor::eZero;
+      //  blendAttachmentState.dstAlphaBlendFactor = vk::BlendFactor::eOne;
 
         vk::PipelineColorBlendStateCreateInfo colorBlendState = make_color_blend_attachment_stage(blendAttachmentState);
         

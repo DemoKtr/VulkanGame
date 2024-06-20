@@ -59,7 +59,7 @@ std::vector<vk::VertexInputAttributeDescription> vkParticle::getParticleVAO()
 	//gradient
 	attributes[2].binding = 0;
 	attributes[2].location = 2;
-	attributes[2].format = vk::Format::eR32G32B32A32Sfloat;
+	attributes[2].format = vk::Format::eR32G32B32Sfloat;
 	attributes[2].offset = 4 * sizeof(float);
 
 	return attributes;

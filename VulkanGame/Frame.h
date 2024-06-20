@@ -24,9 +24,6 @@ namespace vkUtil {
 
 	struct particleUBO {
 		float deltaT = {0};							//		Frame delta time
-		float destX{0};							//		x position of the attractor
-		float destY{0};							//		y position of the attractor
-		float destZ{0};							//		y position of the attractor
 		int32_t particleCount{0};
 	};
 

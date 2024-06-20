@@ -18,6 +18,7 @@ void ParticleMenagerie::finalization(FinalizationChunk finalizationChunk)
 	logicalDevice = finalizationChunk.logicalDevice;
 	std::default_random_engine randomizer(benchmark ? 0 : (unsigned)time(nullptr));
 	std::uniform_real_distribution<float> rndDistX(-0.05f, 0.05f);
+	std::uniform_real_distribution<float> rndDistZ(-0.05f, 0.05f);
 	std::uniform_real_distribution<float> rndDistY(-0.10f, 0.0f);
 	std::uniform_real_distribution<float> rndVelDistX(-0.01f, 0.01f);
 	
@@ -33,6 +34,8 @@ void ParticleMenagerie::finalization(FinalizationChunk finalizationChunk)
 
 		particle.gradientPos.x = 1.0f;// particle.pos.x / 2.0f;
 		particle.gradientPos.y = 1.0f;// particle.pos.x / 2.0f;
+		particle.gradientPos.z = rndDistZ(randomizer);// particle.pos.x / 2.0f;
+		particle.gradientPos.w = particle.gradientPos.z;// particle.pos.x / 2.0f;
 		particle.initialPos = particle.pos;
 		particle.lifeTime = rndLifetimeDist(randomizer);
 		particle.currentLifeTime = particle.lifeTime;

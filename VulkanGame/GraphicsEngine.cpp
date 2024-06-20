@@ -608,7 +608,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 	}
 
 	vk::ClearValue cC;
-	std::array<float, 4> c = { 0.0f, 0.0f, 0.0f, 1.0f };
+	std::array<float, 4> c = { 0.0f, 0.0f, 0.0f, 0.0f };
 	cC.color = vk::ClearColorValue(c);
 	vk::ClearValue dC;
 	dC.depthStencil = vk::ClearDepthStencilValue({ 1.0f, 0 });
@@ -1332,9 +1332,6 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	}
 	
 	_frame.particleUBOData.deltaT =  deltaTime;
-	_frame.particleUBOData.destX = sin(glm::radians(deltaTime)) * 1.0f;
-	_frame.particleUBOData.destY = cos(glm::radians(deltaTime * 360.0f)) * 1.0f;
-	_frame.particleUBOData.destZ = 0.0f;//cos(glm::radians(deltaTime * 360.0f)) * 0.1f - sin(glm::radians(deltaTime * 360.0f)) * 0.1f;
 	_frame.particleUBOData.particleCount = particles->burstParticleCount * particles->numberOfEmiter;
 	
 	_frame.skyboxData.forwards = glm::vec4(camera.Front,1.0f);

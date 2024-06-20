@@ -264,7 +264,7 @@ vk::RenderPass vkInit::create_particle_renderpass(vk::Device logicalDevice, vk::
 	attachment[1].format = depthFormat;
 	attachment[1].samples = vk::SampleCountFlagBits::e1;
 	attachment[1].loadOp = vk::AttachmentLoadOp::eClear;
-	attachment[1].storeOp = vk::AttachmentStoreOp::eStore;
+	attachment[1].storeOp = vk::AttachmentStoreOp::eDontCare;
 	attachment[1].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
 	attachment[1].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
 	attachment[1].initialLayout = vk::ImageLayout::eUndefined;

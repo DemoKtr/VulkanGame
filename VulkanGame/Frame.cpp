@@ -183,10 +183,10 @@ void vkUtil::SwapChainFrame::make_depth_resources()
 			depthBufferMemory = vkImage::make_image_memory(imageInfo, depthBuffer);
 			particledepthBufferMemory = vkImage::make_image_memory(imageInfo, particledepthBuffer);
 			depthBufferView = vkImage::make_image_view(
-				logicalDevice, particledepthBuffer, depthFormat, vk::ImageAspectFlagBits::eDepth, vk::ImageViewType::e2D, 1
+				logicalDevice, depthBuffer, depthFormat, vk::ImageAspectFlagBits::eDepth, vk::ImageViewType::e2D, 1
 			);
 			particledepthBufferView = vkImage::make_image_view(
-				logicalDevice, depthBuffer, depthFormat, vk::ImageAspectFlagBits::eDepth, vk::ImageViewType::e2D, 1
+				logicalDevice, particledepthBuffer, depthFormat, vk::ImageAspectFlagBits::eDepth, vk::ImageViewType::e2D, 1
 			);
 			shadowMapBuffer.height = 1024;
 			shadowMapBuffer.width = 1024;

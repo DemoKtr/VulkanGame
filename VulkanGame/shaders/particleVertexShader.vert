@@ -2,13 +2,12 @@
 
 layout (location = 0) in vec2 inPos;
 layout (location = 1) in vec2 inVel;
-layout (location = 2) in vec4 inGradientPos;
+layout (location = 2) in vec3 inGradientPos;
 
 layout (location = 0) out vec2 outVel;
 layout (location = 1) out float outGradientPosX;
 layout (location = 2) out float outGradientPosY;
-layout (location = 3) out float outGradientPosZ;
-layout (location = 4) out float outGradientPosW;
+
 
 
 
@@ -30,13 +29,12 @@ out gl_PerVertex
 
 void main () 
 {
-  gl_PointSize = 4.0;
+  gl_PointSize = 2.0f;
 
 	
-	gl_Position = cameraData.projection * cameraData.view * vec4(inPos,0.0f ,1.0);
+	gl_Position = cameraData.projection * cameraData.view * vec4(inPos,inGradientPos.z ,1.0);
   outVel = inVel;
   outGradientPosX = inGradientPos.x;
   outGradientPosY = inGradientPos.y;
-  outGradientPosZ = inGradientPos.z;
-  outGradientPosW = inGradientPos.w;
+  
 }
