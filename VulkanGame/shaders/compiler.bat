@@ -4,6 +4,7 @@ glslangValidator -V particleVertexShader.vert -o particleVert.spv
 glslangValidator -V DeferedVertexShader.vert -o deferedVert.spv
 glslangValidator -V ShadowMap.vert -o ShadowMapVert.spv
 glslangValidator -V skyBoxVert.vert -o skyBoxVert.spv
+glslangValidator -V postProcessCombinedImageVert.vert -o postProcessCombinedImageVert.spv
 
 glslangValidator -V ShadowMap.geom -o ShadowMapGeo.spv
 
@@ -15,5 +16,6 @@ glslangValidator -V particleFragmentShader.frag -o particleFrag.spv
 glslangValidator -V DeferedPixelShader.frag -o deferedFrag.spv
 glslangValidator -V ShadowMap.frag -o ShadowMapFrag.spv
 glslangValidator -V skyBoxFrag.frag -o skyBoxFrag.spv
+glslangValidator -V postProcessCombinedImageFrag.frag -o postProcessCombinedImageFrag.spv
 
 pause

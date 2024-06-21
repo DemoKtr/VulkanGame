@@ -118,6 +118,9 @@ class GraphicsEngine
 	vk::DescriptorSetLayout postProcessDescriptorSetLayout;
 	vk::DescriptorPool postProcessDescriptorPool;
 
+
+	vk::DescriptorSetLayout skyBoxDescriptorSetLayout;
+	vk::DescriptorPool skyBoxDescriptorPool;
 	vk::DescriptorSetLayout skyBoxTextureSetLayout;
 	vk::DescriptorPool skyBoxTextureDescriptorPool;
 

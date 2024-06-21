@@ -265,8 +265,8 @@ void GraphicsEngine::create_pipeline()
 
 	vkInit::PostProcessPipelineInBundle postProcessPipelineInput;
 	postProcessPipelineInput.device = device;
-	postProcessPipelineInput.vertexFilePath = "shaders/skyBoxVert.spv";
-	postProcessPipelineInput.fragmentFilePath = "shaders/skyBoxFrag.spv";
+	postProcessPipelineInput.vertexFilePath = "shaders/postProcessCombinedImageVert.spv";
+	postProcessPipelineInput.fragmentFilePath = "shaders/postProcessCombinedImageFrag.spv";
 	postProcessPipelineInput.postProcessSetLayout = {postProcessDescriptorSetLayout};
 	postProcessPipelineInput.swapchainExtent = swapchainExtent;
 	postProcessPipelineInput.swapchainImageFormat = swapchainFormat;
