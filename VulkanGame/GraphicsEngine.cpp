@@ -947,9 +947,6 @@ void GraphicsEngine::record_compute_commands(vk::CommandBuffer commandBuffer, ui
 void GraphicsEngine::record_particle_draw_commands(vk::CommandBuffer commandBuffer ,uint32_t imageIndex)
 {
 
-
-	
-
 	vk::CommandBufferInheritanceInfo inh = {};
 	inh.renderPass = particleRenderPass;
 	inh.subpass = 0;
@@ -987,6 +984,48 @@ void GraphicsEngine::record_particle_draw_commands(vk::CommandBuffer commandBuff
 			std::cout << "failed to record command buffer!" << std::endl;
 		}
 	}
+}
+
+void GraphicsEngine::record_skybox_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex)
+{
+	vk::CommandBufferInheritanceInfo inh = {};
+	inh.renderPass = skyBoxRenderPass;
+	inh.subpass = 0;
+	inh.framebuffer = swapchainFrames[imageIndex].skyBoxFramebuffer;
+
+
+	vk::CommandBufferBeginInfo beginInfo;
+	beginInfo.flags = vk::CommandBufferUsageFlagBits::eRenderPassContinue | vk::CommandBufferUsageFlagBits::eSimultaneousUse;
+	beginInfo.pInheritanceInfo = &inh;
+	try {
+		commandBuffer.begin(beginInfo);
+	}
+	catch (vk::SystemError err) {
+		if (debugMode) {
+			std::cout << "Failed to begin recording skybox command buffer!" << std::endl;
+		}
+	}
+	vk::DeviceSize offset[1] = { 0 };
+	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, skyBoxPipeline);
+	commandBuffer.bindVertexBuffers(0, 1, &cubeMapMesh->vertexBuffer.buffer, offset);
+	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, skyBoxPipelineLayout, 0, swapchainFrames[imageIndex].skyBoxDescriptorSet, nullptr);
+	cubemap->use(commandBuffer, skyBoxPipelineLayout);
+	commandBuffer.draw(36, 1, 0, 0);
+	//commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, particleGraphicsLayout, 0,nullptr, nullptr);
+
+	try {
+		commandBuffer.end();
+	}
+	catch (vk::SystemError err) {
+
+		if (debugMode) {
+			std::cout << "failed to record skybox command buffer!" << std::endl;
+		}
+	}
+
+
+
+
 }
 
 
@@ -1101,13 +1140,15 @@ void GraphicsEngine::render(Scene *scene,int &verticesCounter,float deltaTime,Ca
 	commandBuffer.reset();
 	computeParticleCommandBuffer.reset();
 	graphicParticleCommandBuffer.reset();
+	graphicSkyBoxCommandBuffer.reset();
 	
 	prepare_frame(imageIndex, scene,deltaTime,camera);
 
 	record_compute_commands(computeParticleCommandBuffer,imageIndex);
-	
+	record_skybox_draw_commands(graphicSkyBoxCommandBuffer,imageIndex);
 	record_particle_draw_commands(graphicParticleCommandBuffer, imageIndex);
 	record_draw_commands(commandBuffer,graphicParticleCommandBuffer ,imageIndex);
+
 	/*
 
 	// Set up pipeline barrier to synchronize between render passes
