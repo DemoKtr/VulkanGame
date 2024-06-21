@@ -71,9 +71,9 @@ class GraphicsEngine
 
 
 	//shadows
-	vk::Pipeline skyBoxPipeline;
-	vk::RenderPass skyBoxRenderPass;
-	vk::PipelineLayout skyBoxPipelineLayout;
+	vk::Pipeline postProcessPipeline;
+	vk::RenderPass postProcessRenderPass;
+	vk::PipelineLayout postProcessPipelineLayout;
 
 
 
@@ -115,8 +115,8 @@ class GraphicsEngine
 	vk::DescriptorPool shadowDescriptorPool;
 
 
-	vk::DescriptorSetLayout skyBoxDescriptorSetLayout;
-	vk::DescriptorPool skyBoxDescriptorPool;
+	vk::DescriptorSetLayout postProcessDescriptorSetLayout;
+	vk::DescriptorPool postProcessDescriptorPool;
 
 	vk::DescriptorSetLayout skyBoxTextureSetLayout;
 	vk::DescriptorPool skyBoxTextureDescriptorPool;

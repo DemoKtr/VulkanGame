@@ -109,7 +109,7 @@ namespace vkInit {
     vk::PipelineVertexInputStateCreateInfo make_vertex_input_info(
         const vk::VertexInputBindingDescription& bindingDescription,
         const std::vector<vk::VertexInputAttributeDescription>& attributeDescriptions);
-
+    skyBoxGraphicsPipelineOutBundle create_skybox_pipeline(skyBoxPipelineInBundle specyfication, bool debugMode);
     /**
         \returns the input assembly stage creation info
     */
@@ -1130,8 +1130,6 @@ namespace vkInit {
 
         return output;
     }
-
-
 
     skyBoxGraphicsPipelineOutBundle create_skybox_pipeline(skyBoxPipelineInBundle specyfication, bool debugMode)
     {

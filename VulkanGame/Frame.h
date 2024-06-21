@@ -127,12 +127,12 @@ namespace vkUtil {
 
 		vk::DescriptorSet shadowDescriptorSet;
 
-		vk::DescriptorSet skyBoxDescriptorSet;
+		vk::DescriptorSet postProcessDescriptorSet;
 
-		SkyBoxUBO	skyboxData;
-		Buffer skyboxUBOBuffer;
-		void* skyboxUBOWriteLoacation;
-		vk::DescriptorBufferInfo skyboxUBOBufferDescriptor;
+		//SkyBoxUBO	skyboxData;
+		//Buffer skyboxUBOBuffer;
+		//void* skyboxUBOWriteLoacation;
+		//vk::DescriptorBufferInfo skyboxUBOBufferDescriptor;
 
 		void shadowDescripotrsWrite();
 		

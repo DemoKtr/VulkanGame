@@ -267,13 +267,13 @@ void GraphicsEngine::create_pipeline()
 	postProcessPipelineInput.device = device;
 	postProcessPipelineInput.vertexFilePath = "shaders/skyBoxVert.spv";
 	postProcessPipelineInput.fragmentFilePath = "shaders/skyBoxFrag.spv";
-	postProcessPipelineInput.postProcessSetLayout = {skyBoxDescriptorSetLayout,skyBoxTextureSetLayout};
+	postProcessPipelineInput.postProcessSetLayout = {postProcessDescriptorSetLayout};
 	postProcessPipelineInput.swapchainExtent = swapchainExtent;
 	postProcessPipelineInput.swapchainImageFormat = swapchainFormat;
 	vkInit::PostProcessGraphicsPipelineOutBundle postProcessOutput = vkInit::create_postprocess_pipelines(postProcessPipelineInput,debugMode);
-	skyBoxRenderPass = postProcessOutput.renderpass;
-    skyBoxPipelineLayout = postProcessOutput.postProcessPipelineLayout;
-	skyBoxPipeline = postProcessOutput.postProcessgraphicsPipeline;
+	postProcessRenderPass = postProcessOutput.renderpass;
+    postProcessPipelineLayout = postProcessOutput.postProcessPipelineLayout;
+	postProcessPipeline = postProcessOutput.postProcessgraphicsPipeline;
 
 
 }
@@ -333,7 +333,7 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyPipeline(particleGraphicPipeline);
 	device.destroyPipeline(particleComputePipeline);
 	device.destroyPipeline(graphicsPipeline);
-	device.destroyPipeline(skyBoxPipeline);
+	device.destroyPipeline(postProcessPipeline);
 	device.destroyPipeline(deferedGraphicsPipeline);
 	device.destroyPipeline(shadowPipeline);
 	device.destroyPipelineLayout(layout);
@@ -341,11 +341,11 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyPipelineLayout(shadowLayout);
 	device.destroyPipelineLayout(particleComputeLayout);
 	device.destroyPipelineLayout(particleGraphicsLayout);
-	device.destroyPipelineLayout(skyBoxPipelineLayout);
+	device.destroyPipelineLayout(postProcessPipelineLayout);
 	device.destroyRenderPass(renderpass);
 	device.destroyRenderPass(shadowRenderPass);
 	device.destroyRenderPass(particleRenderPass);
-	device.destroyRenderPass(skyBoxRenderPass);
+	device.destroyRenderPass(postProcessRenderPass);
 	
 	this->cleanup_swapchain();
 	
@@ -355,13 +355,13 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyDescriptorSetLayout(meshSetLayout);
 	device.destroyDescriptorSetLayout(particleCameraGraphicSetLayout);
 	device.destroyDescriptorSetLayout(particleTextureGraphicSetLayout);
-	device.destroyDescriptorSetLayout(skyBoxDescriptorSetLayout);
+	device.destroyDescriptorSetLayout(postProcessDescriptorSetLayout);
 	device.destroyDescriptorSetLayout(skyBoxTextureSetLayout);
 	device.destroyDescriptorPool(meshDescriptorPool);
 	device.destroyDescriptorPool(particleTextureGraphicDescriptorPool);
 	device.destroyDescriptorPool(particleComputeDescriptorPool);
 	device.destroyDescriptorPool(particleCameraGraphicDescriptorPool);
-	device.destroyDescriptorPool(skyBoxDescriptorPool);
+	device.destroyDescriptorPool(postProcessDescriptorPool);
 	device.destroyDescriptorPool(skyBoxTextureDescriptorPool);
 	
 	device.destroyDescriptorPool(shadowDescriptorPool);
@@ -536,22 +536,20 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	particleCameraGraphicSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
 
-	bindings.count = 3;
+	bindings.count = 2;
 	bindings.indices[0] = 0;
 	bindings.indices[1] = 1;
-	bindings.indices[2] = 2;
-	bindings.types[0] = vk::DescriptorType::eUniformBuffer;
+
+	bindings.types[0] = vk::DescriptorType::eCombinedImageSampler;
 	bindings.types[1] = vk::DescriptorType::eCombinedImageSampler;
-	bindings.types[2] = vk::DescriptorType::eCombinedImageSampler;
 	bindings.counts[0] = 1;
 	bindings.counts[1] = 1;
-	bindings.counts[2] = 1;
-	bindings.stages[0] = vk::ShaderStageFlagBits::eVertex;
+	bindings.stages[0] = vk::ShaderStageFlagBits::eFragment;
 	bindings.stages[1] = vk::ShaderStageFlagBits::eFragment;
-	bindings.stages[2] = vk::ShaderStageFlagBits::eFragment;
 
 
-	skyBoxDescriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+
+	postProcessDescriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
 
 	bindings.count = 1;
@@ -808,7 +806,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 
 
 	vk::RenderPassBeginInfo skyBoxRenderpassInfo = {};
-	skyBoxRenderpassInfo.renderPass = skyBoxRenderPass;
+	skyBoxRenderpassInfo.renderPass = postProcessRenderPass;
 	skyBoxRenderpassInfo.framebuffer = swapchainFrames[imageIndex].postProcessFramebuffer;
 	skyBoxRenderpassInfo.renderArea.offset.x = 0;
 	skyBoxRenderpassInfo.renderArea.offset.y = 0;
@@ -822,9 +820,8 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 	skyBoxRenderpassInfo.pClearValues = PostProcessclearValues.data();
 
 	commandBuffer.beginRenderPass(&skyBoxRenderpassInfo, vk::SubpassContents::eInline);
-	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, skyBoxPipeline);
-	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, skyBoxPipelineLayout, 0, swapchainFrames[imageIndex].skyBoxDescriptorSet, nullptr);
-	cubemap->use(commandBuffer,skyBoxPipelineLayout);
+	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, postProcessPipeline);
+	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, postProcessPipelineLayout, 0, swapchainFrames[imageIndex].postProcessDescriptorSet, nullptr);
 
 
 	commandBuffer.draw(3, 1, 0, 0);
@@ -1218,11 +1215,10 @@ void GraphicsEngine::create_frame_resources()
 	particleCameraGraphicDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), CameraBindings);
 
 	vkInit::descriptorSetLayoutData skyBoxBindings;
-	skyBoxBindings.count = 3;
-	skyBoxBindings.types.push_back(vk::DescriptorType::eUniformBuffer);
+	skyBoxBindings.count = 2;
 	skyBoxBindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
 	skyBoxBindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
-	skyBoxDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), skyBoxBindings);
+	postProcessDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), skyBoxBindings);
 
 	
 	//deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
@@ -1247,7 +1243,7 @@ void GraphicsEngine::create_frame_resources()
 		
 		frame.particleCameraDescriptorSet = vkInit::allocate_descriptor_set(device, particleCameraGraphicDescriptorPool, particleCameraGraphicSetLayout);
 
-		frame.skyBoxDescriptorSet = vkInit::allocate_descriptor_set(device, skyBoxDescriptorPool, skyBoxDescriptorSetLayout);
+		frame.postProcessDescriptorSet = vkInit::allocate_descriptor_set(device, postProcessDescriptorPool, postProcessDescriptorSetLayout);
 		
 		
 
@@ -1271,7 +1267,7 @@ void GraphicsEngine::create_framebuffers()
 	
 	frameBufferInput.renderpass = particleRenderPass;
 	vkInit::make_particle_framebuffers(frameBufferInput, swapchainFrames, debugMode);
-	frameBufferInput.renderpass = skyBoxRenderPass;
+	frameBufferInput.renderpass = postProcessRenderPass;
 	vkInit::make_postprocess_framebuffers(frameBufferInput, swapchainFrames, debugMode);
 	
 	
@@ -1346,15 +1342,15 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	_frame.particleUBOData.deltaT =  deltaTime;
 	_frame.particleUBOData.particleCount = particles->burstParticleCount * particles->numberOfEmiter;
 	
-	_frame.skyboxData.forwards = glm::vec4(glm::normalize(camera.Front),1.0f);
-	_frame.skyboxData.right = glm::vec4(glm::normalize(camera.Right),1.0f);
-	_frame.skyboxData.up = glm::vec4(glm::normalize(camera.Up),1.0f);
+	//_frame.skyboxData.forwards = glm::vec4(glm::normalize(camera.Front),1.0f);
+	//_frame.skyboxData.right = glm::vec4(glm::normalize(camera.Right),1.0f);
+	//_frame.skyboxData.up = glm::vec4(glm::normalize(camera.Up),1.0f);
 	
 	memcpy(_frame.cameraDataWriteLocation, &(_frame.cameraData), sizeof(vkUtil::UBO));
 	memcpy(_frame.particleCameraUBOWriteLoacation, &(_frame.particleCameraUBOData), sizeof(vkUtil::UBOCameraParticle));
 	memcpy(_frame.camPosWriteLoacation, &(_frame.camPos), sizeof(glm::vec4));
 	memcpy(_frame.particleUBOWriteLoacation, &(_frame.particleUBOData), sizeof(vkUtil::particleUBO));
-	memcpy(_frame.skyboxUBOWriteLoacation, &(_frame.skyboxData), sizeof(vkUtil::SkyBoxUBO));
+	//memcpy(_frame.skyboxUBOWriteLoacation, &(_frame.skyboxData), sizeof(vkUtil::SkyBoxUBO));
 
 	memcpy(_frame.lightDataWriteLocation, (_frame.LightTransforms.data()), j * sizeof(vkUtil::PointLight));
 	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), i * sizeof(glm::mat4));
