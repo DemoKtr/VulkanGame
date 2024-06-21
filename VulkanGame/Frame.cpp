@@ -39,15 +39,15 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			input.size = sizeof(glm::vec4);
 			camPosBuffer  = createBuffer(input);
 
-			//input.size = sizeof(SkyBoxUBO);
-			//skyboxUBOBuffer = createBuffer(input);
+			input.size = sizeof(SkyBoxUBO);
+			skyboxUBOBuffer = createBuffer(input);
 
 			
 			cameraDataWriteLocation = logicalDevice.mapMemory(cameraDataBuffer.bufferMemory, 0, sizeof(UBO));
 			
 			particleCameraUBOWriteLoacation = logicalDevice.mapMemory(particleCameraUBOBuffer.bufferMemory, 0, sizeof(UBOCameraParticle));
 			camPosWriteLoacation = logicalDevice.mapMemory(camPosBuffer.bufferMemory, 0, sizeof(glm::vec4));
-			//skyboxUBOWriteLoacation = logicalDevice.mapMemory(skyboxUBOBuffer.bufferMemory,0,sizeof(SkyBoxUBO));
+			skyboxUBOWriteLoacation = logicalDevice.mapMemory(skyboxUBOBuffer.bufferMemory,0,sizeof(SkyBoxUBO));
 			////////////
 
 			input.size = sizeof(particleUBO);
@@ -90,9 +90,9 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			camPosBufferDescriptor.range = sizeof(glm::vec4);
 
 
-			//skyboxUBOBufferDescriptor.buffer = skyboxUBOBuffer.buffer;
-			//skyboxUBOBufferDescriptor.offset = 0;
-			//skyboxUBOBufferDescriptor.range = sizeof(SkyBoxUBO);
+			skyboxUBOBufferDescriptor.buffer = skyboxUBOBuffer.buffer;
+			skyboxUBOBufferDescriptor.offset = 0;
+			skyboxUBOBufferDescriptor.range = sizeof(SkyBoxUBO);
 
 			particleCameraUBOBufferDescriptor.buffer = particleCameraUBOBuffer.buffer;
 			particleCameraUBOBufferDescriptor.offset = 0;
@@ -401,6 +401,14 @@ void vkUtil::SwapChainFrame::write_skybox_descriptor()
 
 
 
+	vk::WriteDescriptorSet skyBoxWriteInfo;
+	skyBoxWriteInfo.dstSet = skyBoxDescriptorSet;
+	skyBoxWriteInfo.dstBinding = 0;
+	skyBoxWriteInfo.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+	skyBoxWriteInfo.descriptorCount = 1;
+	skyBoxWriteInfo.descriptorType = vk::DescriptorType::eUniformBuffer;
+	skyBoxWriteInfo.pBufferInfo = &skyboxUBOBufferDescriptor;
+
 
 	vk::DescriptorImageInfo postProcessInputAttachmentImage;
 	postProcessInputAttachmentImage.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
@@ -428,7 +436,7 @@ void vkUtil::SwapChainFrame::write_skybox_descriptor()
 
 
 	std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {
-				 postProcessInputDescriptor, particleDescriptor
+				skyBoxWriteInfo, postProcessInputDescriptor, particleDescriptor,
 	};
 
 	logicalDevice.updateDescriptorSets(writeDescriptorSets, nullptr);
@@ -444,6 +452,7 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.destroyFramebuffer(shadowFramebuffer);
 			logicalDevice.destroyFramebuffer(particleFramebuffer);
 			logicalDevice.destroyFramebuffer(postProcessFramebuffer);
+			logicalDevice.destroyFramebuffer(skyBoxFramebuffer);
 			
 
 			try {
@@ -464,9 +473,9 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.destroyBuffer(camPosBuffer.buffer);
 
 
-			//logicalDevice.unmapMemory(skyboxUBOBuffer.bufferMemory);
-			//logicalDevice.freeMemory(skyboxUBOBuffer.bufferMemory);
-			//logicalDevice.destroyBuffer(skyboxUBOBuffer.buffer);
+			logicalDevice.unmapMemory(skyboxUBOBuffer.bufferMemory);
+			logicalDevice.freeMemory(skyboxUBOBuffer.bufferMemory);
+			logicalDevice.destroyBuffer(skyboxUBOBuffer.buffer);
 
 			logicalDevice.unmapMemory(particleCameraUBOBuffer.bufferMemory);
 			logicalDevice.freeMemory(particleCameraUBOBuffer.bufferMemory);
@@ -500,6 +509,7 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.destroyImage(gbuffer.T.image);
 			logicalDevice.destroyImage(gbuffer.worldPos.image);
 			logicalDevice.destroyImage(particleAttachment.image);
+			logicalDevice.destroyImage(skyBoxAttachment.image);
 			logicalDevice.destroyImage(shadowMapBuffer.shadowBufferDepthAttachment.image);
 			logicalDevice.freeMemory(depthBufferMemory);
 			logicalDevice.freeMemory(postProcessInputAttachment.mem);
@@ -511,6 +521,7 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.freeMemory(gbuffer.T.mem);
 			logicalDevice.freeMemory(gbuffer.worldPos.mem);
 			logicalDevice.freeMemory(particleAttachment.mem);
+			logicalDevice.freeMemory(skyBoxAttachment.mem);
 			logicalDevice.freeMemory(shadowMapBuffer.shadowBufferDepthAttachment.mem);
 			logicalDevice.destroyImageView(depthBufferView);
 			logicalDevice.destroyImageView(postProcessInputAttachment.view);
@@ -522,6 +533,7 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.destroyImageView(gbuffer.T.view);
 			logicalDevice.destroyImageView(gbuffer.worldPos.view);
 			logicalDevice.destroyImageView(particleAttachment.view);
+			logicalDevice.destroyImageView(skyBoxAttachment.view);
 			logicalDevice.destroyImageView(shadowMapBuffer.shadowBufferDepthAttachment.view);
 			logicalDevice.destroySampler(shadowMapBuffer.sampler);
 			

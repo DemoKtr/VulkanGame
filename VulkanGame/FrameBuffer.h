@@ -128,6 +128,38 @@ namespace vkInit {
 	}
 
 
+	void make_skybox_framebuffers(framebufferInput inputChunk, std::vector<vkUtil::SwapChainFrame>& frames, bool debug) {
+
+
+		for (int i = 0; i < frames.size(); ++i) {
+			
+			std::vector<vk::ImageView> attachments = {
+			frames[i].skyBoxAttachment.view	, frames[i].depthBufferView
+			};
+
+			vk::FramebufferCreateInfo framebufferInfo;
+			framebufferInfo.flags = vk::FramebufferCreateFlags();
+			framebufferInfo.renderPass = inputChunk.renderpass;
+			framebufferInfo.attachmentCount = attachments.size();
+			framebufferInfo.pAttachments = attachments.data();
+			framebufferInfo.width = inputChunk.swapchainExtent.width;
+			framebufferInfo.height = inputChunk.swapchainExtent.height;
+			framebufferInfo.layers = 1;
+
+			try {
+				frames[i].skyBoxFramebuffer = inputChunk.device.createFramebuffer(framebufferInfo);
+
+				if (debug) {
+					std::cout << "Created postprocess framebuffer for frame " << i << std::endl;
+				}
+			}
+			catch (vk::SystemError err) {
+				if (debug) {
+					std::cout << "Failed to create postprocess framebuffer for frame " << i << std::endl;
+				}
+			}
+		}
+	}
 
 
 	void make_shadow_framebuffers(framebufferInput inputChunk, std::vector<vkUtil::SwapChainFrame>& frames, bool debug) {

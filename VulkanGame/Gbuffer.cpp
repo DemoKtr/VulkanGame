@@ -57,7 +57,7 @@ void vkGbuffer::createAttachment(attachmentBundle attachmentDescription)
 
 }
 
-void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::Device logicalDevice,vkUtil::Gbuffer* gbuffer, vkUtil::FrameBufferAttachment* attachmnent, vkUtil::FrameBufferAttachment* postProcessInputAttachment)
+void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::Device logicalDevice,vkUtil::Gbuffer* gbuffer, vkUtil::FrameBufferAttachment* attachmnent, vkUtil::FrameBufferAttachment* postProcessInputAttachment, vkUtil::FrameBufferAttachment* skyBoxAttachment)
 {
 	attachmentBundle attachmentDescription;
 	attachmentDescription.logicalDevice = logicalDevice;
@@ -84,6 +84,9 @@ void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::De
 	createAttachment(attachmentDescription);
 	attachmentDescription.canUseAsSampledImage = false;
 	attachmentDescription.attachment = &gbuffer->albedo;
+	attachmentDescription.format = vk::Format::eR8G8B8A8Unorm;
+	createAttachment(attachmentDescription);
+	attachmentDescription.attachment = skyBoxAttachment;
 	attachmentDescription.format = vk::Format::eR8G8B8A8Unorm;
 	createAttachment(attachmentDescription);
 }

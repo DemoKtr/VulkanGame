@@ -85,7 +85,7 @@ namespace vkInit {
 		vk::CommandBufferAllocateInfo secallocInfo = {};
 		secallocInfo.commandPool = inputChunk.commandPool;
 		secallocInfo.level = vk::CommandBufferLevel::eSecondary;
-		secallocInfo.commandBufferCount = 1;
+		secallocInfo.commandBufferCount = 2;
 
 		for (int i = 0; i < inputChunk.frames.size(); ++i) {
 			try {
@@ -93,6 +93,8 @@ namespace vkInit {
 				if (debugMode) std::cout << "Allocated Primary command buffer for frame" << i << std::endl;
 				inputChunk.frames[i].particleSeccondaryCommandBuffer = inputChunk.device.allocateCommandBuffers(secallocInfo)[0];
 				if (debugMode) std::cout << "Allocated graphic particle command buffer for frame" << i << std::endl;
+				inputChunk.frames[i].skyBoxSeccondaryCommandBuffer = inputChunk.device.allocateCommandBuffers(secallocInfo)[1];
+				if (debugMode) std::cout << "Allocated graphic skybox command buffer for frame" << i << std::endl;
 				inputChunk.frames[i].computeCommandBuffer = inputChunk.device.allocateCommandBuffers(compallocInfo)[0];
 				if (debugMode) std::cout << "Allocated compute command buffer for frame" << i << std::endl;
 			}

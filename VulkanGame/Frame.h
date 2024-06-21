@@ -28,9 +28,8 @@ namespace vkUtil {
 	};
 
 	struct SkyBoxUBO {
-		glm::vec4 forwards;
-		glm::vec4 right;
-		glm::vec4 up;
+		glm::mat4 view;
+		glm::mat4 projection;
 	};
 
 	struct UBOCameraParticle {
@@ -55,6 +54,7 @@ namespace vkUtil {
 		vk::Framebuffer shadowFramebuffer;
 		vk::Framebuffer particleFramebuffer;
 		vk::Framebuffer postProcessFramebuffer;
+		vk::Framebuffer skyBoxFramebuffer;
 
 		//zBuffer
 		vk::Image depthBuffer;
@@ -75,6 +75,7 @@ namespace vkUtil {
 		vk::CommandBuffer commandBuffer;
 		vk::CommandBuffer computeCommandBuffer;
 		vk::CommandBuffer particleSeccondaryCommandBuffer;
+		vk::CommandBuffer skyBoxSeccondaryCommandBuffer;
 
 
 		//Sync objects
@@ -93,6 +94,7 @@ namespace vkUtil {
 	
 		FrameBufferAttachment particleAttachment;
 		FrameBufferAttachment postProcessInputAttachment;
+		FrameBufferAttachment skyBoxAttachment;
 
 		std::vector<glm::mat4> modelTransforms;
 		std::vector<PointLight> LightTransforms;
@@ -128,11 +130,13 @@ namespace vkUtil {
 		vk::DescriptorSet shadowDescriptorSet;
 
 		vk::DescriptorSet postProcessDescriptorSet;
+		
+		vk::DescriptorSet skyBoxDescriptorSet;
 
-		//SkyBoxUBO	skyboxData;
-		//Buffer skyboxUBOBuffer;
-		//void* skyboxUBOWriteLoacation;
-		//vk::DescriptorBufferInfo skyboxUBOBufferDescriptor;
+		SkyBoxUBO	skyboxData;
+		Buffer skyboxUBOBuffer;
+		void* skyboxUBOWriteLoacation;
+		vk::DescriptorBufferInfo skyboxUBOBufferDescriptor;
 
 		void shadowDescripotrsWrite();
 		

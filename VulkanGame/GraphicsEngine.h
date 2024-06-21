@@ -70,11 +70,15 @@ class GraphicsEngine
 	
 
 
-	//shadows
+	//postProcess
 	vk::Pipeline postProcessPipeline;
 	vk::RenderPass postProcessRenderPass;
 	vk::PipelineLayout postProcessPipelineLayout;
 
+	//skyBox
+	vk::Pipeline skyBoxPipeline;
+	vk::RenderPass skyBoxRenderPass;
+	vk::PipelineLayout skyBoxPipelineLayout;
 
 
 	//synchronizers 
@@ -121,6 +125,7 @@ class GraphicsEngine
 
 	vk::DescriptorSetLayout skyBoxDescriptorSetLayout;
 	vk::DescriptorPool skyBoxDescriptorPool;
+
 	vk::DescriptorSetLayout skyBoxTextureSetLayout;
 	vk::DescriptorPool skyBoxTextureDescriptorPool;
 
