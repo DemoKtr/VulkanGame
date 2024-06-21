@@ -25,11 +25,10 @@ void main() {
 		
 	//}
 	
-	//if(zAlbedo != 0.0f && zParticle != 0.0f){
-	//if(zParticle >= zAlbedo) color = texture(albedoMap,inUV.xy).rgb;
-	//else color = texture(particleMap,inUV.xy).rgb;
-	//}else color = vec3(1.0f);
-	//if(zAlbedo == 1.0f && zParticle == 1.0f) vec3(1.0f);
-	color = texture(material, forwards).rgb;
+	if(zAlbedo != 0.0f && zParticle != 0.0f){
+	if(zParticle >= zAlbedo) color = texture(albedoMap,inUV.xy).rgb;
+	else color = texture(particleMap,inUV.xy).rgb;
+	}else color = vec3(1.0f);
+	
 	outColor = vec4(color,1.0f);
 }

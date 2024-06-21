@@ -259,13 +259,13 @@ void GraphicsEngine::create_pipeline()
 	postProcessPipelineInput.device = device;
 	postProcessPipelineInput.vertexFilePath = "shaders/skyBoxVert.spv";
 	postProcessPipelineInput.fragmentFilePath = "shaders/skyBoxFrag.spv";
-	postProcessPipelineInput.skyBoxSetLayout = {skyBoxDescriptorSetLayout,skyBoxTextureSetLayout};
+	postProcessPipelineInput.postProcessSetLayout = {skyBoxDescriptorSetLayout,skyBoxTextureSetLayout};
 	postProcessPipelineInput.swapchainExtent = swapchainExtent;
 	postProcessPipelineInput.swapchainImageFormat = swapchainFormat;
 	vkInit::PostProcessGraphicsPipelineOutBundle postProcessOutput = vkInit::create_postprocess_pipelines(postProcessPipelineInput,debugMode);
 	skyBoxRenderPass = postProcessOutput.renderpass;
-    skyBoxPipelineLayout = postProcessOutput.skyBoxPipelineLayout;
-	skyBoxPipeline = postProcessOutput.skyBoxgraphicsPipeline;
+    skyBoxPipelineLayout = postProcessOutput.postProcessPipelineLayout;
+	skyBoxPipeline = postProcessOutput.postProcessgraphicsPipeline;
 
 
 }

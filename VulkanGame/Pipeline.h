@@ -49,8 +49,18 @@ namespace vkInit {
         vk::Extent2D swapchainExtent;
         //vk::Format  depthFormat;
         vk::Format swapchainImageFormat;
-        std::vector<vk::DescriptorSetLayout> skyBoxSetLayout;
+        std::vector<vk::DescriptorSetLayout> postProcessSetLayout;
  
+    };
+    struct skyBoxPipelineInBundle {
+        vk::Device device;
+        std::string vertexFilePath;
+        std::string fragmentFilePath;
+        vk::Extent2D swapchainExtent;
+        vk::Format  depthFormat;
+        vk::Format swapchainImageFormat;
+        std::vector<vk::DescriptorSetLayout> skyBoxSetLayout;
+
     };
 
 	struct GraphicsPipelineOutBundle {
@@ -75,6 +85,12 @@ namespace vkInit {
     };
 
     struct PostProcessGraphicsPipelineOutBundle {
+        vk::PipelineLayout postProcessPipelineLayout;
+        vk::RenderPass renderpass;
+        vk::Pipeline postProcessgraphicsPipeline;
+    };
+
+    struct skyBoxGraphicsPipelineOutBundle {
         vk::PipelineLayout skyBoxPipelineLayout;
         vk::RenderPass renderpass;
         vk::Pipeline skyBoxgraphicsPipeline;
@@ -1028,7 +1044,7 @@ namespace vkInit {
     {
         PostProcessGraphicsPipelineOutBundle output;
 
-        vk::PipelineLayout skyBoxPipelineLayout = create_pipeline_layout(specyfication.device, specyfication.skyBoxSetLayout, debugMode);
+        vk::PipelineLayout skyBoxPipelineLayout = create_pipeline_layout(specyfication.device, specyfication.postProcessSetLayout, debugMode);
         
         vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState = make_input_assembly_info();
         vk::PipelineRasterizationStateCreateInfo rasterizationState = make_rasterizer_info();
@@ -1109,8 +1125,8 @@ namespace vkInit {
         specyfication.device.destroyShaderModule(fragmentShader);
        
         output.renderpass = renderpass;
-        output.skyBoxPipelineLayout = skyBoxPipelineLayout;
-        output.skyBoxgraphicsPipeline = skyBoxPipeline;
+        output.postProcessPipelineLayout = skyBoxPipelineLayout;
+        output.postProcessgraphicsPipeline = skyBoxPipeline;
 
         return output;
     }
