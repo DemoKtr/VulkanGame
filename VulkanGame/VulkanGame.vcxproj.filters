@@ -147,6 +147,9 @@
     <ClCompile Include="ParticleTexture.cpp">
       <Filter>Source Files\vkImage</Filter>
     </ClCompile>
+    <ClCompile Include="CubeMapMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GraphicsEngine.h">
@@ -262,6 +265,9 @@
     </ClInclude>
     <ClInclude Include="ParticleTexture.h">
       <Filter>Header Files\vkImage</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeMapMesh.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

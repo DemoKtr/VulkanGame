@@ -151,6 +151,14 @@ void GraphicsEngine::make_assets(Scene* scene)
 	} };
 	cubemap = new vkImage::Cubemap(skyBoxTextureInput);
 
+
+	cubeMapMesh = new CubeMapMesh();
+	vkMesh::FinalizationChunk cubemapfinalizationChunk;
+	cubemapfinalizationChunk.physicalDevice = physicalDevice;
+	cubemapfinalizationChunk.logicalDevice = device;
+	cubemapfinalizationChunk.queue = graphicsQueue;
+	cubemapfinalizationChunk.commandBuffer = maincommandBuffer;
+	cubeMapMesh->finalize(cubemapfinalizationChunk);
 }
 
 void GraphicsEngine::prepare_scene(vk::CommandBuffer commandBuffer)
@@ -361,6 +369,7 @@ GraphicsEngine::~GraphicsEngine()
 	delete meshes;
 	delete particles;
 	delete particleTexture;
+	delete cubeMapMesh;
 	for (const auto& [key, texture] : materials) delete texture;
 	for (const auto& [key, SceneObjects] : models) {
 		for (SceneObject* obj : SceneObjects) delete obj;

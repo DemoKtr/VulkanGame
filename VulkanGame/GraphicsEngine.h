@@ -11,6 +11,7 @@
 #include "ParticleMenagerie.h"
 #include "ParticleTexture.h"
 #include "Camera.h"
+#include "CubeMapMesh.h"
 
 
 class GraphicsEngine
@@ -120,6 +121,7 @@ class GraphicsEngine
 	vk::DescriptorSetLayout skyBoxTextureSetLayout;
 	vk::DescriptorPool skyBoxTextureDescriptorPool;
 
+	CubeMapMesh* cubeMapMesh;
 
 	vkImage::Cubemap* cubemap;
 
