@@ -169,6 +169,7 @@
     <ClCompile Include="Logging.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Memory.cpp" />
+    <ClCompile Include="NoiseTexture.cpp" />
     <ClCompile Include="Obj_Mesh.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="ParticleEmiter.cpp" />
@@ -203,6 +204,7 @@
     <ClInclude Include="Logging.h" />
     <ClInclude Include="Memory.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="NoiseTexture.h" />
     <ClInclude Include="Obj_Mesh.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="ParticleEmiter.h" />

@@ -148,6 +148,9 @@
       <Filter>Source Files\vkImage</Filter>
     </ClCompile>
     <ClCompile Include="CubeMapMesh.cpp">
+      <Filter>Source Files\vkMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="NoiseTexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -267,6 +270,9 @@
       <Filter>Header Files\vkImage</Filter>
     </ClInclude>
     <ClInclude Include="CubeMapMesh.h">
+      <Filter>Header Files\vkMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="NoiseTexture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

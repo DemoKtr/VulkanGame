@@ -38,6 +38,10 @@ namespace vkUtil {
 		glm::mat4 projection;
 		
 	};
+
+	struct ssaoUBO {
+		
+	};
 	/**
 		Holds the data structures associated with a "Frame"
 	*/
@@ -139,6 +143,10 @@ namespace vkUtil {
 		vk::DescriptorSet postProcessDescriptorSet;
 		
 		vk::DescriptorSet skyBoxDescriptorSet;
+
+		vk::DescriptorSet ssaoDescriptorSet;
+
+		vk::DescriptorSet blurDescriptorSet;
 
 		SkyBoxUBO	skyboxData;
 		Buffer skyboxUBOBuffer;

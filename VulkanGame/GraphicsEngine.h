@@ -12,6 +12,7 @@
 #include "ParticleTexture.h"
 #include "Camera.h"
 #include "CubeMapMesh.h"
+#include "NoiseTexture.h"
 
 
 class GraphicsEngine
@@ -129,9 +130,18 @@ class GraphicsEngine
 	vk::DescriptorSetLayout skyBoxTextureSetLayout;
 	vk::DescriptorPool skyBoxTextureDescriptorPool;
 
+	vk::DescriptorSetLayout ssaoDescriptorSetLayout;
+	vk::DescriptorPool ssaoDescriptorPool;
+
+
+	vk::DescriptorSetLayout blurDescriptorSetLayout;
+	vk::DescriptorPool blurDescriptorPool;
+
 	CubeMapMesh* cubeMapMesh;
 
 	vkImage::Cubemap* cubemap;
+
+	vkImage::NoiseTexture* noiseTexture;
 
 	void make_assets(Scene* scene);
 	void prepare_scene(vk::CommandBuffer commandBuffer);

@@ -161,6 +161,15 @@ void GraphicsEngine::make_assets(Scene* scene)
 	cubemapfinalizationChunk.queue = graphicsQueue;
 	cubemapfinalizationChunk.commandBuffer = maincommandBuffer;
 	cubeMapMesh->finalize(cubemapfinalizationChunk);
+
+
+	vkImage::NoiseTextureInputChunk noiseInput;
+	noiseInput.logicalDevice = device;
+	noiseInput.physicalDevice = physicalDevice;
+	noiseInput.commandBuffer = maincommandBuffer;
+	noiseInput.queue = graphicsQueue;
+
+	noiseTexture = new vkImage::NoiseTexture(noiseInput);
 }
 
 void GraphicsEngine::prepare_scene(vk::CommandBuffer commandBuffer)
@@ -379,6 +388,8 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyDescriptorSetLayout(particleCameraGraphicSetLayout);
 	device.destroyDescriptorSetLayout(particleTextureGraphicSetLayout);
 	device.destroyDescriptorSetLayout(postProcessDescriptorSetLayout);
+	device.destroyDescriptorSetLayout(blurDescriptorSetLayout);
+	device.destroyDescriptorSetLayout(ssaoDescriptorSetLayout);
 	device.destroyDescriptorSetLayout(skyBoxTextureSetLayout);
 	device.destroyDescriptorSetLayout(skyBoxDescriptorSetLayout);
 	device.destroyDescriptorPool(meshDescriptorPool);
@@ -388,6 +399,8 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyDescriptorPool(postProcessDescriptorPool);
 	device.destroyDescriptorPool(skyBoxTextureDescriptorPool);
 	device.destroyDescriptorPool(skyBoxDescriptorPool);
+	device.destroyDescriptorPool(ssaoDescriptorPool);
+	device.destroyDescriptorPool(blurDescriptorPool);
 	
 	device.destroyDescriptorPool(shadowDescriptorPool);
 	
@@ -395,6 +408,7 @@ GraphicsEngine::~GraphicsEngine()
 	delete particles;
 	delete particleTexture;
 	delete cubeMapMesh;
+	delete noiseTexture;
 	for (const auto& [key, texture] : materials) delete texture;
 	for (const auto& [key, SceneObjects] : models) {
 		for (SceneObject* obj : SceneObjects) delete obj;
@@ -564,7 +578,7 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	bindings.count = 3;
 	bindings.indices[0] = 0;
 	bindings.indices[1] = 1;
-
+	bindings.indices[2] = 2;
 	bindings.types[0] = vk::DescriptorType::eCombinedImageSampler;
 	bindings.types[1] = vk::DescriptorType::eCombinedImageSampler;
 	bindings.types[2] = vk::DescriptorType::eCombinedImageSampler;
@@ -594,7 +608,27 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	bindings.counts[0] = 1;
 	bindings.stages[0] = vk::ShaderStageFlagBits::eFragment;
 	skyBoxTextureSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+	blurDescriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
+
+	bindings.count = 4;
+	bindings.indices[0] = 0;
+	bindings.indices[1] = 1;
+	bindings.indices[2] = 2;
+	bindings.indices[3] = 3;
+	bindings.types[0] = vk::DescriptorType::eCombinedImageSampler;
+	bindings.types[1] = vk::DescriptorType::eCombinedImageSampler;
+	bindings.types[2] = vk::DescriptorType::eCombinedImageSampler;
+	bindings.types[3] = vk::DescriptorType::eUniformBuffer;
+	bindings.counts[0] = 1;
+	bindings.counts[1] = 1;
+	bindings.counts[2] = 1;
+	bindings.counts[3] = 1;
+	bindings.stages[0] = vk::ShaderStageFlagBits::eFragment;
+	bindings.stages[1] = vk::ShaderStageFlagBits::eFragment;
+	bindings.stages[2] = vk::ShaderStageFlagBits::eFragment;
+	bindings.stages[3] = vk::ShaderStageFlagBits::eFragment;
+	ssaoDescriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
 }
 
@@ -1348,8 +1382,18 @@ void GraphicsEngine::create_frame_resources()
 	skyBoxBindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
 	postProcessDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), skyBoxBindings);
 	skyBoxBindings.count = 1;
-	skyBoxBindings.types.push_back(vk::DescriptorType::eUniformBuffer);
+	skyBoxBindings.types[0] = vk::DescriptorType::eUniformBuffer;
 	skyBoxDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), skyBoxBindings);
+
+	vkInit::descriptorSetLayoutData ssaoBindings;
+	ssaoBindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
+	ssaoBindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
+	ssaoBindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
+	ssaoBindings.types.push_back(vk::DescriptorType::eUniformBuffer);
+	ssaoBindings.count = 1;
+	blurDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), ssaoBindings);
+	ssaoBindings.count = 4;
+	ssaoDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), ssaoBindings);
 	
 	//deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
 	
@@ -1374,9 +1418,10 @@ void GraphicsEngine::create_frame_resources()
 		frame.particleCameraDescriptorSet = vkInit::allocate_descriptor_set(device, particleCameraGraphicDescriptorPool, particleCameraGraphicSetLayout);
 
 		frame.postProcessDescriptorSet = vkInit::allocate_descriptor_set(device, postProcessDescriptorPool, postProcessDescriptorSetLayout);
-		
 		frame.skyBoxDescriptorSet = vkInit::allocate_descriptor_set(device, skyBoxDescriptorPool, skyBoxDescriptorSetLayout);
-		
+		frame.ssaoDescriptorSet = vkInit::allocate_descriptor_set(device, ssaoDescriptorPool, ssaoDescriptorSetLayout);
+		frame.blurDescriptorSet = vkInit::allocate_descriptor_set(device, blurDescriptorPool, blurDescriptorSetLayout);
+
 		
 
 	}
