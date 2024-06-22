@@ -86,7 +86,7 @@ void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::De
 	createAttachment(attachmentDescription);
 	attachmentDescription.canUseAsSampledImage = false;
 	attachmentDescription.attachment = &gbuffer->albedo;
-	attachmentDescription.format = vk::Format::eR8G8B8A8Unorm;
+	//attachmentDescription.format = vk::Format::eR8G8B8A8Unorm;
 	createAttachment(attachmentDescription);
 	
 }
