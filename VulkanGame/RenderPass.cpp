@@ -468,7 +468,7 @@ vk::RenderPass vkInit::create_skybox_renderpass(vk::Device logicalDevice, vk::Fo
 	attachment[1].storeOp = vk::AttachmentStoreOp::eStore;
 	attachment[1].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
 	attachment[1].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
-	attachment[1].initialLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+	attachment[1].initialLayout = vk::ImageLayout::eUndefined;
 	attachment[1].finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
 
 	vk::AttachmentReference colorAttachmentRef = {};

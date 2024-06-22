@@ -46,7 +46,7 @@ void Floor::update(float deltaTime)
 
 Floor::Floor()
 {
-	objMaterial.setFilenames("res/models/plane.obj", "res/models/plane.mtl", "tex/floordif.png", "tex/floornormal.png", "tex/floorarm.png", "tex/floordepth.png");
+	objMaterial.setFilenames("res/models/plane.obj", "res/models/plane.mtl", "res/textures/groundAlbedo.jpg","res/textures/groundNormal.jpg", "res/textures/groundAMR.jpg", "res/textures/groundDepth.jpg");
 	objMaterial.meshType = meshTypes::DOG;
 }
 

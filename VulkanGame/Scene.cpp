@@ -12,7 +12,7 @@ Scene::Scene()
 	Box* box = new Box();
 	Box* box1 = new Box();
 	Box* box2 = new Box();
-	Floor* floor = new Floor();
+	
 
 
 
@@ -25,20 +25,28 @@ Scene::Scene()
 	//box->getTransform().rotate(glm::vec3(0.0f, 0.0f, 1.0f),(22.0f/28.0f));
 	box1->getTransform().setLocalScale(glm::vec3(0.1f, 0.1f, 0.1f));
 	box1->getTransform().computeModelMatrix();
-
-	floor->getTransform().setLocalPosition(glm::vec3(0.0f, -0.5f, 0.0f));
-	floor->getTransform().setLocalScale(glm::vec3(1.0f, 0.1f, 1.0f));
-	//box->getTransform().rotate(glm::vec3(0.0f, 0.0f, 1.0f),(22.0f/28.0f));
-	floor->getTransform().computeModelMatrix();
-
-
+	
+	for (int x = -5; x < 5; ++x) {
+		for (int z = -5; z < 5; ++z) {
+			Floor* floor = new Floor();
+			floor->getTransform().setLocalPosition(glm::vec3(static_cast<float>(x*2.01f), 0.0f, static_cast<float>(z*2.01f)));
+			floor->getTransform().computeModelMatrix();
+			sceneObjects.push_back(floor);
+		}
+	}
+	
 
 	//positions[meshTypes::KITTY].push_back(box);
 	//positions[meshTypes::DOG].push_back(box1);
-
+	//Floor* floor = new Floor();
+	//floor->getTransform().setLocalPosition(glm::vec3(0.0f,0.0f,0.0f));
+	//floor->getTransform().setLocalScale(glm::vec3(20.0f,1.0f,20.0f));
+	//floor->getTransform().computeModelMatrix();
+	
 	sceneObjects.push_back(box);
 	sceneObjects.push_back(box1);
-	sceneObjects.push_back(floor);
+	//sceneObjects.push_back(floor);
+	
 
 
 
@@ -46,9 +54,9 @@ Scene::Scene()
 	Light* pointLight2 = new Light();
 	pointLight1->diffuse = glm::vec4(255.0f, 255.0f, 255.0f,1.0f);
 	pointLight2->diffuse = glm::vec4(255.0f, 255.0f, 255.0f,1.0f);
-	pointLight1->transform.setLocalPosition(glm::vec3(0.2f, 1.0f, 0.0f));
+	pointLight1->transform.setLocalPosition(glm::vec3(0.0f, 1.0f, 0.0f));
 	pointLight1->transform.computeModelMatrix();
-	pointLight2->transform.setLocalPosition(glm::vec3(0.0f, -100.0f,0.0f));
+	pointLight2->transform.setLocalPosition(glm::vec3(5.0f, 1.0f,-3.0f));
 	pointLight2->transform.computeModelMatrix();
 	
 	lights.push_back(pointLight1);

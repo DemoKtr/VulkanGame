@@ -62,6 +62,13 @@ namespace vkUtil {
 		vk::ImageView depthBufferView;
 		vk::Format depthFormat;
 		int width, height;
+
+
+		vk::Image skyboxdepthBuffer;
+		vk::DeviceMemory skyboxdepthBufferMemory;
+		vk::ImageView skyboxdepthBufferView;
+
+
 		//particleZ
 		vk::Image particledepthBuffer;
 		vk::DeviceMemory particledepthBufferMemory;

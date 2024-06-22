@@ -142,12 +142,14 @@ void GraphicsEngine::make_assets(Scene* scene)
 	skyBoxTextureInput.layout = skyBoxTextureSetLayout;
 	skyBoxTextureInput.descriptorPool = skyBoxTextureDescriptorPool;
 	skyBoxTextureInput.filenames = { {
-			"tex/front.bmp",  //x+
-			"tex/back.bmp",   //x-
-			"tex/left.bmp",   //y+
-			"tex/right.bmp",  //y-
-			"tex/bottom.bmp", //z+
-			"tex/top.bmp",    //z-
+			"tex/left.jpg",
+			
+			"tex/right.jpg",
+			"tex/top.jpg",//x+
+			"tex/bottom.jpg",
+			   //y+
+			 "tex/back.jpg",
+			"tex/front.jpg",    //z-
 	} };
 	cubemap = new vkImage::Cubemap(skyBoxTextureInput);
 
@@ -559,16 +561,19 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	particleCameraGraphicSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
 
-	bindings.count = 2;
+	bindings.count = 3;
 	bindings.indices[0] = 0;
 	bindings.indices[1] = 1;
 
 	bindings.types[0] = vk::DescriptorType::eCombinedImageSampler;
 	bindings.types[1] = vk::DescriptorType::eCombinedImageSampler;
+	bindings.types[2] = vk::DescriptorType::eCombinedImageSampler;
 	bindings.counts[0] = 1;
 	bindings.counts[1] = 1;
+	bindings.counts[2] = 1;
 	bindings.stages[0] = vk::ShaderStageFlagBits::eFragment;
 	bindings.stages[1] = vk::ShaderStageFlagBits::eFragment;
+	bindings.stages[2] = vk::ShaderStageFlagBits::eFragment;
 
 
 
@@ -630,7 +635,7 @@ void GraphicsEngine::recreate_swapchain()
 	
 }
 
-void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::CommandBuffer particleCommandBuffer, uint32_t imageIndex)
+void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::CommandBuffer particleCommandBuffer, vk::CommandBuffer skyboxCommandBuffer,uint32_t imageIndex)
 {
 
 
@@ -687,6 +692,29 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 	commandBuffer.executeCommands(particleCommandBuffer);
 	commandBuffer.endRenderPass();
 
+
+	vk::ClearValue cCc;
+	std::array<float, 4> ccc = { 1.0f, 0.0f, 0.0f, 1.0f };
+	cCc.color = vk::ClearColorValue(ccc);
+	vk::ClearValue dCc;
+	dCc.depthStencil = vk::ClearDepthStencilValue({ 1.0f, 0 });
+	std::vector<vk::ClearValue> cVc = { {cCc,dCc} };
+	vk::RenderPassBeginInfo skyboxrenderPassInfo = {};
+	skyboxrenderPassInfo.renderPass = skyBoxRenderPass;
+	skyboxrenderPassInfo.framebuffer = swapchainFrames[imageIndex].skyBoxFramebuffer;
+	skyboxrenderPassInfo.renderArea.offset.x = 0;
+	skyboxrenderPassInfo.renderArea.offset.y = 0;
+	skyboxrenderPassInfo.renderArea.extent = swapchainExtent;
+	skyboxrenderPassInfo.clearValueCount = cVc.size();
+	skyboxrenderPassInfo.pClearValues = cVc.data();
+
+
+
+	commandBuffer.beginRenderPass(&skyboxrenderPassInfo, vk::SubpassContents::eSecondaryCommandBuffers);
+	commandBuffer.executeCommands(skyboxCommandBuffer);
+	commandBuffer.endRenderPass();
+
+
 	vk::BufferMemoryBarrier bufferBarrierparticle = {  // sType                                  // pNext
 	vk::AccessFlagBits::eVertexAttributeRead,          // srcAccessMask
 	vk::AccessFlagBits::eMemoryRead,           // dstAccessMask
@@ -741,10 +769,11 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 	
 	
 	commandBuffer.endRenderPass();
-	
-	
 
 
+
+
+	
 
 	
 
@@ -792,6 +821,12 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 
 	commandBuffer.draw(3, 1, 0, 0);
 	commandBuffer.endRenderPass();
+
+
+
+
+	
+
 	vk::ImageMemoryBarrier particlebarrier;
 	particlebarrier.oldLayout = vk::ImageLayout::eColorAttachmentOptimal;
 	particlebarrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
@@ -834,7 +869,26 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 	);
 
 
+	vk::ImageMemoryBarrier skyboxbarrier;
+	skyboxbarrier.oldLayout = vk::ImageLayout::eColorAttachmentOptimal;
+	skyboxbarrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	skyboxbarrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+	skyboxbarrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+	skyboxbarrier.image = swapchainFrames[imageIndex].skyBoxAttachment.image; // Twoje vk::Image
+	skyboxbarrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+	skyboxbarrier.subresourceRange.baseMipLevel = 0;
+	skyboxbarrier.subresourceRange.levelCount = 1;
+	skyboxbarrier.subresourceRange.baseArrayLayer = 0;
+	skyboxbarrier.subresourceRange.layerCount = 1;
 
+	commandBuffer.pipelineBarrier(
+		vk::PipelineStageFlagBits::eColorAttachmentOutput, // source stage
+		vk::PipelineStageFlagBits::eFragmentShader, // destination stage
+		{}, // dependency flags
+		nullptr, // memory barriers
+		nullptr, // buffer memory barriers
+		skyboxbarrier // image memory barriers
+	);
 
 	vk::RenderPassBeginInfo skyBoxRenderpassInfo = {};
 	skyBoxRenderpassInfo.renderPass = postProcessRenderPass;
@@ -1147,7 +1201,7 @@ void GraphicsEngine::render(Scene *scene,int &verticesCounter,float deltaTime,Ca
 	record_compute_commands(computeParticleCommandBuffer,imageIndex);
 	record_skybox_draw_commands(graphicSkyBoxCommandBuffer,imageIndex);
 	record_particle_draw_commands(graphicParticleCommandBuffer, imageIndex);
-	record_draw_commands(commandBuffer,graphicParticleCommandBuffer ,imageIndex);
+	record_draw_commands(commandBuffer,graphicParticleCommandBuffer, graphicSkyBoxCommandBuffer ,imageIndex);
 
 	/*
 
@@ -1288,7 +1342,8 @@ void GraphicsEngine::create_frame_resources()
 	particleCameraGraphicDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), CameraBindings);
 
 	vkInit::descriptorSetLayoutData skyBoxBindings;
-	skyBoxBindings.count = 2;
+	skyBoxBindings.count = 3;
+	skyBoxBindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
 	skyBoxBindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
 	skyBoxBindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
 	postProcessDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), skyBoxBindings);
@@ -1397,7 +1452,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	
 	
 	
-	glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), static_cast < float>(1)/ static_cast < float>(1), 0.1f,1024.0f);
+	glm::mat4 shadowProj = glm::perspective(glm::radians(120.0f), static_cast < float>(1)/ static_cast < float>(1), 0.1f,3.0f);
 	std::vector<glm::mat4> shadowTransform;
 	shadowProj[1][1] *= -1;
 

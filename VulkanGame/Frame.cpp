@@ -179,14 +179,21 @@ void vkUtil::SwapChainFrame::make_depth_resources()
 			imageInfo.format = depthFormat;
 			imageInfo.arrayCount = 1;
 			depthBuffer = vkImage::make_image(imageInfo);
+
+			skyboxdepthBuffer = vkImage::make_image(imageInfo);
+
 			particledepthBuffer = vkImage::make_image(imageInfo);
 			
 			depthBufferMemory = vkImage::make_image_memory(imageInfo, depthBuffer);
+			skyboxdepthBufferMemory = vkImage::make_image_memory(imageInfo, skyboxdepthBuffer);
 			particledepthBufferMemory = vkImage::make_image_memory(imageInfo, particledepthBuffer);
 
 
 			depthBufferView = vkImage::make_image_view(
 				logicalDevice, depthBuffer, depthFormat, vk::ImageAspectFlagBits::eDepth, vk::ImageViewType::e2D, 1
+			);
+			skyboxdepthBufferView = vkImage::make_image_view(
+				logicalDevice, skyboxdepthBuffer, depthFormat, vk::ImageAspectFlagBits::eDepth, vk::ImageViewType::e2D, 1
 			);
 			particledepthBufferView = vkImage::make_image_view(
 				logicalDevice, particledepthBuffer, depthFormat, vk::ImageAspectFlagBits::eDepth, vk::ImageViewType::e2D, 1
@@ -410,17 +417,17 @@ void vkUtil::SwapChainFrame::write_skybox_descriptor()
 	skyBoxWriteInfo.pBufferInfo = &skyboxUBOBufferDescriptor;
 
 
-	vk::DescriptorImageInfo postProcessInputAttachmentImage;
-	postProcessInputAttachmentImage.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-	postProcessInputAttachmentImage.imageView = postProcessInputAttachment.view;
-	postProcessInputAttachmentImage.sampler = shadowMapBuffer.sampler;
-	vk::WriteDescriptorSet postProcessInputDescriptor;
-	postProcessInputDescriptor.dstSet = postProcessDescriptorSet;
-	postProcessInputDescriptor.dstBinding = 0;
-	postProcessInputDescriptor.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
-	postProcessInputDescriptor.descriptorCount = 1;
-	postProcessInputDescriptor.descriptorType = vk::DescriptorType::eCombinedImageSampler;
-	postProcessInputDescriptor.pImageInfo = &postProcessInputAttachmentImage;
+	vk::DescriptorImageInfo skyboxInputAttachmentImage;
+	skyboxInputAttachmentImage.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	skyboxInputAttachmentImage.imageView = skyBoxAttachment.view;
+	skyboxInputAttachmentImage.sampler = shadowMapBuffer.sampler;
+	vk::WriteDescriptorSet skyboxInputDescriptor;
+	skyboxInputDescriptor.dstSet = postProcessDescriptorSet;
+	skyboxInputDescriptor.dstBinding = 0;
+	skyboxInputDescriptor.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+	skyboxInputDescriptor.descriptorCount = 1;
+	skyboxInputDescriptor.descriptorType = vk::DescriptorType::eCombinedImageSampler;
+	skyboxInputDescriptor.pImageInfo = &skyboxInputAttachmentImage;
 
 	vk::DescriptorImageInfo particleImage;
 	particleImage.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
@@ -435,8 +442,21 @@ void vkUtil::SwapChainFrame::write_skybox_descriptor()
 	particleDescriptor.pImageInfo = &particleImage;
 
 
+	vk::DescriptorImageInfo postProcessInputAttachmentImage;
+	postProcessInputAttachmentImage.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	postProcessInputAttachmentImage.imageView = postProcessInputAttachment.view;
+	postProcessInputAttachmentImage.sampler = shadowMapBuffer.sampler;
+	vk::WriteDescriptorSet postProcessInputDescriptor;
+	postProcessInputDescriptor.dstSet = postProcessDescriptorSet;
+	postProcessInputDescriptor.dstBinding = 2;
+	postProcessInputDescriptor.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+	postProcessInputDescriptor.descriptorCount = 1;
+	postProcessInputDescriptor.descriptorType = vk::DescriptorType::eCombinedImageSampler;
+	postProcessInputDescriptor.pImageInfo = &postProcessInputAttachmentImage;
+
+
 	std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {
-				skyBoxWriteInfo, postProcessInputDescriptor, particleDescriptor,
+				skyBoxWriteInfo,skyboxInputDescriptor ,particleDescriptor, postProcessInputDescriptor
 	};
 
 	logicalDevice.updateDescriptorSets(writeDescriptorSets, nullptr);
@@ -500,6 +520,7 @@ void vkUtil::SwapChainFrame::destroy()
 
 
 			logicalDevice.destroyImage(depthBuffer);
+			logicalDevice.destroyImage(skyboxdepthBuffer);
 			logicalDevice.destroyImage(postProcessInputAttachment.image);
 			logicalDevice.destroyImage(particledepthBuffer);
 			logicalDevice.destroyImage(gbuffer.position.image);
@@ -512,6 +533,7 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.destroyImage(skyBoxAttachment.image);
 			logicalDevice.destroyImage(shadowMapBuffer.shadowBufferDepthAttachment.image);
 			logicalDevice.freeMemory(depthBufferMemory);
+			logicalDevice.freeMemory(skyboxdepthBufferMemory);
 			logicalDevice.freeMemory(postProcessInputAttachment.mem);
 			logicalDevice.freeMemory(particledepthBufferMemory);
 			logicalDevice.freeMemory(gbuffer.position.mem);
@@ -524,6 +546,7 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.freeMemory(skyBoxAttachment.mem);
 			logicalDevice.freeMemory(shadowMapBuffer.shadowBufferDepthAttachment.mem);
 			logicalDevice.destroyImageView(depthBufferView);
+			logicalDevice.destroyImageView(skyboxdepthBufferView);
 			logicalDevice.destroyImageView(postProcessInputAttachment.view);
 			logicalDevice.destroyImageView(particledepthBufferView);
 			logicalDevice.destroyImageView(gbuffer.position.view);

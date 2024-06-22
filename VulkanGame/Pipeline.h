@@ -1140,6 +1140,7 @@ namespace vkInit {
 
         vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState = make_input_assembly_info();
         vk::PipelineRasterizationStateCreateInfo rasterizationState = make_rasterizer_info();
+        rasterizationState.cullMode = vk::CullModeFlagBits::eFront;
         vk::PipelineColorBlendAttachmentState blendAttachmentState = make_color_blend_attachment_state();
         vk::PipelineColorBlendStateCreateInfo colorBlendState = make_color_blend_attachment_stage(blendAttachmentState);
         vk::PipelineDepthStencilStateCreateInfo depthStageInfo;

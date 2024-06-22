@@ -134,7 +134,7 @@ namespace vkInit {
 		for (int i = 0; i < frames.size(); ++i) {
 			
 			std::vector<vk::ImageView> attachments = {
-			frames[i].skyBoxAttachment.view	, frames[i].depthBufferView
+			frames[i].skyBoxAttachment.view, frames[i].skyboxdepthBufferView
 			};
 
 			vk::FramebufferCreateInfo framebufferInfo;
