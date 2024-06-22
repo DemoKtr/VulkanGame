@@ -40,7 +40,12 @@ namespace vkUtil {
 	};
 
 	struct ssaoUBO {
-		
+		glm::mat4 projection;
+		glm::vec3 samples[64];
+		glm::vec2 screenSize;
+		int kernelSize;//= 64;
+		float radius;// = 0.5;
+		float bias;// = 0.025;
 	};
 	/**
 		Holds the data structures associated with a "Frame"
@@ -152,6 +157,12 @@ namespace vkUtil {
 		Buffer skyboxUBOBuffer;
 		void* skyboxUBOWriteLoacation;
 		vk::DescriptorBufferInfo skyboxUBOBufferDescriptor;
+
+
+		ssaoUBO	ssaoUBOData;
+		Buffer ssaoUBOBuffer;
+		void* ssaoUBOWriteLoacation;
+		vk::DescriptorBufferInfo ssaoUBOBufferDescriptor;
 
 		void shadowDescripotrsWrite();
 		

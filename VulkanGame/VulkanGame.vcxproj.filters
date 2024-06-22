@@ -151,7 +151,7 @@
       <Filter>Source Files\vkMesh</Filter>
     </ClCompile>
     <ClCompile Include="NoiseTexture.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\vkImage</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -273,7 +273,7 @@
       <Filter>Header Files\vkMesh</Filter>
     </ClInclude>
     <ClInclude Include="NoiseTexture.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\vkImage</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -24,4 +24,6 @@ namespace vkUtil {
 		int32_t height;
 		vk::Sampler sampler;
 	};
+
+	
 }

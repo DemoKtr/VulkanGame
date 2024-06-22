@@ -42,12 +42,16 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			input.size = sizeof(SkyBoxUBO);
 			skyboxUBOBuffer = createBuffer(input);
 
+
+			input.size = sizeof(ssaoUBO);
+			ssaoUBOBuffer = createBuffer(input);
 			
 			cameraDataWriteLocation = logicalDevice.mapMemory(cameraDataBuffer.bufferMemory, 0, sizeof(UBO));
 			
 			particleCameraUBOWriteLoacation = logicalDevice.mapMemory(particleCameraUBOBuffer.bufferMemory, 0, sizeof(UBOCameraParticle));
 			camPosWriteLoacation = logicalDevice.mapMemory(camPosBuffer.bufferMemory, 0, sizeof(glm::vec4));
 			skyboxUBOWriteLoacation = logicalDevice.mapMemory(skyboxUBOBuffer.bufferMemory,0,sizeof(SkyBoxUBO));
+			ssaoUBOWriteLoacation = logicalDevice.mapMemory(ssaoUBOBuffer.bufferMemory,0,sizeof(ssaoUBO));
 			////////////
 
 			input.size = sizeof(particleUBO);
@@ -93,6 +97,10 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			skyboxUBOBufferDescriptor.buffer = skyboxUBOBuffer.buffer;
 			skyboxUBOBufferDescriptor.offset = 0;
 			skyboxUBOBufferDescriptor.range = sizeof(SkyBoxUBO);
+
+			ssaoUBOBufferDescriptor.buffer = ssaoUBOBuffer.buffer;
+			ssaoUBOBufferDescriptor.offset = 0;
+			ssaoUBOBufferDescriptor.range = sizeof(ssaoUBO);
 
 			particleCameraUBOBufferDescriptor.buffer = particleCameraUBOBuffer.buffer;
 			particleCameraUBOBufferDescriptor.offset = 0;
@@ -496,6 +504,10 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.unmapMemory(skyboxUBOBuffer.bufferMemory);
 			logicalDevice.freeMemory(skyboxUBOBuffer.bufferMemory);
 			logicalDevice.destroyBuffer(skyboxUBOBuffer.buffer);
+
+			logicalDevice.unmapMemory(ssaoUBOBuffer.bufferMemory);
+			logicalDevice.freeMemory(ssaoUBOBuffer.bufferMemory);
+			logicalDevice.destroyBuffer(ssaoUBOBuffer.buffer);
 
 			logicalDevice.unmapMemory(particleCameraUBOBuffer.bufferMemory);
 			logicalDevice.freeMemory(particleCameraUBOBuffer.bufferMemory);

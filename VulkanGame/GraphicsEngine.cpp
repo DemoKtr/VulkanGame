@@ -170,6 +170,34 @@ void GraphicsEngine::make_assets(Scene* scene)
 	noiseInput.queue = graphicsQueue;
 
 	noiseTexture = new vkImage::NoiseTexture(noiseInput);
+
+
+
+	std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0); // generates random floats between 0.0 and 1.0
+	std::default_random_engine generator;
+	
+
+	for (vkUtil::SwapChainFrame& frame : swapchainFrames) //referencja 
+	{
+		for (unsigned int i = 0; i < 64; ++i)
+		{
+			glm::vec3 sample(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, randomFloats(generator));
+			sample = glm::normalize(sample);
+			sample *= randomFloats(generator);
+			float scale = float(i) / 64.0f;
+
+			// scale samples s.t. they're more aligned to center of kernel
+			scale = ourLerp(0.1f, 1.0f, scale * scale);
+			sample *= scale;
+			frame.ssaoUBOData.samples[i] = sample;
+			
+		}
+		frame.ssaoUBOData.screenSize = glm::vec2(screenSize.x,screenSize.y);
+		frame.ssaoUBOData.kernelSize = 64;
+	}
+
+	
+
 }
 
 void GraphicsEngine::prepare_scene(vk::CommandBuffer commandBuffer)
@@ -1523,13 +1551,19 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	_frame.skyboxData.view = camera.GetViewMatrix();
 	_frame.skyboxData.projection = projection;
 	//_frame.skyboxData.up = glm::vec4(glm::normalize(camera.Up),1.0f);
+
+
+	_frame.ssaoUBOData.bias = 0.025f;
+	_frame.ssaoUBOData.radius = 0.5f;
+	
+
 	
 	memcpy(_frame.cameraDataWriteLocation, &(_frame.cameraData), sizeof(vkUtil::UBO));
 	memcpy(_frame.particleCameraUBOWriteLoacation, &(_frame.particleCameraUBOData), sizeof(vkUtil::UBOCameraParticle));
 	memcpy(_frame.camPosWriteLoacation, &(_frame.camPos), sizeof(glm::vec4));
 	memcpy(_frame.particleUBOWriteLoacation, &(_frame.particleUBOData), sizeof(vkUtil::particleUBO));
 	memcpy(_frame.skyboxUBOWriteLoacation, &(_frame.skyboxData), sizeof(vkUtil::SkyBoxUBO));
-
+	memcpy(_frame.ssaoUBOWriteLoacation, &(_frame.ssaoUBOData), sizeof(vkUtil::ssaoUBO));
 	memcpy(_frame.lightDataWriteLocation, (_frame.LightTransforms.data()), j * sizeof(vkUtil::PointLight));
 	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), i * sizeof(glm::mat4));
 	
@@ -1538,4 +1572,9 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	_frame.shadowDescripotrsWrite();
 	_frame.writeParticleDescriptor(particles->particleBufferDescriptor);
 	_frame.write_skybox_descriptor();
+}
+
+float GraphicsEngine::ourLerp(float a, float b, float f)
+{
+	return a + f * (b - a);
 }

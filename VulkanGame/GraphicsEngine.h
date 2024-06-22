@@ -170,7 +170,7 @@ class GraphicsEngine
 	void record_skybox_draw_commands(vk::CommandBuffer commandBuffer,uint32_t imageIndex);
 	void record_shadow_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex);
 
-
+	float ourLerp(float a, float b, float f);
 	void render_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& starInstance, uint32_t instanceCount);
 	void render_shadows_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& starInstance, uint32_t instanceCount);
 public:
