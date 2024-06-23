@@ -153,6 +153,9 @@
     <ClCompile Include="NoiseTexture.cpp">
       <Filter>Source Files\vkImage</Filter>
     </ClCompile>
+    <ClCompile Include="PBBloom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GraphicsEngine.h">
@@ -274,6 +277,9 @@
     </ClInclude>
     <ClInclude Include="NoiseTexture.h">
       <Filter>Header Files\vkImage</Filter>
+    </ClInclude>
+    <ClInclude Include="PBBloom.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

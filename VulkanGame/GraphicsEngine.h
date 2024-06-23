@@ -13,7 +13,7 @@
 #include "Camera.h"
 #include "CubeMapMesh.h"
 #include "NoiseTexture.h"
-
+#include "PBBloom.h"
 
 class GraphicsEngine
 {
@@ -142,6 +142,8 @@ class GraphicsEngine
 	vkImage::Cubemap* cubemap;
 
 	vkImage::NoiseTexture* noiseTexture;
+
+	vkBloom::PBBloom* bloom;
 
 	void make_assets(Scene* scene);
 	void prepare_scene(vk::CommandBuffer commandBuffer);

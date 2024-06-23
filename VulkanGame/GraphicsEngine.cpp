@@ -196,7 +196,7 @@ void GraphicsEngine::make_assets(Scene* scene)
 		frame.ssaoUBOData.kernelSize = 64;
 	}
 
-	
+	bloom = new vkBloom::PBBloom(1920.0f,1080.0f,device,physicalDevice);
 
 }
 
@@ -431,12 +431,13 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyDescriptorPool(blurDescriptorPool);
 	
 	device.destroyDescriptorPool(shadowDescriptorPool);
-	
+	delete bloom;
 	delete meshes;
 	delete particles;
 	delete particleTexture;
 	delete cubeMapMesh;
 	delete noiseTexture;
+	
 	for (const auto& [key, texture] : materials) delete texture;
 	for (const auto& [key, SceneObjects] : models) {
 		for (SceneObject* obj : SceneObjects) delete obj;

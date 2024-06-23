@@ -175,6 +175,7 @@
     <ClCompile Include="ParticleEmiter.cpp" />
     <ClCompile Include="ParticleMenagerie.cpp" />
     <ClCompile Include="ParticleTexture.cpp" />
+    <ClCompile Include="PBBloom.cpp" />
     <ClCompile Include="Queues.cpp" />
     <ClCompile Include="RenderPass.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -210,6 +211,7 @@
     <ClInclude Include="ParticleEmiter.h" />
     <ClInclude Include="ParticleMenagerie.h" />
     <ClInclude Include="ParticleTexture.h" />
+    <ClInclude Include="PBBloom.h" />
     <ClInclude Include="Pipeline.h" />
     <ClInclude Include="Queues.h" />
     <ClInclude Include="RenderPass.h" />
