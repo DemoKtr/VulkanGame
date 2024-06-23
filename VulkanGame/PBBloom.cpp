@@ -1,6 +1,6 @@
 #include "PBBloom.h"
 #include "Memory.h"
-
+#include "RenderPass.h"
 void vkBloom::PBBloom::createMipImages()
 {
 	for (uint32_t i = 0; i < mipNumber; ++i) {
@@ -79,6 +79,7 @@ void vkBloom::PBBloom::createSampler()
 
 void vkBloom::PBBloom::createPipelines()
 {
+	renderpass = vkInit::create_bloom_renderpass(logicalDevice);
 }
 
 void vkBloom::PBBloom::draw(vk::CommandBuffer commandBuffer)
@@ -116,4 +117,5 @@ vkBloom::PBBloom::~PBBloom()
 	}
 	logicalDevice.destroySampler(sampler);
 	logicalDevice.destroyRenderPass(renderpass);
+	
 }
