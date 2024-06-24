@@ -127,6 +127,43 @@ namespace vkInit {
 		}
 	}
 
+	void make_downupscale_framebuffers(framebufferInput inputChunk, std::vector<vkUtil::SwapChainFrame>& frames,vkBloom::PBBloom bloom,bool debug) {
+
+
+		for (int i = 0; i < frames.size(); ++i) {
+			
+			std::vector<vk::ImageView> attachments = {
+				frames[i].postProcessInputAttachment.view
+			};
+
+			for (uint32_t i = 0; i < bloom.mipImagesView.size(); ++i) {
+				attachments.push_back(bloom.mipImagesView[i]);
+			}
+
+
+			vk::FramebufferCreateInfo framebufferInfo;
+			framebufferInfo.flags = vk::FramebufferCreateFlags();
+			framebufferInfo.renderPass = inputChunk.renderpass;
+			framebufferInfo.attachmentCount = attachments.size();
+			framebufferInfo.pAttachments = attachments.data();
+			framebufferInfo.width = inputChunk.swapchainExtent.width;
+			framebufferInfo.height = inputChunk.swapchainExtent.height;
+			framebufferInfo.layers = 1;
+
+			try {
+				frames[i].downupScaleFramebuffer = inputChunk.device.createFramebuffer(framebufferInfo);
+
+				if (debug) {
+					std::cout << "Created postprocess framebuffer for frame " << i << std::endl;
+				}
+			}
+			catch (vk::SystemError err) {
+				if (debug) {
+					std::cout << "Failed to create postprocess framebuffer for frame " << i << std::endl;
+				}
+			}
+		}
+	}
 
 	void make_skybox_framebuffers(framebufferInput inputChunk, std::vector<vkUtil::SwapChainFrame>& frames, bool debug) {
 

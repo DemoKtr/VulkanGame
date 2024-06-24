@@ -481,6 +481,7 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.destroyFramebuffer(particleFramebuffer);
 			logicalDevice.destroyFramebuffer(postProcessFramebuffer);
 			logicalDevice.destroyFramebuffer(skyBoxFramebuffer);
+			logicalDevice.destroyFramebuffer(downupScaleFramebuffer);
 			
 
 			try {

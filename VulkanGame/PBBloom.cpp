@@ -16,12 +16,12 @@ void vkBloom::PBBloom::createMipImages()
 		imageInfo.usage = vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eInputAttachment;
 		imageInfo.extent.depth = 1;
 
-		mipImages[i] = logicalDevice.createImage(imageInfo);
+		mipImages.push_back(logicalDevice.createImage(imageInfo));
 		vk::MemoryRequirements requirements = logicalDevice.getImageMemoryRequirements(mipImages[i]);
 		vk::MemoryAllocateInfo allocation;
 		allocation.allocationSize = requirements.size;
 		allocation.memoryTypeIndex = vkUtil::findMemoryTypeIndex(physicalDevice, requirements.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal);
-		mipImagesMemory[i] = logicalDevice.allocateMemory(allocation);
+		mipImagesMemory.push_back(logicalDevice.allocateMemory(allocation));
 		logicalDevice.bindImageMemory(mipImages[i], mipImagesMemory[i], 0);
 	}
 
@@ -41,7 +41,7 @@ void vkBloom::PBBloom::createMipImageViews()
 		imageViewInfo.subresourceRange.baseArrayLayer = 0;
 		imageViewInfo.subresourceRange.layerCount = 1;
 		imageViewInfo.image = mipImages[i];
-		mipImagesView[i] = logicalDevice.createImageView(imageViewInfo);
+		mipImagesView.push_back(logicalDevice.createImageView(imageViewInfo));
 	}
 	
 }
@@ -95,7 +95,6 @@ vkBloom::PBBloom::PBBloom(float width, float heigh, vk::Device device, vk::Physi
 
 	glm::vec2 mipSizefloat = glm::vec2(width, heigh);
 	glm::ivec2 mipSizeInt = glm::vec2((int)width, (int)heigh);
-	
 	for (uint32_t i = 0; i < mipNumber; ++i) {
 			mipSizefloat *= 0.5f;
 			mipSizeInt /= 2;

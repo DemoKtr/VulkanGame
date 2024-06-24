@@ -9,9 +9,8 @@ namespace vkBloom {
 		vk::Device logicalDevice;
 		vk::PhysicalDevice physicalDevice;
 
-		vk::Image mipImages[6];
-		vk::ImageView mipImagesView[6];
-		vk::DeviceMemory mipImagesMemory[6];
+		
+		std::vector<vk::DeviceMemory> mipImagesMemory;
 		vk::Sampler sampler;
 		
 		
@@ -32,7 +31,8 @@ namespace vkBloom {
 		vk::PipelineLayout upScalePipelineLayout;
 		std::vector<vk::Pipeline> downScalepipeline;
 		std::vector<vk::Pipeline> upScalepipeline;
-		vk::Framebuffer frameBuffer;
+		std::vector<vk::Image> mipImages;
+		std::vector<vk::ImageView> mipImagesView;
 		~PBBloom();
 	};
 

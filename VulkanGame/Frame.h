@@ -64,6 +64,7 @@ namespace vkUtil {
 		vk::Framebuffer particleFramebuffer;
 		vk::Framebuffer postProcessFramebuffer;
 		vk::Framebuffer skyBoxFramebuffer;
+		vk::Framebuffer downupScaleFramebuffer;
 
 		//zBuffer
 		vk::Image depthBuffer;

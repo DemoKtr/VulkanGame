@@ -1096,7 +1096,7 @@ namespace vkInit {
         vk::PipelineMultisampleStateCreateInfo multisampleState = make_multisampling_info();
         std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
 
-        vk::RenderPass renderpass = vkInit::create_final_renderpass(specyfication.device, specyfication.swapchainImageFormat);
+        vk::RenderPass renderpass = vkInit::create_combinedImage_renderpass(specyfication.device, specyfication.swapchainImageFormat);
 
         vk::GraphicsPipelineCreateInfo pipelineInfo = {};
         pipelineInfo.pInputAssemblyState = &inputAssemblyState;

@@ -320,7 +320,7 @@ vk::RenderPass vkInit::create_particle_renderpass(vk::Device logicalDevice, vk::
 	return particleRenderPass;
 }
 
-vk::RenderPass vkInit::create_final_renderpass(vk::Device logicalDevice, vk::Format swapchainImageFormat)
+vk::RenderPass vkInit::create_combinedImage_renderpass(vk::Device logicalDevice, vk::Format swapchainImageFormat)
 {
 	std::array<vk::AttachmentDescription,1> attachments;
 	vk::AttachmentReference attachmentRefertences[1];
