@@ -196,7 +196,7 @@ void GraphicsEngine::make_assets(Scene* scene)
 		frame.ssaoUBOData.kernelSize = 64;
 	}
 
-	bloom = new vkBloom::PBBloom(1920.0f,1080.0f,device,physicalDevice);
+	
 
 }
 
@@ -258,11 +258,11 @@ void GraphicsEngine::create_pipeline()
 	specification.swapchainImageFormat = swapchainFormat;
 	specification.depthFormat = swapchainFrames[0].depthFormat;
 	specification.geometryDescriptorSetLayouts = { frameSetLayout,meshSetLayout };
-	specification.deferedDescriptorSetLayouts = { deferedSetLayout};
+	specification.deferedDescriptorSetLayouts = { deferedSetLayout };
 	specification.gbuffer = swapchainFrames[0].gbuffer;
 	specification.postProcessImageInput = swapchainFrames[0].postProcessInputAttachment;
 
-	vkInit::GraphicsPipelineOutBundle output = vkInit::create_defered_pipelines(specification,debugMode);
+	vkInit::GraphicsPipelineOutBundle output = vkInit::create_defered_pipelines(specification, debugMode);
 	layout = output.layout;
 	renderpass = output.renderpass;
 	graphicsPipeline = output.graphicsPipeline;
@@ -277,7 +277,7 @@ void GraphicsEngine::create_pipeline()
 	input.depthFormat = swapchainFrames[0].depthFormat;
 	input.shadowDescriptorSetLayout = { shadowSetLayout };
 	input.shadowAttachmentBuffer = swapchainFrames[0].shadowMapBuffer;
-	vkInit::ShadowGraphicsPipelineOutBundle out = vkInit::createShadowsPipeline(input,debugMode);
+	vkInit::ShadowGraphicsPipelineOutBundle out = vkInit::createShadowsPipeline(input, debugMode);
 	shadowRenderPass = out.shadowRenderPass;
 	shadowPipeline = out.shadowPipeline;
 	shadowLayout = out.shadowPipelineLayout;
@@ -291,9 +291,9 @@ void GraphicsEngine::create_pipeline()
 	particleInput.swapchainExtent = swapchainExtent;
 	particleInput.particleComputeDescriptorSetLayout = { particleComputeSetLayout };
 	particleInput.particleAttachment = swapchainFrames[0].particleAttachment;
-	particleInput.particleGraphicDescriptorSetLayout = {particleCameraGraphicSetLayout,particleTextureGraphicSetLayout};
+	particleInput.particleGraphicDescriptorSetLayout = { particleCameraGraphicSetLayout,particleTextureGraphicSetLayout };
 
-	vkInit::ParticleGraphicsPipelineOutBundle particleOutput = vkInit::createParticlePipeline(particleInput,debugMode);
+	vkInit::ParticleGraphicsPipelineOutBundle particleOutput = vkInit::createParticlePipeline(particleInput, debugMode);
 	particleGraphicPipeline = particleOutput.particleGrphicPipeline;
 	particleGraphicsLayout = particleOutput.particlePipelineLayout;
 	particleComputeLayout = particleOutput.particleComputePipelineLayout;
@@ -306,12 +306,12 @@ void GraphicsEngine::create_pipeline()
 	postProcessPipelineInput.device = device;
 	postProcessPipelineInput.vertexFilePath = "shaders/postProcessCombinedImageVert.spv";
 	postProcessPipelineInput.fragmentFilePath = "shaders/postProcessCombinedImageFrag.spv";
-	postProcessPipelineInput.postProcessSetLayout = {postProcessDescriptorSetLayout};
+	postProcessPipelineInput.postProcessSetLayout = { postProcessDescriptorSetLayout };
 	postProcessPipelineInput.swapchainExtent = swapchainExtent;
 	postProcessPipelineInput.swapchainImageFormat = swapchainFormat;
-	vkInit::PostProcessGraphicsPipelineOutBundle postProcessOutput = vkInit::create_postprocess_pipelines(postProcessPipelineInput,debugMode);
+	vkInit::PostProcessGraphicsPipelineOutBundle postProcessOutput = vkInit::create_postprocess_pipelines(postProcessPipelineInput, debugMode);
 	postProcessRenderPass = postProcessOutput.renderpass;
-    postProcessPipelineLayout = postProcessOutput.postProcessPipelineLayout;
+	postProcessPipelineLayout = postProcessOutput.postProcessPipelineLayout;
 	postProcessPipeline = postProcessOutput.postProcessgraphicsPipeline;
 
 
@@ -326,10 +326,27 @@ void GraphicsEngine::create_pipeline()
 	skyBoxInput.skyBoxSetLayout = { skyBoxDescriptorSetLayout, skyBoxTextureSetLayout };
 	skyBoxInput.depthFormat = swapchainFrames[0].depthFormat;
 	skyBoxInput.Attachment = swapchainFrames[0].skyBoxAttachment;
-	vkInit::skyBoxGraphicsPipelineOutBundle skyBoxOutput = vkInit::create_skybox_pipeline(skyBoxInput,debugMode);
+	vkInit::skyBoxGraphicsPipelineOutBundle skyBoxOutput = vkInit::create_skybox_pipeline(skyBoxInput, debugMode);
 	skyBoxPipelineLayout = skyBoxOutput.skyBoxPipelineLayout;
 	skyBoxPipeline = skyBoxOutput.skyBoxgraphicsPipeline;
 	skyBoxRenderPass = skyBoxOutput.renderpass;
+
+	bloom = new vkBloom::PBBloom(1920.0f, 1080.0f, device, physicalDevice);
+	vkInit::updownGraphicsPipelineInBundle bloomPipelineInput;
+	bloomPipelineInput.device = device;
+	bloomPipelineInput.downSampleDescriptorSetLayout = {downScaleDescriptorSetLayout};
+	bloomPipelineInput.upSampleDescriptorSetLayout = {upScaleDescriptorSetLayout};
+	bloomPipelineInput.downScalefragmentFilePath = "shaders/downScaleFrag.spv";
+	bloomPipelineInput.upScalefragmentFilePath = "shaders/upScaleFrag.spv";
+	bloomPipelineInput.downScalevertexFilePath = "shaders/postProcessCombinedImageVert.spv";
+	bloomPipelineInput.upScalevertexFilePath = "shaders/postProcessCombinedImageVert.spv";
+	bloomPipelineInput.screenSize = bloom->intMipSize;
+	vkInit::updownGraphicsPipelineOutBundle bloomPipelineOutput = vkInit::create_updownsampling_pipeline(bloomPipelineInput,debugMode);
+	bloom->downScalePipelineLayout = bloomPipelineOutput.downscalePipelineLayout;
+	bloom->upScalePipelineLayout = bloomPipelineOutput.upscalePipelineLayout;
+	bloom->renderpass = bloomPipelineOutput.renderpass;
+	bloom->downScalepipeline = bloomPipelineOutput.downscalePipeline;
+	bloom->upScalepipeline = bloomPipelineOutput.upscaleGrphicPipeline;
 
 
 
@@ -420,6 +437,8 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyDescriptorSetLayout(ssaoDescriptorSetLayout);
 	device.destroyDescriptorSetLayout(skyBoxTextureSetLayout);
 	device.destroyDescriptorSetLayout(skyBoxDescriptorSetLayout);
+	device.destroyDescriptorSetLayout(downScaleDescriptorSetLayout);
+	device.destroyDescriptorSetLayout(upScaleDescriptorSetLayout);
 	device.destroyDescriptorPool(meshDescriptorPool);
 	device.destroyDescriptorPool(particleTextureGraphicDescriptorPool);
 	device.destroyDescriptorPool(particleComputeDescriptorPool);
@@ -429,6 +448,8 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyDescriptorPool(skyBoxDescriptorPool);
 	device.destroyDescriptorPool(ssaoDescriptorPool);
 	device.destroyDescriptorPool(blurDescriptorPool);
+	device.destroyDescriptorPool(downScaleDescriptorPool);
+	device.destroyDescriptorPool(upScaleDescriptorPool);
 	
 	device.destroyDescriptorPool(shadowDescriptorPool);
 	delete bloom;
@@ -658,6 +679,20 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	bindings.stages[2] = vk::ShaderStageFlagBits::eFragment;
 	bindings.stages[3] = vk::ShaderStageFlagBits::eFragment;
 	ssaoDescriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+	bindings.count = 2;
+	bindings.indices[0] = 0;
+	bindings.indices[1] = 1;
+
+	bindings.types[0] = vk::DescriptorType::eCombinedImageSampler;
+	bindings.types[1] = vk::DescriptorType::eUniformBuffer;
+	bindings.counts[0] = 1;
+	bindings.counts[1] = 1;
+	bindings.stages[0] = vk::ShaderStageFlagBits::eFragment;
+	bindings.stages[1] = vk::ShaderStageFlagBits::eFragment;
+
+	downScaleDescriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+	upScaleDescriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+
 
 }
 
@@ -1424,6 +1459,13 @@ void GraphicsEngine::create_frame_resources()
 	ssaoBindings.count = 4;
 	ssaoDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), ssaoBindings);
 	
+	bindings.count = 2;
+	bindings.types[0] =vk::DescriptorType::eCombinedImageSampler;
+	bindings.types[1] = vk::DescriptorType::eUniformBuffer;
+
+	upScaleDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);;
+	downScaleDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);;
+
 	//deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
 	
 	for (vkUtil::SwapChainFrame& frame : swapchainFrames) //referencja 

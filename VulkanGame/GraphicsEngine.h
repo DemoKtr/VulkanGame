@@ -69,8 +69,13 @@ class GraphicsEngine
 	//compute
 	vk::CommandPool computeCommandPool;
 	
+	///
 
-
+	vk::DescriptorSetLayout downScaleDescriptorSetLayout;
+	vk::DescriptorPool downScaleDescriptorPool;
+	vk::DescriptorSetLayout upScaleDescriptorSetLayout;
+	vk::DescriptorPool upScaleDescriptorPool;
+	////
 	//postProcess
 	vk::Pipeline postProcessPipeline;
 	vk::RenderPass postProcessRenderPass;

@@ -13,14 +13,9 @@ namespace vkBloom {
 		vk::ImageView mipImagesView[6];
 		vk::DeviceMemory mipImagesMemory[6];
 		vk::Sampler sampler;
-		glm::vec2 mipSize[6];
-		glm::ivec2 intMipSize[6];
-		vk::RenderPass renderpass;
-		vk::PipelineLayout downScalePipelineLayout;
-		vk::PipelineLayout upScalePipelineLayout;
-		std::vector<vk::Pipeline> downScalepipeline;
-		std::vector<vk::Pipeline> upScalepipeline;
-		vk::Framebuffer frameBuffer;
+		
+		
+		
 		void createMipImages();
 		void createMipImageViews();
 		void createSampler();
@@ -30,6 +25,14 @@ namespace vkBloom {
 
 	public:
 		PBBloom(float width, float heigh, vk::Device device, vk::PhysicalDevice physicalDevice);
+		std::vector<glm::vec2> mipSize;
+		std::vector<glm::ivec2> intMipSize;
+		vk::RenderPass renderpass;
+		vk::PipelineLayout downScalePipelineLayout;
+		vk::PipelineLayout upScalePipelineLayout;
+		std::vector<vk::Pipeline> downScalepipeline;
+		std::vector<vk::Pipeline> upScalepipeline;
+		vk::Framebuffer frameBuffer;
 		~PBBloom();
 	};
 

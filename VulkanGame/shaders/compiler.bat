@@ -20,5 +20,7 @@ glslangValidator -V skyBoxFrag.frag -o skyBoxFrag.spv
 glslangValidator -V postProcessCombinedImageFrag.frag -o postProcessCombinedImageFrag.spv
 glslangValidator -V ssaoFrag.frag -o ssaoFrag.spv
 glslangValidator -V ssaoBlurFrag.frag -o ssaoBlurFrag.spv
+glslangValidator -V downScale.frag -o downScaleFrag.spv
+glslangValidator -V upScale.frag -o upScaleFrag.spv
 
 pause

@@ -72,7 +72,7 @@ namespace vkInit {
         std::string upScalefragmentFilePath;
         std::vector<vk::DescriptorSetLayout> downSampleDescriptorSetLayout;
         std::vector<vk::DescriptorSetLayout> upSampleDescriptorSetLayout;
-        std::vector<glm::vec2> screenSize;
+        std::vector<glm::ivec2> screenSize;
     };
 
 	struct GraphicsPipelineOutBundle {
@@ -1367,9 +1367,10 @@ namespace vkInit {
             viewport.maxDepth = 1.0f;
 
             vk::PipelineViewportStateCreateInfo viewportState = make_viewport_state(viewport, scissor);
-            pipelineInfo.subpass = 6 + specyfication.screenSize.size() - i;
+            pipelineInfo.subpass = 6 + specyfication.screenSize.size() - i-1;
             pipelineInfo.pViewportState = &viewportState;
             if (debugMode) std::cout << "Creating upScale " << i << " Graphics Pipeline " << std::endl;
+           // if (debugMode) std::cout << "Creating upScale subpass" << 6 + specyfication.screenSize.size() - i - 1 << " Graphics Pipeline " << std::endl;
             try {
 
                 upsampepipelines.push_back(specyfication.device.createGraphicsPipeline(nullptr, pipelineInfo).value);

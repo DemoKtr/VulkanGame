@@ -99,8 +99,8 @@ vkBloom::PBBloom::PBBloom(float width, float heigh, vk::Device device, vk::Physi
 	for (uint32_t i = 0; i < mipNumber; ++i) {
 			mipSizefloat *= 0.5f;
 			mipSizeInt /= 2;
-			mipSize[i] = mipSizefloat;
-			intMipSize[i] = mipSizeInt;
+			mipSize.push_back(mipSizefloat);
+			intMipSize.push_back(mipSizeInt);
 		}
 	createMipImages();
 	createMipImageViews();
