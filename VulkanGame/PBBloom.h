@@ -16,8 +16,10 @@ namespace vkBloom {
 		glm::vec2 mipSize[6];
 		glm::ivec2 intMipSize[6];
 		vk::RenderPass renderpass;
-		vk::PipelineLayout pipelineLayout[6];
-		vk::Pipeline pipeline[6];
+		vk::PipelineLayout downScalePipelineLayout;
+		vk::PipelineLayout upScalePipelineLayout;
+		std::vector<vk::Pipeline> downScalepipeline;
+		std::vector<vk::Pipeline> upScalepipeline;
 		vk::Framebuffer frameBuffer;
 		void createMipImages();
 		void createMipImageViews();

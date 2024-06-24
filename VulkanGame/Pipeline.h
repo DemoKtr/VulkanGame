@@ -64,6 +64,17 @@ namespace vkInit {
 
     };
 
+    struct updownGraphicsPipelineInBundle {
+        vk::Device device;
+        std::string downScalevertexFilePath;
+        std::string upScalevertexFilePath;
+        std::string downScalefragmentFilePath;
+        std::string upScalefragmentFilePath;
+        std::vector<vk::DescriptorSetLayout> downSampleDescriptorSetLayout;
+        std::vector<vk::DescriptorSetLayout> upSampleDescriptorSetLayout;
+        std::vector<glm::vec2> screenSize;
+    };
+
 	struct GraphicsPipelineOutBundle {
         vk::PipelineLayout layout;
         vk::PipelineLayout deferedLayout;
@@ -98,12 +109,21 @@ namespace vkInit {
     };
 
 
+    struct updownGraphicsPipelineOutBundle {
+        vk::PipelineLayout downscalePipelineLayout;
+        vk::PipelineLayout upscalePipelineLayout;
+        vk::RenderPass renderpass;
+        std::vector<vk::Pipeline> downscalePipeline;
+        std::vector<vk::Pipeline> upscaleGrphicPipeline;
+    };
+
+
     ShadowGraphicsPipelineOutBundle createShadowsPipeline(ShadowGraphicsPipelineInBundle specyfication, bool debugMode);
     vk::PipelineLayout create_pipeline_layout(vk::Device device, std::vector<vk::DescriptorSetLayout> descriptorSetLayouts ,bool debugMode);
     PostProcessGraphicsPipelineOutBundle create_postprocess_pipelines(PostProcessPipelineInBundle specyfication, bool debugMode);
     vk::RenderPass create_renderpass(vk::Device device, vk::Format swapchainImageFormat, vk::Format depthFormat, bool debugMode);
     GraphicsPipelineOutBundle create_graphic_pipeline(GraphicsPipelineInBundle specyfication, bool debugMode);
-    GraphicsPipelineOutBundle createPipeline(const GraphicsPipelineInBundle& specification, bool debugMode);
+    
     vk::PipelineInputAssemblyStateCreateInfo make_input_assembly_info();
     vk::PipelineShaderStageCreateInfo make_shader_info(
         const vk::ShaderModule& shaderModule, const vk::ShaderStageFlagBits& stage);
@@ -111,6 +131,7 @@ namespace vkInit {
         const vk::VertexInputBindingDescription& bindingDescription,
         const std::vector<vk::VertexInputAttributeDescription>& attributeDescriptions);
     skyBoxGraphicsPipelineOutBundle create_skybox_pipeline(skyBoxPipelineInBundle specyfication, bool debugMode);
+    updownGraphicsPipelineOutBundle create_updownsampling_pipeline(updownGraphicsPipelineInBundle specyfication, bool debugMode);
     /**
         \returns the input assembly stage creation info
     */
@@ -1223,6 +1244,156 @@ namespace vkInit {
         output.skyBoxPipelineLayout = skyBoxPipelineLayout;
         output.skyBoxgraphicsPipeline = skyBoxPipeline;
 
+        return output;
+    }
+
+
+    updownGraphicsPipelineOutBundle create_updownsampling_pipeline(updownGraphicsPipelineInBundle specyfication, bool debugMode)
+    {
+        updownGraphicsPipelineOutBundle output;
+
+        vk::PipelineLayout downScale = create_pipeline_layout(specyfication.device, specyfication.downSampleDescriptorSetLayout, debugMode);
+        vk::PipelineLayout upScale = create_pipeline_layout(specyfication.device, specyfication.upSampleDescriptorSetLayout, debugMode);
+
+        vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState = make_input_assembly_info();
+        vk::PipelineRasterizationStateCreateInfo rasterizationState = make_rasterizer_info();
+        rasterizationState.cullMode = vk::CullModeFlagBits::eFront;
+        vk::PipelineColorBlendAttachmentState blendAttachmentState = make_color_blend_attachment_state();
+        vk::PipelineColorBlendStateCreateInfo colorBlendState = make_color_blend_attachment_stage(blendAttachmentState);
+
+   
+
+
+        vk::PipelineDepthStencilStateCreateInfo depthStageInfo;
+        depthStageInfo.flags = vk::PipelineDepthStencilStateCreateFlags();
+        depthStageInfo.depthTestEnable = false;
+        depthStageInfo.depthWriteEnable = false;
+        depthStageInfo.depthCompareOp = vk::CompareOp::eLessOrEqual;
+        depthStageInfo.depthBoundsTestEnable = false;
+        depthStageInfo.stencilTestEnable = false;
+        //Viewport and Scissor
+        
+        vk::PipelineMultisampleStateCreateInfo multisampleState = make_multisampling_info();
+        std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
+
+        vk::RenderPass renderpass = vkInit::create_updownscale_renderpass(specyfication.device);
+
+        vk::GraphicsPipelineCreateInfo pipelineInfo = {};
+        pipelineInfo.pInputAssemblyState = &inputAssemblyState;
+        pipelineInfo.renderPass = renderpass;
+        pipelineInfo.pRasterizationState = &rasterizationState;
+        pipelineInfo.pColorBlendState = &colorBlendState;
+        pipelineInfo.pMultisampleState = &multisampleState;
+        
+        pipelineInfo.pDepthStencilState = &depthStageInfo;
+       
+
+        /////////////////////////////////////////////////////////////
+        //offscreen
+        
+        vk::PipelineVertexInputStateCreateInfo emptyInputState = {};
+        pipelineInfo.pVertexInputState = &emptyInputState;
+
+        // Offscreen pipeline
+        vk::ShaderModule downScalevertexShader = vkUtil::createModule(specyfication.downScalevertexFilePath, specyfication.device, debugMode);
+        vk::PipelineShaderStageCreateInfo downScalevertexShaderInfo = make_shader_info(downScalevertexShader, vk::ShaderStageFlagBits::eVertex);
+        shaderStages[0] = (downScalevertexShaderInfo);
+        vk::ShaderModule downScalefragmentShader = vkUtil::createModule(specyfication.downScalefragmentFilePath, specyfication.device, debugMode);
+        vk::PipelineShaderStageCreateInfo downScalefragmentShaderInfo = make_shader_info(downScalefragmentShader, vk::ShaderStageFlagBits::eFragment);
+        shaderStages[1] = (downScalefragmentShaderInfo);
+        pipelineInfo.layout = downScale;
+        // Blend attachment states required for all color attachments
+        // This is important, as color write mask will otherwise be 0x0 and you
+        // won't see anything rendered to the attachment
+
+
+
+        pipelineInfo.stageCount = shaderStages.size();
+        pipelineInfo.pStages = shaderStages.data();
+        
+        pipelineInfo.basePipelineHandle = nullptr;
+        std::vector<vk::Pipeline> downsampepipelines;
+        std::vector<vk::Pipeline> upsampepipelines;
+
+        for (uint32_t i = 0; i < specyfication.screenSize.size(); ++i) {
+            vk::Rect2D scissor = {};
+            scissor.offset.x = 0.0f;
+            scissor.offset.y = 0.0f;
+            scissor.extent.width = specyfication.screenSize[i].x;
+            scissor.extent.height = specyfication.screenSize[i].y;
+            vk::Viewport viewport = {};
+            viewport.x = 0.0f;
+            viewport.y = 0.0f;
+            viewport.width = (float)specyfication.screenSize[i].x;
+            viewport.height = (float)specyfication.screenSize[i].y;
+            viewport.minDepth = 0.0f;
+            viewport.maxDepth = 1.0f;
+
+            vk::PipelineViewportStateCreateInfo viewportState = make_viewport_state(viewport, scissor);
+            pipelineInfo.subpass = i;
+            pipelineInfo.pViewportState = &viewportState;
+            if (debugMode) std::cout << "Creating downScale "<<i<<" Graphics Pipeline " << std::endl;
+            try {
+                
+               downsampepipelines.push_back(specyfication.device.createGraphicsPipeline(nullptr, pipelineInfo).value);
+            }
+            catch (vk::SystemError err) {
+                if (debugMode) std::cout << "Failed create downScale " << i << " Graphics Pipeline !" << std::endl;
+            }
+        }
+
+
+        vk::ShaderModule upScalevertexShader = vkUtil::createModule(specyfication.upScalevertexFilePath, specyfication.device, debugMode);
+        vk::PipelineShaderStageCreateInfo upScalevertexShaderInfo = make_shader_info(upScalevertexShader, vk::ShaderStageFlagBits::eVertex);
+        shaderStages[0] = (upScalevertexShaderInfo);
+        vk::ShaderModule upScalefragmentShader = vkUtil::createModule(specyfication.upScalefragmentFilePath, specyfication.device, debugMode);
+        vk::PipelineShaderStageCreateInfo upScalefragmentShaderInfo = make_shader_info(upScalefragmentShader, vk::ShaderStageFlagBits::eFragment);
+        shaderStages[1] = (upScalefragmentShaderInfo);
+        pipelineInfo.layout = upScale;
+
+
+        for (uint32_t i = 0; i < specyfication.screenSize.size(); ++i) {
+            vk::Rect2D scissor = {};
+            scissor.offset.x = 0.0f;
+            scissor.offset.y = 0.0f;
+            scissor.extent.width = specyfication.screenSize[i].x;
+            scissor.extent.height = specyfication.screenSize[i].y;
+            vk::Viewport viewport = {};
+            viewport.x = 0.0f;
+            viewport.y = 0.0f;
+            viewport.width = (float)specyfication.screenSize[i].x;
+            viewport.height = (float)specyfication.screenSize[i].y;
+            viewport.minDepth = 0.0f;
+            viewport.maxDepth = 1.0f;
+
+            vk::PipelineViewportStateCreateInfo viewportState = make_viewport_state(viewport, scissor);
+            pipelineInfo.subpass = 6 + specyfication.screenSize.size() - i;
+            pipelineInfo.pViewportState = &viewportState;
+            if (debugMode) std::cout << "Creating upScale " << i << " Graphics Pipeline " << std::endl;
+            try {
+
+                upsampepipelines.push_back(specyfication.device.createGraphicsPipeline(nullptr, pipelineInfo).value);
+            }
+            catch (vk::SystemError err) {
+                if (debugMode) std::cout << "Failed create upScale " << i << " Graphics Pipeline !" << std::endl;
+            }
+        }
+        
+
+        
+
+
+
+        specyfication.device.destroyShaderModule(downScalevertexShader);
+        specyfication.device.destroyShaderModule(upScalevertexShader);
+        specyfication.device.destroyShaderModule(downScalefragmentShader);
+        specyfication.device.destroyShaderModule(upScalefragmentShader);
+
+        output.renderpass = renderpass;
+        output.downscalePipelineLayout = downScale;
+        output.upscalePipelineLayout = upScale;
+        output.downscalePipeline = downsampepipelines;
+        output.upscaleGrphicPipeline = upsampepipelines;
         return output;
     }
 

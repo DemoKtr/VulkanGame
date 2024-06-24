@@ -1,6 +1,6 @@
 #include "PBBloom.h"
 #include "Memory.h"
-#include "RenderPass.h"
+//#include "Pipeline.h"
 void vkBloom::PBBloom::createMipImages()
 {
 	for (uint32_t i = 0; i < mipNumber; ++i) {
@@ -79,11 +79,13 @@ void vkBloom::PBBloom::createSampler()
 
 void vkBloom::PBBloom::createPipelines()
 {
-	renderpass = vkInit::create_bloom_renderpass(logicalDevice);
+	//vkInit::updownGraphicsPipelineInBundle input;
+	//vkInit::updownGraphicsPipelineOutBundle output;
 }
 
 void vkBloom::PBBloom::draw(vk::CommandBuffer commandBuffer)
 {
+
 }
 
 vkBloom::PBBloom::PBBloom(float width, float heigh, vk::Device device, vk::PhysicalDevice physicalDevice)
@@ -112,10 +114,16 @@ vkBloom::PBBloom::~PBBloom()
 		logicalDevice.freeMemory(mipImagesMemory[i]);
 		logicalDevice.destroyImage(mipImages[i]);
 		logicalDevice.destroyImageView(mipImagesView[i]);
-		logicalDevice.destroyPipeline(pipeline[i]);
-		logicalDevice.destroyPipelineLayout(pipelineLayout[i]);
+		logicalDevice.destroyPipeline(downScalepipeline[i]);
+		logicalDevice.destroyPipeline(upScalepipeline[i]);
+		
 	}
+
+	
+
 	logicalDevice.destroySampler(sampler);
 	logicalDevice.destroyRenderPass(renderpass);
+	logicalDevice.destroyPipelineLayout(downScalePipelineLayout);
+	logicalDevice.destroyPipelineLayout(upScalePipelineLayout);
 	
 }

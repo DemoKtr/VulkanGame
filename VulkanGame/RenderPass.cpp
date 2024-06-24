@@ -509,7 +509,7 @@ vk::RenderPass vkInit::create_skybox_renderpass(vk::Device logicalDevice, vk::Fo
 	return skyBoxRenderpass;
 }
 
-vk::RenderPass vkInit::create_bloom_renderpass(vk::Device logicalDevice)
+vk::RenderPass vkInit::create_updownscale_renderpass(vk::Device logicalDevice)
 {
 	std::array<vk::AttachmentDescription, 7> attachments;
 	vk::AttachmentReference attachmentRefertences[7];
