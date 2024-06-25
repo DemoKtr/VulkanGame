@@ -73,6 +73,7 @@ namespace vkInit {
         std::vector<vk::DescriptorSetLayout> downSampleDescriptorSetLayout;
         std::vector<vk::DescriptorSetLayout> upSampleDescriptorSetLayout;
         std::vector<glm::ivec2> screenSize;
+        vk::Extent2D swapchainExtent;
     };
 
 	struct GraphicsPipelineOutBundle {
@@ -112,7 +113,9 @@ namespace vkInit {
     struct updownGraphicsPipelineOutBundle {
         vk::PipelineLayout downscalePipelineLayout;
         vk::PipelineLayout upscalePipelineLayout;
-        vk::RenderPass renderpass;
+        vk::RenderPass downScaleRenderpass;
+        vk::RenderPass upScaleRenderpass;
+        vk::RenderPass finalRenderpass;
         std::vector<vk::Pipeline> downscalePipeline;
         std::vector<vk::Pipeline> upscaleGrphicPipeline;
     };
@@ -1096,7 +1099,7 @@ namespace vkInit {
         vk::PipelineMultisampleStateCreateInfo multisampleState = make_multisampling_info();
         std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
 
-        vk::RenderPass renderpass = vkInit::create_combinedImage_renderpass(specyfication.device, specyfication.swapchainImageFormat);
+        vk::RenderPass renderpass = vkInit::create_combinedImage_renderpass(specyfication.device);
 
         vk::GraphicsPipelineCreateInfo pipelineInfo = {};
         pipelineInfo.pInputAssemblyState = &inputAssemblyState;
@@ -1276,11 +1279,11 @@ namespace vkInit {
         vk::PipelineMultisampleStateCreateInfo multisampleState = make_multisampling_info();
         std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
 
-        vk::RenderPass renderpass = vkInit::create_downscale_renderpass(specyfication.device);
+        vk::RenderPass downScaleRenderpass = vkInit::create_downscale_renderpass(specyfication.device);
 
         vk::GraphicsPipelineCreateInfo pipelineInfo = {};
         pipelineInfo.pInputAssemblyState = &inputAssemblyState;
-        pipelineInfo.renderPass = renderpass;
+        pipelineInfo.renderPass = downScaleRenderpass;
         pipelineInfo.pRasterizationState = &rasterizationState;
         pipelineInfo.pColorBlendState = &colorBlendState;
         pipelineInfo.pMultisampleState = &multisampleState;
@@ -1350,6 +1353,10 @@ namespace vkInit {
         vk::PipelineShaderStageCreateInfo upScalefragmentShaderInfo = make_shader_info(upScalefragmentShader, vk::ShaderStageFlagBits::eFragment);
         shaderStages[1] = (upScalefragmentShaderInfo);
         pipelineInfo.layout = upScale;
+        vk::RenderPass upScaleRenderpass = vkInit::create_upscale_renderpass(specyfication.device);
+       
+
+
 
 
         for (uint32_t i = 0; i < specyfication.screenSize.size(); ++i) {
@@ -1381,8 +1388,30 @@ namespace vkInit {
         }
         
 
-        
+        vk::Rect2D scissor = {};
+        scissor.offset.x = 0.0f;
+        scissor.offset.y = 0.0f;
+        scissor.extent.width = specyfication.swapchainExtent.width;
+        scissor.extent.height = specyfication.swapchainExtent.height;
+        vk::Viewport viewport = {};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = (float)specyfication.swapchainExtent.width;
+        viewport.height = (float)specyfication.swapchainExtent.height;
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
 
+        vk::PipelineViewportStateCreateInfo viewportState = make_viewport_state(viewport, scissor);
+
+        pipelineInfo.pViewportState = &viewportState;
+        vk::RenderPass finalRenderpass = vkInit::create_combinedImage_renderpass(specyfication.device);
+        pipelineInfo.renderPass = finalRenderpass;
+        try {
+            upsampepipelines.push_back(specyfication.device.createGraphicsPipeline(nullptr, pipelineInfo).value);
+        }
+        catch (vk::SystemError err) {
+            if (debugMode) std::cout << "Failed create upScale final"  << " Graphics Pipeline !" << std::endl;
+        }
 
 
         specyfication.device.destroyShaderModule(downScalevertexShader);
@@ -1390,7 +1419,9 @@ namespace vkInit {
         specyfication.device.destroyShaderModule(downScalefragmentShader);
         specyfication.device.destroyShaderModule(upScalefragmentShader);
 
-        output.renderpass = renderpass;
+        output.downScaleRenderpass = downScaleRenderpass;
+        output.upScaleRenderpass = upScaleRenderpass;
+        output.finalRenderpass = finalRenderpass;
         output.downscalePipelineLayout = downScale;
         output.upscalePipelineLayout = upScale;
         output.downscalePipeline = downsampepipelines;

@@ -26,7 +26,9 @@ namespace vkBloom {
 		PBBloom(float width, float heigh, vk::Device device, vk::PhysicalDevice physicalDevice);
 		std::vector<glm::vec2> mipSize;
 		std::vector<glm::ivec2> intMipSize;
-		vk::RenderPass renderpass;
+		vk::RenderPass downScaleRenderpass;
+		vk::RenderPass upScaleRenderpass;
+		vk::RenderPass finalRenderpass;
 		vk::PipelineLayout downScalePipelineLayout;
 		vk::PipelineLayout upScalePipelineLayout;
 		std::vector<vk::Pipeline> downScalepipeline;

@@ -347,10 +347,13 @@ void GraphicsEngine::create_pipeline()
 	bloomPipelineInput.downScalevertexFilePath = "shaders/postProcessCombinedImageVert.spv";
 	bloomPipelineInput.upScalevertexFilePath = "shaders/postProcessCombinedImageVert.spv";
 	bloomPipelineInput.screenSize = bloom->intMipSize;
+	bloomPipelineInput.swapchainExtent = this->swapchainExtent;
 	vkInit::updownGraphicsPipelineOutBundle bloomPipelineOutput = vkInit::create_updownsampling_pipeline(bloomPipelineInput,debugMode);
 	bloom->downScalePipelineLayout = bloomPipelineOutput.downscalePipelineLayout;
 	bloom->upScalePipelineLayout = bloomPipelineOutput.upscalePipelineLayout;
-	bloom->renderpass = bloomPipelineOutput.renderpass;
+	bloom->downScaleRenderpass = bloomPipelineOutput.downScaleRenderpass;
+	bloom->upScaleRenderpass = bloomPipelineOutput.upScaleRenderpass;
+	bloom->finalRenderpass = bloomPipelineOutput.finalRenderpass;
 	bloom->downScalepipeline = bloomPipelineOutput.downscalePipeline;
 	bloom->upScalepipeline = bloomPipelineOutput.upscaleGrphicPipeline;
 
@@ -1573,8 +1576,9 @@ void GraphicsEngine::create_framebuffers()
 	vkInit::make_skybox_framebuffers(frameBufferInput, swapchainFrames, debugMode);
 	frameBufferInput.renderpass = finalRenderPass;
 	vkInit::make_final_framebuffers(frameBufferInput, swapchainFrames, debugMode);
-	frameBufferInput.renderpass = bloom->renderpass;
+	frameBufferInput.renderpass = bloom->downScaleRenderpass;
 	vkInit::make_downscale_framebuffers(frameBufferInput, swapchainFrames,bloom ,debugMode);
+	frameBufferInput.renderpass = bloom->upScaleRenderpass;
 	vkInit::make_upscale_framebuffers(frameBufferInput, swapchainFrames,bloom ,debugMode);
 	
 }

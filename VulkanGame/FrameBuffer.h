@@ -207,7 +207,7 @@ namespace vkInit {
 
 
 
-	void make_upscale_framebuffers(framebufferInput inputChunk, std::vector<vkUtil::SwapChainFrame>& frames, vkBloom::PBBloom* bloom, bool debug) {
+	void make_upscale_framebuffers(framebufferInput inputChunk, std::vector<vkUtil::SwapChainFrame>& frames, vkBloom::PBBloom* bloom ,bool debug) {
 
 
 		for (int i = 0; i < frames.size(); ++i) {
@@ -245,7 +245,7 @@ namespace vkInit {
 				}
 
 			}
-			/*
+			
 			std::vector<vk::ImageView> attachments = {
 				frames[i].gbuffer.albedo.view,
 			};
@@ -253,7 +253,7 @@ namespace vkInit {
 
 			vk::FramebufferCreateInfo framebufferInfo;
 			framebufferInfo.flags = vk::FramebufferCreateFlags();
-			framebufferInfo.renderPass = inputChunk.renderpass;
+			framebufferInfo.renderPass = bloom->finalRenderpass;
 			framebufferInfo.attachmentCount = attachments.size();
 			framebufferInfo.pAttachments = attachments.data();
 			framebufferInfo.width = inputChunk.swapchainExtent.width;
@@ -273,7 +273,7 @@ namespace vkInit {
 				}
 			}
 
-			*/
+			
 		}
 	}
 

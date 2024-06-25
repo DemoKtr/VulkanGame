@@ -122,7 +122,9 @@ vkBloom::PBBloom::~PBBloom()
 	
 
 	logicalDevice.destroySampler(sampler);
-	logicalDevice.destroyRenderPass(renderpass);
+	logicalDevice.destroyRenderPass(downScaleRenderpass);
+	logicalDevice.destroyRenderPass(upScaleRenderpass);
+	logicalDevice.destroyRenderPass(finalRenderpass);
 	logicalDevice.destroyPipelineLayout(downScalePipelineLayout);
 	logicalDevice.destroyPipelineLayout(upScalePipelineLayout);
 	
