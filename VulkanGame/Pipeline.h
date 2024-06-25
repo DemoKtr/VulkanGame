@@ -1276,7 +1276,7 @@ namespace vkInit {
         vk::PipelineMultisampleStateCreateInfo multisampleState = make_multisampling_info();
         std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
 
-        vk::RenderPass renderpass = vkInit::create_updownscale_renderpass(specyfication.device);
+        vk::RenderPass renderpass = vkInit::create_downscale_renderpass(specyfication.device);
 
         vk::GraphicsPipelineCreateInfo pipelineInfo = {};
         pipelineInfo.pInputAssemblyState = &inputAssemblyState;
@@ -1314,7 +1314,7 @@ namespace vkInit {
         pipelineInfo.basePipelineHandle = nullptr;
         std::vector<vk::Pipeline> downsampepipelines;
         std::vector<vk::Pipeline> upsampepipelines;
-
+        pipelineInfo.subpass = 0;
         for (uint32_t i = 0; i < specyfication.screenSize.size(); ++i) {
             vk::Rect2D scissor = {};
             scissor.offset.x = 0.0f;
@@ -1330,7 +1330,7 @@ namespace vkInit {
             viewport.maxDepth = 1.0f;
 
             vk::PipelineViewportStateCreateInfo viewportState = make_viewport_state(viewport, scissor);
-            pipelineInfo.subpass = i;
+            
             pipelineInfo.pViewportState = &viewportState;
             if (debugMode) std::cout << "Creating downScale "<<i<<" Graphics Pipeline " << std::endl;
             try {
@@ -1367,7 +1367,7 @@ namespace vkInit {
             viewport.maxDepth = 1.0f;
 
             vk::PipelineViewportStateCreateInfo viewportState = make_viewport_state(viewport, scissor);
-            pipelineInfo.subpass = 6 + specyfication.screenSize.size() - i-1;
+            
             pipelineInfo.pViewportState = &viewportState;
             if (debugMode) std::cout << "Creating upScale " << i << " Graphics Pipeline " << std::endl;
            // if (debugMode) std::cout << "Creating upScale subpass" << 6 + specyfication.screenSize.size() - i - 1 << " Graphics Pipeline " << std::endl;

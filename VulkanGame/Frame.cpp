@@ -493,13 +493,14 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.destroyFramebuffer(particleFramebuffer);
 			logicalDevice.destroyFramebuffer(postProcessFramebuffer);
 			logicalDevice.destroyFramebuffer(skyBoxFramebuffer);
-			logicalDevice.destroyFramebuffer(downupScaleFramebuffer);
 			logicalDevice.destroyFramebuffer(finalFramebuffer);
 			logicalDevice.destroySemaphore(imageAvailable);
 			logicalDevice.destroySemaphore(computeFinished);
 			logicalDevice.destroySemaphore(renderFinished);
 			
 			
+			for (uint32_t i = 0; i < downupscaleFramebuffer.size(); ++i) { logicalDevice.destroyFramebuffer(downupscaleFramebuffer[i]); }
+
 			
 			logicalDevice.destroyFence(inFlight);
 

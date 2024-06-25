@@ -693,7 +693,6 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	bindings.count = 2;
 	bindings.indices[0] = 0;
 	bindings.indices[1] = 1;
-
 	bindings.types[0] = vk::DescriptorType::eCombinedImageSampler;
 	bindings.types[1] = vk::DescriptorType::eUniformBuffer;
 	bindings.counts[0] = 1;
@@ -1016,7 +1015,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 	commandBuffer.endRenderPass();
 
 
-
+	/*
 	vk::ImageMemoryBarrier normalbarrier;
 	normalbarrier.oldLayout = vk::ImageLayout::eColorAttachmentOptimal;
 	normalbarrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
@@ -1037,6 +1036,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 		nullptr, // buffer memory barriers
 		normalbarrier // image memory barriers
 	);
+	*/
 	vk::RenderPassBeginInfo finalRenderpassInfo = {};
 	finalRenderpassInfo.renderPass = finalRenderPass;
 	finalRenderpassInfo.framebuffer = swapchainFrames[imageIndex].finalFramebuffer;
@@ -1505,8 +1505,8 @@ void GraphicsEngine::create_frame_resources()
 	bindings.types[0] =vk::DescriptorType::eCombinedImageSampler;
 	bindings.types[1] = vk::DescriptorType::eUniformBuffer;
 
-	upScaleDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);;
-	downScaleDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);;
+	upScaleDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(bloom->upScalepipeline.size()), bindings);;
+	downScaleDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(bloom->downScalepipeline.size()), bindings);;
 	bindings.count = 1;
 	finalDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);;
 	//deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
@@ -1542,6 +1542,14 @@ void GraphicsEngine::create_frame_resources()
 	}
 	
 
+	for (uint32_t i = 0; i < bloom->downScalepipeline.size(); ++i) {
+		bloom->downScaleDescriptorsSet.push_back(vkInit::allocate_descriptor_set(device, downScaleDescriptorPool, downScaleDescriptorSetLayout));
+		
+	}
+	for (uint32_t i = 0; i < bloom->upScalepipeline.size(); ++i) {
+		bloom->upScaleDescriptorsSet.push_back(vkInit::allocate_descriptor_set(device, upScaleDescriptorPool, upScaleDescriptorSetLayout));
+	}
+
 }
 
 void GraphicsEngine::create_framebuffers()
@@ -1565,6 +1573,9 @@ void GraphicsEngine::create_framebuffers()
 	vkInit::make_skybox_framebuffers(frameBufferInput, swapchainFrames, debugMode);
 	frameBufferInput.renderpass = finalRenderPass;
 	vkInit::make_final_framebuffers(frameBufferInput, swapchainFrames, debugMode);
+	frameBufferInput.renderpass = bloom->renderpass;
+	vkInit::make_downscale_framebuffers(frameBufferInput, swapchainFrames,bloom ,debugMode);
+	vkInit::make_upscale_framebuffers(frameBufferInput, swapchainFrames,bloom ,debugMode);
 	
 }
 

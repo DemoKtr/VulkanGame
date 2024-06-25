@@ -13,7 +13,7 @@ void vkBloom::PBBloom::createMipImages()
 		imageInfo.arrayLayers = 1;
 		imageInfo.samples = vk::SampleCountFlagBits::e1;
 		imageInfo.tiling = vk::ImageTiling::eLinear;
-		imageInfo.usage = vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eInputAttachment;
+		imageInfo.usage = vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eColorAttachment;
 		imageInfo.extent.depth = 1;
 
 		mipImages.push_back(logicalDevice.createImage(imageInfo));
@@ -83,7 +83,7 @@ void vkBloom::PBBloom::createPipelines()
 	//vkInit::updownGraphicsPipelineOutBundle output;
 }
 
-void vkBloom::PBBloom::draw(vk::CommandBuffer commandBuffer)
+void vkBloom::PBBloom::draw(vk::CommandBuffer commandBuffer, vk::Framebuffer framebuffer)
 {
 
 }
@@ -119,10 +119,18 @@ vkBloom::PBBloom::~PBBloom()
 	}
 
 	
+	
 
 	logicalDevice.destroySampler(sampler);
 	logicalDevice.destroyRenderPass(renderpass);
 	logicalDevice.destroyPipelineLayout(downScalePipelineLayout);
 	logicalDevice.destroyPipelineLayout(upScalePipelineLayout);
 	
+}
+
+void vkBloom::PBBloom::wirte_descriptor_set()
+{
+
+
+
 }

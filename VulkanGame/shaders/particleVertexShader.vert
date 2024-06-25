@@ -26,7 +26,7 @@ out gl_PerVertex
 
 void main () 
 {
-  gl_PointSize = 5.0f;
+  gl_PointSize = 1.0f;
 
 	
 	gl_Position = cameraData.projection * cameraData.view * cameraData.model *vec4(inPos.xy,inGradientPos.z ,1.0);

@@ -19,7 +19,7 @@ namespace vkBloom {
 		void createMipImageViews();
 		void createSampler();
 		void createPipelines();
-		void draw(vk::CommandBuffer commandBuffer);
+		void draw(vk::CommandBuffer commandBuffer,vk::Framebuffer framebuffer);
 
 
 	public:
@@ -33,7 +33,10 @@ namespace vkBloom {
 		std::vector<vk::Pipeline> upScalepipeline;
 		std::vector<vk::Image> mipImages;
 		std::vector<vk::ImageView> mipImagesView;
+		std::vector<vk::DescriptorSet> downScaleDescriptorsSet;
+		std::vector<vk::DescriptorSet> upScaleDescriptorsSet;
 		~PBBloom();
+		void wirte_descriptor_set();
 	};
 
 }
