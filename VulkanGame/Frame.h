@@ -65,6 +65,7 @@ namespace vkUtil {
 		vk::Framebuffer postProcessFramebuffer;
 		vk::Framebuffer skyBoxFramebuffer;
 		vk::Framebuffer downupScaleFramebuffer;
+		vk::Framebuffer finalFramebuffer;
 
 		//zBuffer
 		vk::Image depthBuffer;
@@ -153,6 +154,7 @@ namespace vkUtil {
 		vk::DescriptorSet ssaoDescriptorSet;
 
 		vk::DescriptorSet blurDescriptorSet;
+		vk::DescriptorSet finalDescriptorSet;
 
 		SkyBoxUBO	skyboxData;
 		Buffer skyboxUBOBuffer;

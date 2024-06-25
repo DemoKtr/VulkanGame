@@ -87,6 +87,13 @@ class GraphicsEngine
 	vk::PipelineLayout skyBoxPipelineLayout;
 
 
+
+	vk::DescriptorSetLayout finalDescriptorSetLayout;
+	vk::DescriptorPool finalDescriptorPool;
+	vk::Pipeline finalPipeline;
+	vk::RenderPass finalRenderPass;
+	vk::PipelineLayout finalPipelineLayou;
+
 	//synchronizers 
 	int maxFramesInFlight, frameNumber;
 

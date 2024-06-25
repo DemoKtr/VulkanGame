@@ -1398,5 +1398,99 @@ namespace vkInit {
         return output;
     }
 
+
+
+    PostProcessGraphicsPipelineOutBundle create_final_pipelines(PostProcessPipelineInBundle specyfication, bool debugMode)
+    {
+        PostProcessGraphicsPipelineOutBundle output;
+
+        vk::PipelineLayout skyBoxPipelineLayout = create_pipeline_layout(specyfication.device, specyfication.postProcessSetLayout, debugMode);
+
+        vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState = make_input_assembly_info();
+        vk::PipelineRasterizationStateCreateInfo rasterizationState = make_rasterizer_info();
+        vk::PipelineColorBlendAttachmentState blendAttachmentState = make_color_blend_attachment_state();
+        vk::PipelineColorBlendStateCreateInfo colorBlendState = make_color_blend_attachment_stage(blendAttachmentState);
+        vk::PipelineDepthStencilStateCreateInfo depthStageInfo;
+        depthStageInfo.flags = vk::PipelineDepthStencilStateCreateFlags();
+        depthStageInfo.depthTestEnable = false;
+        depthStageInfo.depthWriteEnable = false;
+        depthStageInfo.depthCompareOp = vk::CompareOp::eLess;
+        depthStageInfo.depthBoundsTestEnable = false;
+        depthStageInfo.stencilTestEnable = false;
+        //Viewport and Scissor
+        vk::Rect2D scissor = {};
+        scissor.offset.x = 0.0f;
+        scissor.offset.y = 0.0f;
+        scissor.extent.width = specyfication.swapchainExtent.width;
+        scissor.extent.height = specyfication.swapchainExtent.height;
+        vk::Viewport viewport = {};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = (float)specyfication.swapchainExtent.width;
+        viewport.height = (float)specyfication.swapchainExtent.height;
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        vk::PipelineViewportStateCreateInfo viewportState = make_viewport_state(viewport, scissor);
+        vk::PipelineMultisampleStateCreateInfo multisampleState = make_multisampling_info();
+        std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
+
+        vk::RenderPass renderpass = vkInit::create_final_renderpass(specyfication.device, specyfication.swapchainImageFormat);
+
+        vk::GraphicsPipelineCreateInfo pipelineInfo = {};
+        pipelineInfo.pInputAssemblyState = &inputAssemblyState;
+        pipelineInfo.renderPass = renderpass;
+        pipelineInfo.pRasterizationState = &rasterizationState;
+        pipelineInfo.pColorBlendState = &colorBlendState;
+        pipelineInfo.pMultisampleState = &multisampleState;
+        pipelineInfo.pViewportState = &viewportState;
+        pipelineInfo.pDepthStencilState = &depthStageInfo;
+
+        /////////////////////////////////////////////////////////////
+        //offscreen
+        pipelineInfo.layout = skyBoxPipelineLayout;
+        vk::PipelineVertexInputStateCreateInfo emptyInputState = {};
+        pipelineInfo.pVertexInputState = &emptyInputState;
+
+        // Offscreen pipeline
+        vk::ShaderModule vertexShader = vkUtil::createModule(specyfication.vertexFilePath, specyfication.device, debugMode);
+        vk::PipelineShaderStageCreateInfo vertexShaderInfo = make_shader_info(vertexShader, vk::ShaderStageFlagBits::eVertex);
+        shaderStages[0] = (vertexShaderInfo);
+        vk::ShaderModule fragmentShader = vkUtil::createModule(specyfication.fragmentFilePath, specyfication.device, debugMode);
+        vk::PipelineShaderStageCreateInfo fragmentShaderInfo = make_shader_info(fragmentShader, vk::ShaderStageFlagBits::eFragment);
+        shaderStages[1] = (fragmentShaderInfo);
+
+        // Blend attachment states required for all color attachments
+        // This is important, as color write mask will otherwise be 0x0 and you
+        // won't see anything rendered to the attachment
+
+
+
+        pipelineInfo.stageCount = shaderStages.size();
+        pipelineInfo.pStages = shaderStages.data();
+        pipelineInfo.subpass = 0;
+        vk::Pipeline skyBoxPipeline = {};
+
+        pipelineInfo.basePipelineHandle = nullptr;
+        if (debugMode) std::cout << "Creating final Graphics Pipeline " << std::endl;
+        try {
+            skyBoxPipeline = specyfication.device.createGraphicsPipeline(nullptr, pipelineInfo).value;
+        }
+        catch (vk::SystemError err) {
+            if (debugMode) std::cout << "Failed create final Graphics Pipeline!" << std::endl;
+        }
+
+
+
+        specyfication.device.destroyShaderModule(vertexShader);
+        specyfication.device.destroyShaderModule(fragmentShader);
+
+        output.renderpass = renderpass;
+        output.postProcessPipelineLayout = skyBoxPipelineLayout;
+        output.postProcessgraphicsPipeline = skyBoxPipeline;
+
+        return output;
+    }
+
+
 }
 

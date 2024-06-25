@@ -22,5 +22,6 @@ glslangValidator -V ssaoFrag.frag -o ssaoFrag.spv
 glslangValidator -V ssaoBlurFrag.frag -o ssaoBlurFrag.spv
 glslangValidator -V downScale.frag -o downScaleFrag.spv
 glslangValidator -V upScale.frag -o upScaleFrag.spv
+glslangValidator -V finalFrag.frag -o finalFrag.spv
 
 pause

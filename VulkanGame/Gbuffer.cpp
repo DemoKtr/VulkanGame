@@ -33,7 +33,7 @@ void vkGbuffer::createAttachment(attachmentBundle attachmentDescription)
 	if(!attachmentDescription.canUseAsSampledImage)
 	imageInfo.usage = attachmentDescription.usage | vk::ImageUsageFlagBits::eInputAttachment;
 	else
-	imageInfo.usage = attachmentDescription.usage | vk::ImageUsageFlagBits::eSampled;
+	imageInfo.usage = attachmentDescription.usage | vk::ImageUsageFlagBits::eSampled |  vk::ImageUsageFlagBits::eInputAttachment;
 	
 	attachmentDescription.attachment->image = attachmentDescription.logicalDevice.createImage(imageInfo);
 	vk::MemoryRequirements requirements = attachmentDescription.logicalDevice.getImageMemoryRequirements(attachmentDescription.attachment->image);
@@ -69,8 +69,7 @@ void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::De
 	attachmentDescription.usage = vk::ImageUsageFlagBits::eColorAttachment;
 	attachmentDescription.canUseAsSampledImage = false;
 	createAttachment(attachmentDescription);
-	attachmentDescription.attachment = &gbuffer->normal;
-	createAttachment(attachmentDescription);
+	
 	attachmentDescription.attachment = &gbuffer->arm;
 	createAttachment(attachmentDescription);
 	attachmentDescription.attachment = &gbuffer->T;
@@ -78,6 +77,8 @@ void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::De
 	attachmentDescription.attachment = &gbuffer->worldPos;
 	createAttachment(attachmentDescription);
 	attachmentDescription.canUseAsSampledImage = true;
+	attachmentDescription.attachment = &gbuffer->normal;
+	createAttachment(attachmentDescription);
 	attachmentDescription.attachment = attachmnent;
 	createAttachment(attachmentDescription);
 	attachmentDescription.attachment = postProcessInputAttachment;

@@ -98,9 +98,9 @@ namespace vkInit {
 
 
 		for (int i = 0; i < frames.size(); ++i) {
-
+			
 			std::vector<vk::ImageView> attachments = {
-				frames[i].imageView,
+				frames[i].gbuffer.normal.view,
 			};
 
 			vk::FramebufferCreateInfo framebufferInfo;
@@ -127,13 +127,46 @@ namespace vkInit {
 		}
 	}
 
+	void make_final_framebuffers(framebufferInput inputChunk, std::vector<vkUtil::SwapChainFrame>& frames, bool debug) {
+
+
+		for (int i = 0; i < frames.size(); ++i) {
+
+			std::vector<vk::ImageView> attachments = {
+				frames[i].imageView,
+			};
+
+			vk::FramebufferCreateInfo framebufferInfo;
+			framebufferInfo.flags = vk::FramebufferCreateFlags();
+			framebufferInfo.renderPass = inputChunk.renderpass;
+			framebufferInfo.attachmentCount = attachments.size();
+			framebufferInfo.pAttachments = attachments.data();
+			framebufferInfo.width = inputChunk.swapchainExtent.width;
+			framebufferInfo.height = inputChunk.swapchainExtent.height;
+			framebufferInfo.layers = 1;
+
+			try {
+				frames[i].finalFramebuffer = inputChunk.device.createFramebuffer(framebufferInfo);
+
+				if (debug) {
+					std::cout << "Created final framebuffer for frame " << i << std::endl;
+				}
+			}
+			catch (vk::SystemError err) {
+				if (debug) {
+					std::cout << "Failed to create final framebuffer for frame " << i << std::endl;
+				}
+			}
+		}
+	}
+
 	void make_downupscale_framebuffers(framebufferInput inputChunk, std::vector<vkUtil::SwapChainFrame>& frames,vkBloom::PBBloom bloom,bool debug) {
 
 
 		for (int i = 0; i < frames.size(); ++i) {
 			
 			std::vector<vk::ImageView> attachments = {
-				frames[i].postProcessInputAttachment.view
+				frames[i].gbuffer.albedo.view
 			};
 
 			for (uint32_t i = 0; i < bloom.mipImagesView.size(); ++i) {
@@ -154,12 +187,12 @@ namespace vkInit {
 				frames[i].downupScaleFramebuffer = inputChunk.device.createFramebuffer(framebufferInfo);
 
 				if (debug) {
-					std::cout << "Created postprocess framebuffer for frame " << i << std::endl;
+					std::cout << "Created downupscale framebuffer for frame " << i << std::endl;
 				}
 			}
 			catch (vk::SystemError err) {
 				if (debug) {
-					std::cout << "Failed to create postprocess framebuffer for frame " << i << std::endl;
+					std::cout << "Failed to create downupscale framebuffer for frame " << i << std::endl;
 				}
 			}
 		}

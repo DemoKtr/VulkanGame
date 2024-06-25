@@ -314,7 +314,12 @@ void GraphicsEngine::create_pipeline()
 	postProcessPipelineLayout = postProcessOutput.postProcessPipelineLayout;
 	postProcessPipeline = postProcessOutput.postProcessgraphicsPipeline;
 
-
+	postProcessPipelineInput.fragmentFilePath = "shaders/finalFrag.spv";
+	postProcessPipelineInput.postProcessSetLayout = { finalDescriptorSetLayout };
+	postProcessOutput = vkInit::create_final_pipelines(postProcessPipelineInput, debugMode);
+	finalRenderPass = postProcessOutput.renderpass;
+	finalPipelineLayou = postProcessOutput.postProcessPipelineLayout;
+	finalPipeline = postProcessOutput.postProcessgraphicsPipeline;
 
 
 	vkInit::skyBoxPipelineInBundle skyBoxInput;
@@ -331,6 +336,7 @@ void GraphicsEngine::create_pipeline()
 	skyBoxPipeline = skyBoxOutput.skyBoxgraphicsPipeline;
 	skyBoxRenderPass = skyBoxOutput.renderpass;
 
+	
 	bloom = new vkBloom::PBBloom(1920.0f, 1080.0f, device, physicalDevice);
 	vkInit::updownGraphicsPipelineInBundle bloomPipelineInput;
 	bloomPipelineInput.device = device;
@@ -348,7 +354,7 @@ void GraphicsEngine::create_pipeline()
 	bloom->downScalepipeline = bloomPipelineOutput.downscalePipeline;
 	bloom->upScalepipeline = bloomPipelineOutput.upscaleGrphicPipeline;
 
-
+	
 
 }
 void GraphicsEngine::create_swapchain()
@@ -409,6 +415,7 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyPipeline(graphicsPipeline);
 	device.destroyPipeline(postProcessPipeline);
 	device.destroyPipeline(skyBoxPipeline);
+	device.destroyPipeline(finalPipeline);
 	device.destroyPipeline(deferedGraphicsPipeline);
 	device.destroyPipeline(shadowPipeline);
 	device.destroyPipelineLayout(layout);
@@ -418,11 +425,13 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyPipelineLayout(particleGraphicsLayout);
 	device.destroyPipelineLayout(postProcessPipelineLayout);
 	device.destroyPipelineLayout(skyBoxPipelineLayout);
+	device.destroyPipelineLayout(finalPipelineLayou);
 	device.destroyRenderPass(renderpass);
 	device.destroyRenderPass(shadowRenderPass);
 	device.destroyRenderPass(particleRenderPass);
 	device.destroyRenderPass(postProcessRenderPass);
 	device.destroyRenderPass(skyBoxRenderPass);
+	device.destroyRenderPass(finalRenderPass);
 	
 	this->cleanup_swapchain();
 	
@@ -437,6 +446,7 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyDescriptorSetLayout(ssaoDescriptorSetLayout);
 	device.destroyDescriptorSetLayout(skyBoxTextureSetLayout);
 	device.destroyDescriptorSetLayout(skyBoxDescriptorSetLayout);
+	device.destroyDescriptorSetLayout(finalDescriptorSetLayout);
 	device.destroyDescriptorSetLayout(downScaleDescriptorSetLayout);
 	device.destroyDescriptorSetLayout(upScaleDescriptorSetLayout);
 	device.destroyDescriptorPool(meshDescriptorPool);
@@ -450,6 +460,7 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyDescriptorPool(blurDescriptorPool);
 	device.destroyDescriptorPool(downScaleDescriptorPool);
 	device.destroyDescriptorPool(upScaleDescriptorPool);
+	device.destroyDescriptorPool(finalDescriptorPool);
 	
 	device.destroyDescriptorPool(shadowDescriptorPool);
 	delete bloom;
@@ -692,7 +703,8 @@ void GraphicsEngine::create_descriptor_set_layouts()
 
 	downScaleDescriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 	upScaleDescriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
-
+	bindings.count = 1;
+	finalDescriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
 }
 
@@ -864,16 +876,9 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 
 
 	
-	
-	
 	commandBuffer.endRenderPass();
 
 
-
-
-	
-
-	
 
 	vk::RenderPassBeginInfo renderPassInfo = {};
 	renderPassInfo.renderPass = renderpass;
@@ -949,7 +954,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 	lightbarrier.oldLayout = vk::ImageLayout::eColorAttachmentOptimal;
 	lightbarrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 	lightbarrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
-	lightbarrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+	lightbarrier.dstAccessMask = vk::AccessFlagBits::eColorAttachmentRead;
 	lightbarrier.image = swapchainFrames[imageIndex].postProcessInputAttachment.image; // Twoje vk::Image
 	lightbarrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
 	lightbarrier.subresourceRange.baseMipLevel = 0;
@@ -1011,7 +1016,44 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 	commandBuffer.endRenderPass();
 
 
-	
+
+	vk::ImageMemoryBarrier normalbarrier;
+	normalbarrier.oldLayout = vk::ImageLayout::eColorAttachmentOptimal;
+	normalbarrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	normalbarrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+	normalbarrier.dstAccessMask = vk::AccessFlagBits::eColorAttachmentRead;
+	normalbarrier.image = swapchainFrames[imageIndex].gbuffer.normal.image; // Twoje vk::Image
+	normalbarrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+	normalbarrier.subresourceRange.baseMipLevel = 0;
+	normalbarrier.subresourceRange.levelCount = 1;
+	normalbarrier.subresourceRange.baseArrayLayer = 0;
+	normalbarrier.subresourceRange.layerCount = 1;
+
+	commandBuffer.pipelineBarrier(
+		vk::PipelineStageFlagBits::eColorAttachmentOutput, // source stage
+		vk::PipelineStageFlagBits::eFragmentShader, // destination stage
+		{}, // dependency flags
+		nullptr, // memory barriers
+		nullptr, // buffer memory barriers
+		normalbarrier // image memory barriers
+	);
+	vk::RenderPassBeginInfo finalRenderpassInfo = {};
+	finalRenderpassInfo.renderPass = finalRenderPass;
+	finalRenderpassInfo.framebuffer = swapchainFrames[imageIndex].finalFramebuffer;
+	finalRenderpassInfo.renderArea.offset.x = 0;
+	finalRenderpassInfo.renderArea.offset.y = 0;
+	finalRenderpassInfo.renderArea.extent = swapchainExtent;
+
+	finalRenderpassInfo.clearValueCount = PostProcessclearValues.size();
+	finalRenderpassInfo.pClearValues = PostProcessclearValues.data();
+	commandBuffer.beginRenderPass(&finalRenderpassInfo, vk::SubpassContents::eInline);
+	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, finalPipeline);
+	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, finalPipelineLayou, 0, swapchainFrames[imageIndex].finalDescriptorSet, nullptr);
+
+
+	commandBuffer.draw(3, 1, 0, 0);
+	commandBuffer.endRenderPass();
+
 
 	try {
 		commandBuffer.end();
@@ -1465,7 +1507,8 @@ void GraphicsEngine::create_frame_resources()
 
 	upScaleDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);;
 	downScaleDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);;
-
+	bindings.count = 1;
+	finalDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);;
 	//deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
 	
 	for (vkUtil::SwapChainFrame& frame : swapchainFrames) //referencja 
@@ -1492,6 +1535,7 @@ void GraphicsEngine::create_frame_resources()
 		frame.skyBoxDescriptorSet = vkInit::allocate_descriptor_set(device, skyBoxDescriptorPool, skyBoxDescriptorSetLayout);
 		frame.ssaoDescriptorSet = vkInit::allocate_descriptor_set(device, ssaoDescriptorPool, ssaoDescriptorSetLayout);
 		frame.blurDescriptorSet = vkInit::allocate_descriptor_set(device, blurDescriptorPool, blurDescriptorSetLayout);
+		frame.finalDescriptorSet = vkInit::allocate_descriptor_set(device, finalDescriptorPool, finalDescriptorSetLayout);
 
 		
 
@@ -1519,7 +1563,8 @@ void GraphicsEngine::create_framebuffers()
 	vkInit::make_postprocess_framebuffers(frameBufferInput, swapchainFrames, debugMode);
 	frameBufferInput.renderpass = skyBoxRenderPass;
 	vkInit::make_skybox_framebuffers(frameBufferInput, swapchainFrames, debugMode);
-	
+	frameBufferInput.renderpass = finalRenderPass;
+	vkInit::make_final_framebuffers(frameBufferInput, swapchainFrames, debugMode);
 	
 }
 

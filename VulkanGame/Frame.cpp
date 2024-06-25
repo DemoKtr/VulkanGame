@@ -463,8 +463,20 @@ void vkUtil::SwapChainFrame::write_skybox_descriptor()
 	postProcessInputDescriptor.pImageInfo = &postProcessInputAttachmentImage;
 
 
+	vk::DescriptorImageInfo finalInputAttachmentImage;
+	finalInputAttachmentImage.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	finalInputAttachmentImage.imageView = gbuffer.normal.view;
+	finalInputAttachmentImage.sampler = shadowMapBuffer.sampler;
+	vk::WriteDescriptorSet finalInputDescriptor;
+	finalInputDescriptor.dstSet = finalDescriptorSet;
+	finalInputDescriptor.dstBinding = 0;
+	finalInputDescriptor.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+	finalInputDescriptor.descriptorCount = 1;
+	finalInputDescriptor.descriptorType = vk::DescriptorType::eCombinedImageSampler;
+	finalInputDescriptor.pImageInfo = &finalInputAttachmentImage;
+
 	std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {
-				skyBoxWriteInfo,skyboxInputDescriptor ,particleDescriptor, postProcessInputDescriptor
+				skyBoxWriteInfo,skyboxInputDescriptor ,particleDescriptor, postProcessInputDescriptor, finalInputDescriptor,
 	};
 
 	logicalDevice.updateDescriptorSets(writeDescriptorSets, nullptr);
@@ -482,18 +494,12 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.destroyFramebuffer(postProcessFramebuffer);
 			logicalDevice.destroyFramebuffer(skyBoxFramebuffer);
 			logicalDevice.destroyFramebuffer(downupScaleFramebuffer);
+			logicalDevice.destroyFramebuffer(finalFramebuffer);
+			logicalDevice.destroySemaphore(imageAvailable);
+			logicalDevice.destroySemaphore(computeFinished);
+			logicalDevice.destroySemaphore(renderFinished);
 			
-
-			try {
-				logicalDevice.destroySemaphore(imageAvailable);
-				logicalDevice.destroySemaphore(computeFinished);
-
-
-				logicalDevice.destroySemaphore(renderFinished);
-			}
-			catch (vk::SystemError err) {
-				 std::cout << "Failed delete semaphores!" << std::endl;
-			}
+			
 			
 			logicalDevice.destroyFence(inFlight);
 
