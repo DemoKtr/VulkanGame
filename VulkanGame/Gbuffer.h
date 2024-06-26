@@ -10,10 +10,12 @@ struct attachmentBundle {
 	vk::Device logicalDevice;
 	vk::PhysicalDevice physicalDevice;
 	bool canUseAsSampledImage;
+	vk::SampleCountFlagBits sampler;
 };
 
 namespace vkGbuffer {
 	void createAttachment(attachmentBundle attachmentDescription);
-	void createGbufferAttachment(vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, vkUtil::Gbuffer* gbuffer, vkUtil::FrameBufferAttachment* attachmnent, vkUtil::FrameBufferAttachment* postProcessInputAttachment, vkUtil::FrameBufferAttachment* skyBoxAttachment, vkUtil::FrameBufferAttachment* sampledAttachment);
 	
+	void createGbufferAttachment(vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, vkUtil::Gbuffer* gbuffer, vkUtil::FrameBufferAttachment* attachmnent, vkUtil::FrameBufferAttachment* postProcessInputAttachment, vkUtil::FrameBufferAttachment* skyBoxAttachment, vkUtil::FrameBufferAttachment* sampledAttachment);
+	void createMultiSampledAttachment(vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, vkUtil::FrameBufferAttachment* attachmnent, vk::Extent2D ex);
 }
