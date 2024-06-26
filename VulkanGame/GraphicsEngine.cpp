@@ -705,7 +705,15 @@ void GraphicsEngine::create_descriptor_set_layouts()
 
 	downScaleDescriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 	upScaleDescriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
-	bindings.count = 1;
+	bindings.count = 2;
+	bindings.indices[0] = 0;
+	bindings.indices[1] = 1;
+	bindings.types[0] = vk::DescriptorType::eCombinedImageSampler;
+	bindings.types[1] = vk::DescriptorType::eCombinedImageSampler;
+	bindings.counts[0] = 1;
+	bindings.counts[1] = 1;
+	bindings.stages[0] = vk::ShaderStageFlagBits::eFragment;
+	bindings.stages[1] = vk::ShaderStageFlagBits::eFragment;
 	finalDescriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
 }
@@ -1518,7 +1526,9 @@ void GraphicsEngine::create_frame_resources()
 
 	upScaleDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(bloom->upScalepipeline.size()* swapchainFrames.size()), bindings);;
 	downScaleDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(bloom->downScalepipeline.size()* swapchainFrames.size()), bindings);;
-	bindings.count = 1;
+	bindings.count = 2;
+	bindings.types[0] = vk::DescriptorType::eCombinedImageSampler;
+	bindings.types[1] = vk::DescriptorType::eCombinedImageSampler;
 	finalDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);;
 	//deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
 	

@@ -181,7 +181,7 @@ void main() {
 
 	vec3 wp = (subpassLoad(inputWorldPos).rgb);
 	vec3 world = inverse(TBN)*(worldPos);
-	color = shadow(vec3(color),world);
+	//color = shadow(vec3(color),world);
     // HDR tonemapping
    // color = color / (color + vec3(1.0));
     // gamma correct

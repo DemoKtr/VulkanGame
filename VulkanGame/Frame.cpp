@@ -734,7 +734,7 @@ void vkUtil::SwapChainFrame::write_skybox_descriptor(std::vector<vk::ImageView>&
 
 	vk::DescriptorImageInfo finalInputAttachmentImage;
 	finalInputAttachmentImage.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-	finalInputAttachmentImage.imageView =  sampledAttachment.view;// sampledAttachment.view;
+	finalInputAttachmentImage.imageView =  gbuffer.normal.view;// sampledAttachment.view;
 	finalInputAttachmentImage.sampler = upscaleSampler;
 	vk::WriteDescriptorSet finalInputDescriptor;
 	finalInputDescriptor.dstSet = finalDescriptorSet;
@@ -744,8 +744,20 @@ void vkUtil::SwapChainFrame::write_skybox_descriptor(std::vector<vk::ImageView>&
 	finalInputDescriptor.descriptorType = vk::DescriptorType::eCombinedImageSampler;
 	finalInputDescriptor.pImageInfo = &finalInputAttachmentImage;
 
+	vk::DescriptorImageInfo finalbloomInputAttachmentImage;
+	finalbloomInputAttachmentImage.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	finalbloomInputAttachmentImage.imageView = sampledAttachment.view;// sampledAttachment.view;
+	finalbloomInputAttachmentImage.sampler = upscaleSampler;
+	vk::WriteDescriptorSet finalbloomInputDescriptor;
+	finalbloomInputDescriptor.dstSet = finalDescriptorSet;
+	finalbloomInputDescriptor.dstBinding = 1;
+	finalbloomInputDescriptor.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+	finalbloomInputDescriptor.descriptorCount = 1;
+	finalbloomInputDescriptor.descriptorType = vk::DescriptorType::eCombinedImageSampler;
+	finalbloomInputDescriptor.pImageInfo = &finalInputAttachmentImage;
+
 	std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {
-				skyBoxWriteInfo,skyboxInputDescriptor ,particleDescriptor, postProcessInputDescriptor, finalInputDescriptor,
+				skyBoxWriteInfo,skyboxInputDescriptor ,particleDescriptor, postProcessInputDescriptor, finalInputDescriptor,finalbloomInputDescriptor
 	};
 
 	logicalDevice.updateDescriptorSets(writeDescriptorSets, nullptr);

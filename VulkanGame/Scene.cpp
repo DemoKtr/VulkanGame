@@ -52,8 +52,8 @@ Scene::Scene()
 
 	Light* pointLight1 = new Light();
 	Light* pointLight2 = new Light();
-	pointLight1->diffuse = glm::vec4(255.0f, 255.0f, 255.0f,1.0f);
-	pointLight2->diffuse = glm::vec4(255.0f, 255.0f, 255.0f,1.0f);
+	pointLight1->diffuse = glm::vec4(28.0f, 28.0f, 28.0f,1.0f);
+	pointLight2->diffuse = glm::vec4(28.0f, 28.0f, 28.0f,1.0f);
 	pointLight1->transform.setLocalPosition(glm::vec3(0.0f, 1.0f, 0.0f));
 	pointLight1->transform.computeModelMatrix();
 	pointLight2->transform.setLocalPosition(glm::vec3(5.0f, 1.0f,-3.0f));
