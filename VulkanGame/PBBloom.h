@@ -2,6 +2,9 @@
 #include "config.h"
 
 namespace vkBloom {
+
+
+	
 	class PBBloom
 	{
 		uint32_t mipNumber = 6;
@@ -11,18 +14,21 @@ namespace vkBloom {
 
 		
 		std::vector<vk::DeviceMemory> mipImagesMemory;
-		vk::Sampler sampler;
 		
 		
+		glm::vec2 initialSize;
 		
 		void createMipImages();
 		void createMipImageViews();
 		void createSampler();
-		void createPipelines();
-		void draw(vk::CommandBuffer commandBuffer,vk::Framebuffer framebuffer);
 
+
+		
+
+		
 
 	public:
+		vk::Sampler sampler;
 		PBBloom(float width, float heigh, vk::Device device, vk::PhysicalDevice physicalDevice);
 		std::vector<glm::vec2> mipSize;
 		std::vector<glm::ivec2> intMipSize;
@@ -35,10 +41,10 @@ namespace vkBloom {
 		std::vector<vk::Pipeline> upScalepipeline;
 		std::vector<vk::Image> mipImages;
 		std::vector<vk::ImageView> mipImagesView;
-		std::vector<vk::DescriptorSet> downScaleDescriptorsSet;
-		std::vector<vk::DescriptorSet> upScaleDescriptorsSet;
+		
+		void draw(vk::CommandBuffer commandBuffer, std::vector<vk::Framebuffer> downscaleframebuffer, std::vector<vk::Framebuffer> upscaleframebuffer, std::vector<vk::DescriptorSet>downScaleDescriptorsSet, std::vector<vk::DescriptorSet>upScaleDescriptorsSet, vk::Extent2D swapchainext);
 		~PBBloom();
-		void wirte_descriptor_set();
+		
 	};
 
 }

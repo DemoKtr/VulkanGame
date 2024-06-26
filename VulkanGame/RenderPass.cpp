@@ -320,7 +320,7 @@ vk::RenderPass vkInit::create_particle_renderpass(vk::Device logicalDevice, vk::
 	return particleRenderPass;
 }
 
-vk::RenderPass vkInit::create_combinedImage_renderpass(vk::Device logicalDevice)
+vk::RenderPass vkInit::create_combinedImage_renderpass(vk::Device logicalDevice, vk::AttachmentLoadOp loadtype, vk::ImageLayout initialLayout)
 {
 	std::array<vk::AttachmentDescription,1> attachments;
 	vk::AttachmentReference attachmentRefertences[1];
@@ -329,11 +329,11 @@ vk::RenderPass vkInit::create_combinedImage_renderpass(vk::Device logicalDevice)
 	attachments[0].flags = vk::AttachmentDescriptionFlags();
 	attachments[0].format = vk::Format::eR16G16B16A16Sfloat;
 	attachments[0].samples = vk::SampleCountFlagBits::e1;
-	attachments[0].loadOp = vk::AttachmentLoadOp::eLoad;
+	attachments[0].loadOp = loadtype;
 	attachments[0].storeOp = vk::AttachmentStoreOp::eStore;
 	attachments[0].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
 	attachments[0].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
-	attachments[0].initialLayout = vk::ImageLayout::eColorAttachmentOptimal;
+	attachments[0].initialLayout = initialLayout;
 	attachments[0].finalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 	//Define a general attachment, with its load/store operations
 
@@ -632,7 +632,7 @@ vk::RenderPass vkInit::create_downscale_renderpass(vk::Device logicalDevice)
 	attachments[0].flags = vk::AttachmentDescriptionFlags();
 	attachments[0].format = vk::Format::eB10G11R11UfloatPack32;
 	attachments[0].samples = vk::SampleCountFlagBits::e1;
-	attachments[0].loadOp = vk::AttachmentLoadOp::eDontCare;
+	attachments[0].loadOp = vk::AttachmentLoadOp::eClear;
 	attachments[0].storeOp = vk::AttachmentStoreOp::eStore;
 	attachments[0].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
 	attachments[0].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
@@ -741,12 +741,12 @@ vk::RenderPass vkInit::create_upscale_renderpass(vk::Device logicalDevice)
 	attachments[0].flags = vk::AttachmentDescriptionFlags();
 	attachments[0].format = vk::Format::eB10G11R11UfloatPack32;
 	attachments[0].samples = vk::SampleCountFlagBits::e1;
-	attachments[0].loadOp = vk::AttachmentLoadOp::eDontCare;
+	attachments[0].loadOp = vk::AttachmentLoadOp::eClear;
 	attachments[0].storeOp = vk::AttachmentStoreOp::eStore;
 	attachments[0].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
 	attachments[0].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
-	attachments[0].initialLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-	attachments[0].finalLayout = vk::ImageLayout::eColorAttachmentOptimal;
+	attachments[0].initialLayout = vk::ImageLayout::eColorAttachmentOptimal;
+	attachments[0].finalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 	//Define a general attachment, with its load/store operations
 
 	/*

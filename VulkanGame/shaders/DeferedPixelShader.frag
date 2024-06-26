@@ -183,9 +183,9 @@ void main() {
 	vec3 world = inverse(TBN)*(worldPos);
 	color = shadow(vec3(color),world);
     // HDR tonemapping
-    color = color / (color + vec3(1.0));
+   // color = color / (color + vec3(1.0));
     // gamma correct
-    color = pow(color, vec3(1.0/2.2)); 
+    //color = pow(color, vec3(1.0/2.2)); 
 
     outColor = vec4(color,subpassLoad(inputPosition).a);
 	

@@ -101,4 +101,5 @@ void main()
 	  downsample += (j+k+l+m)*0.125;       // ok
 	  break;
 	}
+	
 }

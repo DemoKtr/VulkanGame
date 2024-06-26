@@ -22,9 +22,9 @@ void main() {
 	}else  
 	{
 	if(zParticle >= zAlbedo) color = texture(albedoMap,inUV.xy).rgb;
-	else color = texture(particleMap,inUV.xy).rgb;
+	else color =pow((texture(particleMap,inUV.xy).rgb),vec3(2.2f));
 	}
-;
+	
 
 	outColor = vec4(color,1.0f);
 }

@@ -165,8 +165,7 @@ namespace vkInit {
 
 		for (int i = 0; i < frames.size(); ++i) {
 			
-			
-			
+		
 
 			for (uint32_t j = 0; j < bloom->downScalepipeline.size(); ++j)
 			{
@@ -185,7 +184,7 @@ namespace vkInit {
 				framebufferInfo.layers = 1;
 
 				try {
-					frames[i].downupscaleFramebuffer.push_back(inputChunk.device.createFramebuffer(framebufferInfo));
+					frames[i].downscaleFramebuffer.push_back(inputChunk.device.createFramebuffer(framebufferInfo));
 
 					if (debug) {
 						std::cout << "Created downupscale framebuffer for frame " << i << std::endl;
@@ -215,24 +214,24 @@ namespace vkInit {
 
 
 
-			for (uint32_t j = bloom->upScalepipeline.size()-2; j >0 ; --j)
+			for (uint32_t j = bloom->upScalepipeline.size()-1; j > 0; --j)
 			{
 				std::vector<vk::ImageView> attachments = {
-					bloom->mipImagesView[j],
+					bloom->mipImagesView[j-1],
 				};
 
 
 				vk::FramebufferCreateInfo framebufferInfo;
 				framebufferInfo.flags = vk::FramebufferCreateFlags();
-				framebufferInfo.renderPass = inputChunk.renderpass;
+				framebufferInfo.renderPass = bloom->upScaleRenderpass;
 				framebufferInfo.attachmentCount = attachments.size();
 				framebufferInfo.pAttachments = attachments.data();
-				framebufferInfo.width = bloom->intMipSize[j].x;
-				framebufferInfo.height = bloom->intMipSize[j].y;
+				framebufferInfo.width = bloom->intMipSize[j-1].x;
+				framebufferInfo.height = bloom->intMipSize[j-1].y;
 				framebufferInfo.layers = 1;
 
 				try {
-					frames[i].downupscaleFramebuffer.push_back(inputChunk.device.createFramebuffer(framebufferInfo));
+					frames[i].upscaleFramebuffer.push_back(inputChunk.device.createFramebuffer(framebufferInfo));
 
 					if (debug) {
 						std::cout << "Created upscale framebuffer for frame " << i << std::endl;
@@ -246,22 +245,22 @@ namespace vkInit {
 
 			}
 			
-			std::vector<vk::ImageView> attachments = {
-				frames[i].gbuffer.albedo.view,
+			std::vector<vk::ImageView> attachmentsy = {
+				frames[i].sampledAttachment.view,
 			};
 
 
 			vk::FramebufferCreateInfo framebufferInfo;
 			framebufferInfo.flags = vk::FramebufferCreateFlags();
 			framebufferInfo.renderPass = bloom->finalRenderpass;
-			framebufferInfo.attachmentCount = attachments.size();
-			framebufferInfo.pAttachments = attachments.data();
+			framebufferInfo.attachmentCount = attachmentsy.size();
+			framebufferInfo.pAttachments = attachmentsy.data();
 			framebufferInfo.width = inputChunk.swapchainExtent.width;
 			framebufferInfo.height = inputChunk.swapchainExtent.height;
 			framebufferInfo.layers = 1;
 
 			try {
-				frames[i].downupscaleFramebuffer.push_back(inputChunk.device.createFramebuffer(framebufferInfo));
+				frames[i].upscaleFramebuffer.push_back(inputChunk.device.createFramebuffer(framebufferInfo));
 
 				if (debug) {
 					std::cout << "Created upscale framebuffer for frame " << i << std::endl;
@@ -269,7 +268,7 @@ namespace vkInit {
 			}
 			catch (vk::SystemError err) {
 				if (debug) {
-					std::cout << "Failed to create downupscale framebuffer for frame " << i << std::endl;
+					std::cout << "Failed to create upscale framebuffer for frame " << i << std::endl;
 				}
 			}
 

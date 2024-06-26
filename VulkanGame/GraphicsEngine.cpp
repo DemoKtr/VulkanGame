@@ -1040,6 +1040,14 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 		normalbarrier // image memory barriers
 	);
 	*/
+
+	bloom->draw(commandBuffer, swapchainFrames[imageIndex].downscaleFramebuffer, swapchainFrames[imageIndex].upscaleFramebuffer, swapchainFrames[imageIndex].downScaleDescriptorsSet, swapchainFrames[imageIndex].upScaleDescriptorsSet,swapchainExtent);
+
+
+	
+
+	
+
 	vk::RenderPassBeginInfo finalRenderpassInfo = {};
 	finalRenderpassInfo.renderPass = finalRenderPass;
 	finalRenderpassInfo.framebuffer = swapchainFrames[imageIndex].finalFramebuffer;
@@ -1508,8 +1516,8 @@ void GraphicsEngine::create_frame_resources()
 	bindings.types[0] =vk::DescriptorType::eCombinedImageSampler;
 	bindings.types[1] = vk::DescriptorType::eUniformBuffer;
 
-	upScaleDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(bloom->upScalepipeline.size()), bindings);;
-	downScaleDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(bloom->downScalepipeline.size()), bindings);;
+	upScaleDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(bloom->upScalepipeline.size()* swapchainFrames.size()), bindings);;
+	downScaleDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(bloom->downScalepipeline.size()* swapchainFrames.size()), bindings);;
 	bindings.count = 1;
 	finalDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);;
 	//deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
@@ -1539,20 +1547,20 @@ void GraphicsEngine::create_frame_resources()
 		frame.ssaoDescriptorSet = vkInit::allocate_descriptor_set(device, ssaoDescriptorPool, ssaoDescriptorSetLayout);
 		frame.blurDescriptorSet = vkInit::allocate_descriptor_set(device, blurDescriptorPool, blurDescriptorSetLayout);
 		frame.finalDescriptorSet = vkInit::allocate_descriptor_set(device, finalDescriptorPool, finalDescriptorSetLayout);
+		for (uint32_t i = 0; i < bloom->downScalepipeline.size(); ++i) {
+			frame.downScaleDescriptorsSet.push_back(vkInit::allocate_descriptor_set(device, downScaleDescriptorPool, downScaleDescriptorSetLayout));
 
+		}
+		for (uint32_t i = 0; i < bloom->upScalepipeline.size(); ++i) {
+			frame.upScaleDescriptorsSet.push_back(vkInit::allocate_descriptor_set(device, upScaleDescriptorPool, upScaleDescriptorSetLayout));
+		}
 		
-
+		
 	}
 	
 
-	for (uint32_t i = 0; i < bloom->downScalepipeline.size(); ++i) {
-		bloom->downScaleDescriptorsSet.push_back(vkInit::allocate_descriptor_set(device, downScaleDescriptorPool, downScaleDescriptorSetLayout));
-		
-	}
-	for (uint32_t i = 0; i < bloom->upScalepipeline.size(); ++i) {
-		bloom->upScaleDescriptorsSet.push_back(vkInit::allocate_descriptor_set(device, upScaleDescriptorPool, upScaleDescriptorSetLayout));
-	}
-
+	
+	
 }
 
 void GraphicsEngine::create_framebuffers()
@@ -1674,7 +1682,10 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	_frame.writeGbufferDescriptor(_frame.deferedDescriptorSet, device);
 	_frame.shadowDescripotrsWrite();
 	_frame.writeParticleDescriptor(particles->particleBufferDescriptor);
-	_frame.write_skybox_descriptor();
+	_frame.write_skybox_descriptor(bloom->mipImagesView,bloom->sampler);
+	_frame.wirte_samplingdescriptor_set(bloom->mipImagesView, bloom->sampler);
+	_frame.wirte_samplingubo_set(glm::vec2(swapchainExtent.width, swapchainExtent.height), bloom->mipSize);
+	
 }
 
 float GraphicsEngine::ourLerp(float a, float b, float f)

@@ -1099,7 +1099,7 @@ namespace vkInit {
         vk::PipelineMultisampleStateCreateInfo multisampleState = make_multisampling_info();
         std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
 
-        vk::RenderPass renderpass = vkInit::create_combinedImage_renderpass(specyfication.device);
+        vk::RenderPass renderpass = vkInit::create_combinedImage_renderpass(specyfication.device, vk::AttachmentLoadOp::eDontCare, vk::ImageLayout::eColorAttachmentOptimal);
 
         vk::GraphicsPipelineCreateInfo pipelineInfo = {};
         pipelineInfo.pInputAssemblyState = &inputAssemblyState;
@@ -1260,8 +1260,10 @@ namespace vkInit {
 
         vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState = make_input_assembly_info();
         vk::PipelineRasterizationStateCreateInfo rasterizationState = make_rasterizer_info();
-        rasterizationState.cullMode = vk::CullModeFlagBits::eFront;
+        rasterizationState.cullMode = vk::CullModeFlagBits::eBack;
         vk::PipelineColorBlendAttachmentState blendAttachmentState = make_color_blend_attachment_state();
+        blendAttachmentState.colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB;
+        blendAttachmentState.blendEnable = VK_FALSE;
         vk::PipelineColorBlendStateCreateInfo colorBlendState = make_color_blend_attachment_stage(blendAttachmentState);
 
    
@@ -1357,19 +1359,19 @@ namespace vkInit {
        
 
 
+        pipelineInfo.renderPass = upScaleRenderpass;
 
-
-        for (uint32_t i = 0; i < specyfication.screenSize.size(); ++i) {
+        for (uint32_t i = 0; i < specyfication.screenSize.size()-1; ++i) {
             vk::Rect2D scissor = {};
             scissor.offset.x = 0.0f;
             scissor.offset.y = 0.0f;
-            scissor.extent.width = specyfication.screenSize[i].x;
-            scissor.extent.height = specyfication.screenSize[i].y;
+            scissor.extent.width = specyfication.screenSize[specyfication.screenSize.size() - 2-i].x;
+            scissor.extent.height = specyfication.screenSize[specyfication.screenSize.size() - 2-i].y;
             vk::Viewport viewport = {};
             viewport.x = 0.0f;
             viewport.y = 0.0f;
-            viewport.width = (float)specyfication.screenSize[i].x;
-            viewport.height = (float)specyfication.screenSize[i].y;
+            viewport.width = (float)specyfication.screenSize[specyfication.screenSize.size() - 2-i].x;
+            viewport.height = (float)specyfication.screenSize[specyfication.screenSize.size() - 2-i].y;
             viewport.minDepth = 0.0f;
             viewport.maxDepth = 1.0f;
 
@@ -1404,7 +1406,7 @@ namespace vkInit {
         vk::PipelineViewportStateCreateInfo viewportState = make_viewport_state(viewport, scissor);
 
         pipelineInfo.pViewportState = &viewportState;
-        vk::RenderPass finalRenderpass = vkInit::create_combinedImage_renderpass(specyfication.device);
+        vk::RenderPass finalRenderpass = vkInit::create_combinedImage_renderpass(specyfication.device, vk::AttachmentLoadOp::eClear, vk::ImageLayout::eUndefined);
         pipelineInfo.renderPass = finalRenderpass;
         try {
             upsampepipelines.push_back(specyfication.device.createGraphicsPipeline(nullptr, pipelineInfo).value);

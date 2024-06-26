@@ -47,6 +47,17 @@ namespace vkUtil {
 		float radius;// = 0.5;
 		float bias;// = 0.025;
 	};
+
+	struct downSacalingUBO {
+		glm::vec2 srcResolution;
+		int mipLevel;
+	};
+
+	struct upSacalingUBO {
+		float filterRadius;
+	};
+
+
 	/**
 		Holds the data structures associated with a "Frame"
 	*/
@@ -68,7 +79,8 @@ namespace vkUtil {
 		vk::Framebuffer finalFramebuffer;
 
 
-		std::vector<vk::Framebuffer> downupscaleFramebuffer;
+		std::vector<vk::Framebuffer> downscaleFramebuffer;
+		std::vector<vk::Framebuffer> upscaleFramebuffer;
 
 		//zBuffer
 		vk::Image depthBuffer;
@@ -116,6 +128,7 @@ namespace vkUtil {
 		FrameBufferAttachment particleAttachment;
 		FrameBufferAttachment postProcessInputAttachment;
 		FrameBufferAttachment skyBoxAttachment;
+		FrameBufferAttachment sampledAttachment;
 
 		std::vector<glm::mat4> modelTransforms;
 		std::vector<PointLight> LightTransforms;
@@ -165,20 +178,35 @@ namespace vkUtil {
 		vk::DescriptorBufferInfo skyboxUBOBufferDescriptor;
 
 
+
+		std::vector<vk::DescriptorSet> downScaleDescriptorsSet;
+		std::vector<vk::DescriptorSet> upScaleDescriptorsSet;
+		downSacalingUBO	downScaleUBOData;
+		Buffer downScaleUBOBuffer;
+		void* downScaleUBOWriteLoacation;
+		vk::DescriptorBufferInfo downsScaleBufferDescriptor;
+		upSacalingUBO	upScaleUBOData;
+		Buffer upScaleUBOBuffer;
+		void* upScaleUBOWriteLoacation;
+		vk::DescriptorBufferInfo upScaleUBOBufferDescriptor;
+
 		ssaoUBO	ssaoUBOData;
 		Buffer ssaoUBOBuffer;
 		void* ssaoUBOWriteLoacation;
 		vk::DescriptorBufferInfo ssaoUBOBufferDescriptor;
 
+		vk::Sampler upscaleSampler;
+
 		void shadowDescripotrsWrite();
 		
 		void make_descriptor_resources();
-	
+		void wirte_samplingdescriptor_set(std::vector<vk::ImageView> mipImagesView, vk::Sampler sampler);
+		void wirte_samplingubo_set(glm::vec2 screenSize, std::vector<glm::vec2> mipSize);
 		void make_depth_resources();
 		void write_descriptor_set();
 		void writeGbufferDescriptor(vk::DescriptorSet descriptorSet, vk::Device logicalDevice);
 		void writeParticleDescriptor(vk::DescriptorBufferInfo &particleBufferDescriptor);
-		void write_skybox_descriptor();
+		void write_skybox_descriptor(std::vector<vk::ImageView> &mipImagesView,vk::Sampler sampler);
 		void destroy();
 
 	};
