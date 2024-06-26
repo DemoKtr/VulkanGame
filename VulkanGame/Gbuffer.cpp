@@ -99,7 +99,7 @@ void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::De
 	
 }
 
-void vkGbuffer::createMultiSampledAttachment(vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, vkUtil::FrameBufferAttachment* attachmnent, vk::Extent2D ex)
+void vkGbuffer::createMultiSampledAttachment(vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, vkUtil::FrameBufferAttachment* attachmnent, vk::Extent2D ex,vk::Format format)
 {
 	attachmentBundle attachmentDescription;
 	attachmentDescription.logicalDevice = logicalDevice;
@@ -107,7 +107,7 @@ void vkGbuffer::createMultiSampledAttachment(vk::PhysicalDevice physicalDevice, 
 	attachmentDescription.width = ex.width;
 	attachmentDescription.height = ex.height;
 	attachmentDescription.attachment = attachmnent;
-	attachmentDescription.format = vk::Format::eR8G8B8A8Unorm;
+	attachmentDescription.format = format;
 	attachmentDescription.usage = vk::ImageUsageFlagBits::eColorAttachment;
 	attachmentDescription.canUseAsSampledImage = false;
 	attachmentDescription.sampler = vk::SampleCountFlagBits::e8;

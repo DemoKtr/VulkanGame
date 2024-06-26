@@ -186,7 +186,7 @@ vkInit::SwapChainBundle vkInit::create_swapchain(vk::PhysicalDevice physicalDevi
 		bundle.frames[i].gbuffer.height = extent.height;
 		bundle.frames[i].gbuffer.width = extent.width;
 		vkGbuffer::createGbufferAttachment(physicalDevice,logicalDevice,&bundle.frames[i].gbuffer, &bundle.frames[i].particleAttachment, &bundle.frames[i].postProcessInputAttachment, &bundle.frames[i].skyBoxAttachment, &bundle.frames[i].sampledAttachment);
-		vkGbuffer::createMultiSampledAttachment(physicalDevice,logicalDevice, &bundle.frames[i].multiSampledattachment,extent);
+		vkGbuffer::createMultiSampledAttachment(physicalDevice,logicalDevice, &bundle.frames[i].multiSampledattachment,extent,format.format);
 
 	}
 	bundle.format = format.format;
