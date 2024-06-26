@@ -836,6 +836,7 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.destroyImage(postProcessInputAttachment.image);
 			logicalDevice.destroyImage(particledepthBuffer);
 			logicalDevice.destroyImage(gbuffer.position.image);
+			logicalDevice.destroyImage(multiSampledattachment.image);
 			logicalDevice.destroyImage(gbuffer.normal.image);
 			logicalDevice.destroyImage(gbuffer.albedo.image);
 			logicalDevice.destroyImage(gbuffer.arm.image);
@@ -854,6 +855,7 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.freeMemory(gbuffer.albedo.mem);
 			logicalDevice.freeMemory(gbuffer.arm.mem);
 			logicalDevice.freeMemory(gbuffer.T.mem);
+			logicalDevice.freeMemory(multiSampledattachment.mem);
 			logicalDevice.freeMemory(gbuffer.worldPos.mem);
 			logicalDevice.freeMemory(sampledAttachment.mem);
 			logicalDevice.freeMemory(particleAttachment.mem);
@@ -866,6 +868,7 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.destroyImageView(gbuffer.position.view);
 			logicalDevice.destroyImageView(gbuffer.normal.view);
 			logicalDevice.destroyImageView(gbuffer.albedo.view);
+			logicalDevice.destroyImageView(multiSampledattachment.view);
 			logicalDevice.destroyImageView(gbuffer.arm.view);
 			logicalDevice.destroyImageView(gbuffer.T.view);
 			logicalDevice.destroyImageView(gbuffer.worldPos.view);
@@ -874,6 +877,7 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.destroyImageView(sampledAttachment.view);
 			logicalDevice.destroyImageView(shadowMapBuffer.shadowBufferDepthAttachment.view);
 			logicalDevice.destroySampler(shadowMapBuffer.sampler);
+			logicalDevice.destroySampler(upscaleSampler);
 			
 		}
 

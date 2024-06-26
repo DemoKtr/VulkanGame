@@ -1054,7 +1054,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 
 	
 
-	
+	PostProcessclearValues.push_back(colorClear);
 
 	vk::RenderPassBeginInfo finalRenderpassInfo = {};
 	finalRenderpassInfo.renderPass = finalRenderPass;

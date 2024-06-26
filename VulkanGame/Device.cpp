@@ -122,7 +122,7 @@ vk::Device vkInit::create_logical_device(vk::PhysicalDevice physicalDevice, vk::
 
 	vk::PhysicalDeviceFeatures deviceFeatures = vk::PhysicalDeviceFeatures();
 	deviceFeatures.geometryShader = VK_TRUE;
-	
+	deviceFeatures.sampleRateShading = VK_TRUE;
 	//deviceFeatures.samplerAnisotropy = true;
 	std::vector<const char*> enabledLayers;
 	if (debugMode) {

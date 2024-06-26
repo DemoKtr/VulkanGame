@@ -431,57 +431,49 @@ vk::RenderPass vkInit::create_combinedImage_renderpass(vk::Device logicalDevice,
 
 vk::RenderPass vkInit::create_final_renderpass(vk::Device logicalDevice, vk::Format swapchainImageFormat)
 {
-		std::array<vk::AttachmentDescription, 1> attachments;
-		vk::AttachmentReference attachmentRefertences[1];
+		std::array<vk::AttachmentDescription, 2> attachments;
+		vk::AttachmentReference attachmentRefertences[2];
 
 
 		attachments[0].flags = vk::AttachmentDescriptionFlags();
 		attachments[0].format = swapchainImageFormat;
-		attachments[0].samples = vk::SampleCountFlagBits::e1;
+		attachments[0].samples = vk::SampleCountFlagBits::e8;
 		attachments[0].loadOp = vk::AttachmentLoadOp::eClear;
 		attachments[0].storeOp = vk::AttachmentStoreOp::eStore;
 		attachments[0].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
 		attachments[0].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
 		attachments[0].initialLayout = vk::ImageLayout::eUndefined;
-		attachments[0].finalLayout = vk::ImageLayout::ePresentSrcKHR;
-		//Define a general attachment, with its load/store operations
-
-		/*
+		attachments[0].finalLayout = vk::ImageLayout::eColorAttachmentOptimal;
+		
 		attachments[1].flags = vk::AttachmentDescriptionFlags();
-		attachments[1].format = depthFormat;
+		attachments[1].format = swapchainImageFormat;
 		attachments[1].samples = vk::SampleCountFlagBits::e1;
 		attachments[1].loadOp = vk::AttachmentLoadOp::eClear;
 		attachments[1].storeOp = vk::AttachmentStoreOp::eStore;
 		attachments[1].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
 		attachments[1].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
 		attachments[1].initialLayout = vk::ImageLayout::eUndefined;
-		attachments[1].finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
-
-
-		*/
+		attachments[1].finalLayout = vk::ImageLayout::ePresentSrcKHR;
 
 		vk::AttachmentReference colorAttachmentRef = {};
 		colorAttachmentRef.attachment = 0;
 		colorAttachmentRef.layout = vk::ImageLayout::eColorAttachmentOptimal;
 		//Declare that attachment to be color buffer 0 of the framebuffer
 		attachmentRefertences[0] = colorAttachmentRef;
-		/*
-		vk::AttachmentReference depthAttachmentRef = {};
-		depthAttachmentRef.attachment = 1;
-		depthAttachmentRef.layout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
-		*/
-
-		// Pierwszy subpass: Renderowanie geometrii i wype³nienie za³¹czników position, normal i albedo
-	
+		vk::AttachmentReference resolvecolorAttachmentRef = {};
+		resolvecolorAttachmentRef.attachment = 1;
+		resolvecolorAttachmentRef.layout = vk::ImageLayout::eColorAttachmentOptimal;
+		attachmentRefertences[1] = resolvecolorAttachmentRef;
 
 		std::vector<vk::SubpassDescription> subpassDescriptions;
 		vk::SubpassDescription subpassGeometry = {};
 		subpassGeometry.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
 		subpassGeometry.colorAttachmentCount = 1; // Liczba za³¹czników kolorowych
-		subpassGeometry.pColorAttachments = attachmentRefertences; // Tablica referencji do za³¹czników kolorowych
+		subpassGeometry.pColorAttachments = &colorAttachmentRef; // Tablica referencji do za³¹czników kolorowych
 		subpassGeometry.pDepthStencilAttachment = nullptr; // Za³¹cznik g³êbokoœci i/lub szablonu
 		subpassGeometry.inputAttachmentCount = 0;
 		subpassGeometry.pInputAttachments = 0;
+		subpassGeometry.pResolveAttachments = &resolvecolorAttachmentRef;
 		// Drugi subpass: Obliczenia opóŸnione na podstawie za³¹czników position, normal i albedo
 
 		

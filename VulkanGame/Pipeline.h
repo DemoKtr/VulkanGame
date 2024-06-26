@@ -1465,6 +1465,9 @@ namespace vkInit {
         viewport.maxDepth = 1.0f;
         vk::PipelineViewportStateCreateInfo viewportState = make_viewport_state(viewport, scissor);
         vk::PipelineMultisampleStateCreateInfo multisampleState = make_multisampling_info();
+        multisampleState.sampleShadingEnable = VK_TRUE;
+        multisampleState.rasterizationSamples = vk::SampleCountFlagBits::e8;
+
         std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
 
         vk::RenderPass renderpass = vkInit::create_final_renderpass(specyfication.device, specyfication.swapchainImageFormat);

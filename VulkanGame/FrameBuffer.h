@@ -128,12 +128,12 @@ namespace vkInit {
 	}
 
 	void make_final_framebuffers(framebufferInput inputChunk, std::vector<vkUtil::SwapChainFrame>& frames, bool debug) {
-
+		
 
 		for (int i = 0; i < frames.size(); ++i) {
 
 			std::vector<vk::ImageView> attachments = {
-				frames[i].imageView,
+			frames[i].multiSampledattachment.view,frames[i].imageView,
 			};
 
 			vk::FramebufferCreateInfo framebufferInfo;
@@ -147,7 +147,7 @@ namespace vkInit {
 
 			try {
 				frames[i].finalFramebuffer = inputChunk.device.createFramebuffer(framebufferInfo);
-
+				
 				if (debug) {
 					std::cout << "Created final framebuffer for frame " << i << std::endl;
 				}

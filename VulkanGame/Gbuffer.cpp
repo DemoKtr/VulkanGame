@@ -27,7 +27,7 @@ void vkGbuffer::createAttachment(attachmentBundle attachmentDescription)
 	imageInfo.extent.height = attachmentDescription.height;
 	imageInfo.mipLevels = 1;
 	imageInfo.arrayLayers = 1;
-	imageInfo.samples = vk::SampleCountFlagBits::e1;
+	imageInfo.samples = attachmentDescription.sampler;
 	imageInfo.tiling = vk::ImageTiling::eOptimal;
 	imageInfo.extent.depth = 1;
 	if(!attachmentDescription.canUseAsSampledImage)
@@ -57,8 +57,10 @@ void vkGbuffer::createAttachment(attachmentBundle attachmentDescription)
 
 }
 
+
 void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::Device logicalDevice,vkUtil::Gbuffer* gbuffer, vkUtil::FrameBufferAttachment* attachmnent, vkUtil::FrameBufferAttachment* postProcessInputAttachment, vkUtil::FrameBufferAttachment* skyBoxAttachment, vkUtil::FrameBufferAttachment* sampledAttachment)
 {
+	
 	attachmentBundle attachmentDescription;
 	attachmentDescription.logicalDevice = logicalDevice;
 	attachmentDescription.physicalDevice = physicalDevice;
@@ -68,6 +70,7 @@ void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::De
 	attachmentDescription.format = vk::Format::eR16G16B16A16Sfloat;
 	attachmentDescription.usage = vk::ImageUsageFlagBits::eColorAttachment;
 	attachmentDescription.canUseAsSampledImage = false;
+	attachmentDescription.sampler = vk::SampleCountFlagBits::e1;
 	createAttachment(attachmentDescription);
 	
 	attachmentDescription.attachment = &gbuffer->arm;
@@ -94,6 +97,21 @@ void vkGbuffer::createGbufferAttachment(vk::PhysicalDevice physicalDevice,vk::De
 	//attachmentDescription.canUseAsSampledImage = false;
 	
 	
+}
+
+void vkGbuffer::createMultiSampledAttachment(vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, vkUtil::FrameBufferAttachment* attachmnent, vk::Extent2D ex)
+{
+	attachmentBundle attachmentDescription;
+	attachmentDescription.logicalDevice = logicalDevice;
+	attachmentDescription.physicalDevice = physicalDevice;
+	attachmentDescription.width = ex.width;
+	attachmentDescription.height = ex.height;
+	attachmentDescription.attachment = attachmnent;
+	attachmentDescription.format = vk::Format::eR8G8B8A8Unorm;
+	attachmentDescription.usage = vk::ImageUsageFlagBits::eColorAttachment;
+	attachmentDescription.canUseAsSampledImage = false;
+	attachmentDescription.sampler = vk::SampleCountFlagBits::e8;
+	createAttachment(attachmentDescription);
 }
 
 
