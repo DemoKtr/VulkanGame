@@ -15,6 +15,7 @@ glslangValidator -V PixelShader.frag -o frag.spv
 glslangValidator -V GeometryPixelShader.frag -o geoFrag.spv
 glslangValidator -V particleFragmentShader.frag -o particleFrag.spv
 glslangValidator -V DeferedPixelShader.frag -o deferedFrag.spv
+glslangValidator -V DeferedPixelShaderShadow.frag -o deferedFragShadow.spv
 glslangValidator -V ShadowMap.frag -o ShadowMapFrag.spv
 glslangValidator -V skyBoxFrag.frag -o skyBoxFrag.spv
 glslangValidator -V postProcessCombinedImageFrag.frag -o postProcessCombinedImageFrag.spv

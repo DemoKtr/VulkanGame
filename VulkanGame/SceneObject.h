@@ -68,7 +68,8 @@ class Box : public SceneObject {
 public:
 	void draw() override;
 	void update(float deltaTime) override;
-
+	float angle = { 0 };
+	int index =0;
 	Box();
 	~Box();
 };

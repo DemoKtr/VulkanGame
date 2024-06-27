@@ -20,7 +20,11 @@ void Box::draw()
 
 void Box::update(float deltaTime)
 {
-	transform.rotate(glm::vec3(1.0f,1.0f,0.0f),0.1*deltaTime);
+	angle += 0.1f * deltaTime;
+	if(index==0)
+	transform.setLocalPosition(glm::vec3(glm::sin(angle)*0.5f, 0.0f, glm::cos(angle)*.5f));
+	else transform.setLocalPosition(glm::vec3(glm::cos(angle)*0.5f, 0.0f, glm::sin(angle)*0.5f));
+	transform.rotate(glm::vec3(0.0f,1.0f,0.0f),0.1*deltaTime);
 	transform.computeModelMatrix();
 }
 

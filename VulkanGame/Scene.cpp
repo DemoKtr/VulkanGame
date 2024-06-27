@@ -11,6 +11,7 @@ Scene::Scene()
 	
 	Box* box = new Box();
 	Box* box1 = new Box();
+	box1->index = 1;
 	Box* box2 = new Box();
 	
 
