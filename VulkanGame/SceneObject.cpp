@@ -30,7 +30,7 @@ void Box::update(float deltaTime)
 
 Box::Box()
 {
-	objMaterial.setFilenames("res/models/box.obj", "res/models/box.mtl", "tex/floordif.png", "tex/floornormal.png", "tex/floorarm.png", "tex/floordepth.png");
+	objMaterial.setFilenames("res/models/box.obj", "res/models/box.mtl", "res/textures/diffuse/floor.jpg", "res/textures/normals/floor.jpg", "res/textures/arm/floor.jpg", "res/textures/depth/floor.jpg");
 	objMaterial.meshType = meshTypes::KITTY;
 }
 
@@ -50,7 +50,7 @@ void Floor::update(float deltaTime)
 
 Floor::Floor()
 {
-	objMaterial.setFilenames("res/models/plane.obj", "res/models/plane.mtl", "res/textures/groundAlbedo.jpg","res/textures/groundNormal.jpg", "res/textures/groundAMR.jpg", "res/textures/groundDepth.jpg");
+	objMaterial.setFilenames("res/models/plane.obj", "res/models/plane.mtl", "res/textures/diffuse/floor.jpg", "res/textures/normals/floor.jpg", "res/textures/arm/floor.jpg", "res/textures/depth/floor.jpg");
 	objMaterial.meshType = meshTypes::DOG;
 }
 
