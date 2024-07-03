@@ -13,7 +13,7 @@ public:
 	std::vector<float> particleVertexData;
 	vk::Device logicalDevice;
 	bool benchmark = true;
-	int burstParticleCount = 1024* 1024;
+	int burstParticleCount = 1024 * 1024;
 	int numberOfEmiter = { 0 };
 	Buffer particleBuffer;
 	void finalization(FinalizationChunk finalizationChunk);
@@ -21,6 +21,5 @@ public:
 	void make_descriptors_resources();
 	vk::DeviceSize getBufferSize();
 	vk::DeviceSize size;
-
 };
 

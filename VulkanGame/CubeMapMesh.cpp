@@ -47,8 +47,6 @@ CubeMapMesh::~CubeMapMesh()
 	logicalDevice.freeMemory(vertexBuffer.bufferMemory);
 }
 
-
-
 void CubeMapMesh::finalize(vkMesh::FinalizationChunk finalizationChunk)
 {
 	logicalDevice = finalizationChunk.logicalDevice;

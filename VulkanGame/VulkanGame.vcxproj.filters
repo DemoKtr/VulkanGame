@@ -81,13 +81,13 @@
     <ClCompile Include="Image.cpp">
       <Filter>Source Files\vkImage</Filter>
     </ClCompile>
-    <ClCompile Include="Obj_Mesh.cpp">
+    <ClCompile Include="ObjMesh.cpp">
       <Filter>Source Files\vkMesh</Filter>
     </ClCompile>
     <ClCompile Include="Logging.cpp">
       <Filter>Source Files\vkInit</Filter>
     </ClCompile>
-    <ClCompile Include="single_time_commands.cpp">
+    <ClCompile Include="SingleTimeCommands.cpp">
       <Filter>Source Files\vkUtil</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
@@ -221,10 +221,10 @@
     <ClInclude Include="RenderStruct.h">
       <Filter>Header Files\vkUtil</Filter>
     </ClInclude>
-    <ClInclude Include="single_time_commands.h">
+    <ClInclude Include="SingleTimeCommands.h">
       <Filter>Header Files\vkUtil</Filter>
     </ClInclude>
-    <ClInclude Include="Obj_Mesh.h">
+    <ClInclude Include="ObjMesh.h">
       <Filter>Header Files\vkMesh</Filter>
     </ClInclude>
     <ClInclude Include="Texture.h">

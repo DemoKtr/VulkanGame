@@ -72,7 +72,7 @@ vk::DeviceMemory vkImage::make_image_memory(ImageInputChunk input, vk::Image ima
 
 void vkImage::transition_image_layout(ImageLayoutTransitionJob job)
 {
-	vkUtil::start_job(job.commandBuffer);
+	vkUtil::startJob(job.commandBuffer);
 
 	/*
 	typedef struct VkImageSubresourceRange {
@@ -134,12 +134,12 @@ void vkImage::transition_image_layout(ImageLayoutTransitionJob job)
 
 	job.commandBuffer.pipelineBarrier(sourceStage, destinationStage, vk::DependencyFlags(), nullptr, nullptr, barrier);
 
-	vkUtil::end_job(job.commandBuffer, job.queue);
+	vkUtil::endJob(job.commandBuffer, job.queue);
 }
 
 void vkImage::copy_buffer_to_image(BufferImageCopyJob job)
 {
-	vkUtil::start_job(job.commandBuffer);
+	vkUtil::startJob(job.commandBuffer);
 
 	/*
 	typedef struct VkBufferImageCopy {
@@ -174,7 +174,7 @@ void vkImage::copy_buffer_to_image(BufferImageCopyJob job)
 		job.srcBuffer, job.dstImage, vk::ImageLayout::eTransferDstOptimal, copy
 	);
 
-	vkUtil::end_job(job.commandBuffer, job.queue);
+	vkUtil::endJob(job.commandBuffer, job.queue);
 }
 
 vk::ImageView vkImage::make_image_view(vk::Device logicalDevice, vk::Image image, vk::Format format, vk::ImageAspectFlags aspect, vk::ImageViewType type, uint32_t arrayCount)

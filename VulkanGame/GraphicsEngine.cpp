@@ -8,7 +8,7 @@
 #include "Commands.h"
 #include "Synchronizer.h"
 #include "Descrpitors.h"
-#include "Obj_Mesh.h"
+#include "ObjMesh.h"
 #include "Gbuffer.h"
 #include <set>
 
@@ -226,10 +226,12 @@ void GraphicsEngine::make_instance()
 	}
 	surface = c_style_surface;
 }
+
 void GraphicsEngine::make_debug_messenger()
 {
 	debugMessenger = vkInit::make_debug_messenger(instance, dldi);
 }
+
 void GraphicsEngine::choice_device()
 {
 	this->physicalDevice = vkInit::choose_physical_device(instance, debugMode);
@@ -246,6 +248,7 @@ void GraphicsEngine::choice_device()
 	
 	frameNumber = 0;
 }
+
 void GraphicsEngine::create_pipeline()
 {
 	vkInit::GraphicsPipelineInBundle specification = {};
@@ -360,6 +363,7 @@ void GraphicsEngine::create_pipeline()
 	
 
 }
+
 void GraphicsEngine::create_swapchain()
 {
 	
@@ -380,7 +384,9 @@ void GraphicsEngine::create_swapchain()
 		frame.make_depth_resources();
 	}
 }
+
 ////////////////////////////////////
+
 GraphicsEngine::GraphicsEngine(ivec2 screenSize, GLFWwindow* window,Scene* scene ,bool debugMode)
 {
 	this->screenSize = screenSize;
@@ -401,8 +407,6 @@ GraphicsEngine::GraphicsEngine(ivec2 screenSize, GLFWwindow* window,Scene* scene
 	make_assets(scene);
 
 }
-
-
 
 GraphicsEngine::~GraphicsEngine()
 {
@@ -1084,6 +1088,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 		}
 	}
 }
+
 void GraphicsEngine::record_compute_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex)
 {
 
@@ -1245,9 +1250,6 @@ void GraphicsEngine::record_skybox_draw_commands(vk::CommandBuffer commandBuffer
 
 }
 
-
-
-
 void GraphicsEngine::record_shadow_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex)
 {
 	vk::CommandBufferInheritanceInfo inh = {};
@@ -1289,6 +1291,7 @@ void GraphicsEngine::record_shadow_draw_commands(vk::CommandBuffer commandBuffer
 	}
 
 }
+
 void GraphicsEngine::render_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& startInstance, uint32_t instanceCount) {
 	//Triangles
 	int indexCount = meshes->indexCounts.find(objectType)->second;
@@ -1604,8 +1607,6 @@ void GraphicsEngine::create_framebuffers()
 	vkInit::make_upscale_framebuffers(frameBufferInput, swapchainFrames,bloom ,debugMode);
 	
 }
-
-
 
 void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float deltaTime,Camera::Camera camera)
 {
