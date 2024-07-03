@@ -36,22 +36,46 @@ void ParticleMenagerie::finalization(FinalizationChunk finalizationChunk)
 		particle.initialPos = particle.pos;
 		particle.initialPos.z = rndLifetimeDist(randomizer);
 		particle.initialPos.w = particle.initialPos.z;
-		
+		particle.acc = glm::vec4(1.0f);
 	}
-	vk::DeviceSize storageBufferSize = particles.size() * sizeof(vkParticle::Particle);
+	particleVertexData.reserve(particles.size() * 16);
+	for (auto& particle : particles) {
+		particleVertexData.push_back(particle.pos.x);
+		particleVertexData.push_back(particle.pos.y);
+		particleVertexData.push_back(particle.pos.z);
+		particleVertexData.push_back(particle.pos.w);
+
+		particleVertexData.push_back(particle.gradientPos.x);
+		particleVertexData.push_back(particle.gradientPos.y);
+		particleVertexData.push_back(particle.gradientPos.z);
+		particleVertexData.push_back(particle.gradientPos.w);
+
+		particleVertexData.push_back(particle.initialPos.x);
+		particleVertexData.push_back(particle.initialPos.y);
+		particleVertexData.push_back(particle.initialPos.z);
+		particleVertexData.push_back(particle.initialPos.w);
+
+		particleVertexData.push_back(particle.acc.x);
+		particleVertexData.push_back(particle.acc.y);
+		particleVertexData.push_back(particle.acc.z);
+		particleVertexData.push_back(particle.acc.w);
+	}
+
+
+	vk::DeviceSize storageBufferSize = particleVertexData.size() * sizeof(float);
 	size = storageBufferSize;
 
 	BufferInputChunk inputChunk;
 	inputChunk.logicalDevice = logicalDevice;
 	inputChunk.physicalDevice = finalizationChunk.physicalDevice;
-	inputChunk.size = particles.size() * sizeof(vkParticle::Particle);
+	inputChunk.size = storageBufferSize;
 	inputChunk.usage = vk::BufferUsageFlagBits::eTransferSrc;
 	inputChunk.memoryProperties = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
 	Buffer stagingBuffer = vkUtil::createBuffer(inputChunk);
 
 	//fill it with vertex data
-	particleWriteLoacation = logicalDevice.mapMemory(stagingBuffer.bufferMemory, 0, inputChunk.size);
-	memcpy(particleWriteLoacation, particles.data(), inputChunk.size);
+	particleWriteLoacation = logicalDevice.mapMemory(stagingBuffer.bufferMemory, 0, storageBufferSize);
+	memcpy(particleWriteLoacation, particleVertexData.data(), storageBufferSize);
 
 	logicalDevice.unmapMemory(stagingBuffer.bufferMemory);
 

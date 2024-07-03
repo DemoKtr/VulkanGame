@@ -5,7 +5,7 @@ struct Particle
 	vec4 pos;
 	vec4 gradientPos;
 	vec4 initialPos;
-	
+	vec4 acc;
 
 };
 
@@ -51,7 +51,7 @@ void main()
 	
 	particles[index].initialPos.z  = particles[index].initialPos.w;
 	
-	particles[index].gradientPos.y = 0.0f;
+	particles[index].gradientPos.y = 0.0f * particles[index].acc.x * particles[index].acc.y * particles[index].acc.z;
 	particles[index].gradientPos.x = 0.9f;
 	particles[index].gradientPos.z = particles[index].gradientPos.w;
 	}

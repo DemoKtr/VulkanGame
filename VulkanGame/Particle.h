@@ -9,6 +9,7 @@ namespace vkParticle {
 		glm::vec4 pos;								// Particle position								// Particle velocity
 		glm::vec4 gradientPos;
 		glm::vec4 initialPos;
+		glm::vec4 acc;
 
 	};
 	vk::VertexInputBindingDescription getParticleVBO();

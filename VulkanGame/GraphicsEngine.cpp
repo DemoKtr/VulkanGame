@@ -785,7 +785,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 	particleGraphicRenderPass.clearValueCount = cV.size();
 	particleGraphicRenderPass.pClearValues = cV.data();
 
-
+	/*
 	vk::BufferMemoryBarrier bufferBarrier = {  // sType                                  // pNext
 	vk::AccessFlagBits::eMemoryRead,          // srcAccessMask
 	vk::AccessFlagBits::eVertexAttributeRead,           // dstAccessMask
@@ -805,7 +805,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 		bufferBarrier,                             // bufferBarriers
 		nullptr                                    // imageBarriers
 	);
-
+	*/
 
 	commandBuffer.beginRenderPass(&particleGraphicRenderPass,vk::SubpassContents::eSecondaryCommandBuffers);
 	
@@ -834,7 +834,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 	commandBuffer.executeCommands(skyboxCommandBuffer);
 	commandBuffer.endRenderPass();
 
-
+	/*
 	vk::BufferMemoryBarrier bufferBarrierparticle = {  // sType                                  // pNext
 	vk::AccessFlagBits::eVertexAttributeRead,          // srcAccessMask
 	vk::AccessFlagBits::eMemoryRead,           // dstAccessMask
@@ -854,7 +854,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 		nullptr                                    // imageBarriers
 	);
 
-
+	*/
 	
 
 	//commandBuffer.executeCommands(particleCommandBuffer);
@@ -1098,7 +1098,7 @@ void GraphicsEngine::record_compute_commands(vk::CommandBuffer commandBuffer, ui
 			std::cout << "Failed to begin recording compute command buffer!" << std::endl;
 		}
 	}
-	
+	/*
 	vk::BufferMemoryBarrier bufferBarrier = {  // sType                                  // pNext
 	vk::AccessFlagBits::eMemoryRead,          // srcAccessMask
 	vk::AccessFlagBits::eShaderRead,           // dstAccessMask
@@ -1119,7 +1119,7 @@ void GraphicsEngine::record_compute_commands(vk::CommandBuffer commandBuffer, ui
 		nullptr                                    // imageBarriers
 	);
 	
-	
+	*/
 	// Dispatch the compute job
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eCompute, particleComputePipeline);
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eCompute, particleComputeLayout, 0, swapchainFrames[imageIndex].particleDescriptorSet, nullptr);
@@ -1129,7 +1129,7 @@ void GraphicsEngine::record_compute_commands(vk::CommandBuffer commandBuffer, ui
 	// Without this the (rendering) vertex shader may display incomplete results (partial data from last frame)
 	
 
-	
+	/*
 	vk::BufferMemoryBarrier bufferBarrier2 = {  // sType                                  // pNext
 	vk::AccessFlagBits::eShaderRead,          // srcAccessMask
 	vk::AccessFlagBits::eMemoryRead,           // dstAccessMask
@@ -1149,7 +1149,7 @@ void GraphicsEngine::record_compute_commands(vk::CommandBuffer commandBuffer, ui
 		bufferBarrier2,                             // bufferBarriers
 		nullptr                                    // imageBarriers
 	);
-
+	*/
 	
 
 
@@ -1177,9 +1177,13 @@ void GraphicsEngine::record_particle_draw_commands(vk::CommandBuffer commandBuff
 			std::cout << "Failed to begin recording shadow command buffer!" << std::endl;
 		}
 	}
-	vk::DeviceSize offset[1] = { 0 };
+	
+
+	vk::Buffer vertexBuffers[] = { particles->particleBuffer.buffer };
+	vk::DeviceSize offets[] = { 0 };
+
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, particleGraphicPipeline);
-	commandBuffer.bindVertexBuffers(0,1,&particles->particleBuffer.buffer, offset);
+	commandBuffer.bindVertexBuffers(0,1,vertexBuffers, offets);
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, particleGraphicsLayout, 0, swapchainFrames[imageIndex].particleCameraDescriptorSet, nullptr);
 	particleTexture->useTexture(commandBuffer, particleGraphicsLayout);
 	commandBuffer.draw(particles->burstParticleCount * particles->numberOfEmiter,1,0,0);

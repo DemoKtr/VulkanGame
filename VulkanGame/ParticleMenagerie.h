@@ -10,6 +10,7 @@ public:
 	vk::DescriptorBufferInfo particleBufferDescriptor;
 	void* particleWriteLoacation;
 	std::vector<vkParticle::Particle> particleData;
+	std::vector<float> particleVertexData;
 	vk::Device logicalDevice;
 	bool benchmark = true;
 	int burstParticleCount = 1024* 1024;
@@ -20,5 +21,6 @@ public:
 	void make_descriptors_resources();
 	vk::DeviceSize getBufferSize();
 	vk::DeviceSize size;
+
 };
 
