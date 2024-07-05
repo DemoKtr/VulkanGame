@@ -36,7 +36,10 @@ void ParticleMenagerie::finalization(FinalizationChunk finalizationChunk)
 		particle.initialPos = particle.pos;
 		particle.initialPos.z = rndLifetimeDist(randomizer);
 		particle.initialPos.w = particle.initialPos.z;
-		particle.acc = glm::vec4(1.0f);
+		particle.acc.x = 2.0f;
+		particle.acc.y = 4.0f;
+		particle.acc.z = 4.0f;
+		particle.acc.w = 1.0f;
 	}
 	particleVertexData.reserve(particles.size() * 16);
 	for (auto& particle : particles) {
