@@ -77,9 +77,6 @@ void vkBloom::PBBloom::createSampler()
 	}
 }
 
-
-
-
 void vkBloom::PBBloom::draw(vk::CommandBuffer commandBuffer, std::vector<vk::Framebuffer> downscaleframebuffer,std::vector<vk::Framebuffer> upscaleframebuffer, std::vector<vk::DescriptorSet>downScaleDescriptorsSet, std::vector<vk::DescriptorSet>upScaleDescriptorsSet, vk::Extent2D swapchainext)
 {
 
@@ -232,6 +229,3 @@ vkBloom::PBBloom::~PBBloom()
 	
 	
 }
-
-
-

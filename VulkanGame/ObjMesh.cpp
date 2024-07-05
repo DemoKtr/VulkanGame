@@ -1,4 +1,4 @@
-#include "Obj_Mesh.h"
+#include "ObjMesh.h"
 
 vkMesh::ObjMesh::ObjMesh(const char* objFilepath, const char* mtlFilepath, glm::mat4 preTransform) {
 

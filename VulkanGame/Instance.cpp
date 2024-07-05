@@ -62,6 +62,7 @@ bool vkInit::supported(std::vector<const char*>& extensions, std::vector<const c
 
 	return true;
 }
+
 vk::Instance vkInit::make_instance(bool debugMode, const char* appName) {
 	if (debugMode) {
 		std::cout << "Making Instance" << std::endl;

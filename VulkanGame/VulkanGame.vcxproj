@@ -170,7 +170,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="NoiseTexture.cpp" />
-    <ClCompile Include="Obj_Mesh.cpp" />
+    <ClCompile Include="ObjMesh.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="ParticleEmiter.cpp" />
     <ClCompile Include="ParticleMenagerie.cpp" />
@@ -181,7 +181,7 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="Shadows.cpp" />
-    <ClCompile Include="single_time_commands.cpp" />
+    <ClCompile Include="SingleTimeCommands.cpp" />
     <ClCompile Include="Swapchain.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TriangleMesh.cpp" />
@@ -206,7 +206,7 @@
     <ClInclude Include="Memory.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="NoiseTexture.h" />
-    <ClInclude Include="Obj_Mesh.h" />
+    <ClInclude Include="ObjMesh.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="ParticleEmiter.h" />
     <ClInclude Include="ParticleMenagerie.h" />
@@ -221,7 +221,7 @@
     <ClInclude Include="Settings.h" />
     <ClInclude Include="Shaders.h" />
     <ClInclude Include="Shadows.h" />
-    <ClInclude Include="single_time_commands.h" />
+    <ClInclude Include="SingleTimeCommands.h" />
     <ClInclude Include="Swapchain.h" />
     <ClInclude Include="Synchronizer.h" />
     <ClInclude Include="Texture.h" />

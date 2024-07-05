@@ -106,8 +106,6 @@ vk::SurfaceFormatKHR vkInit::choose_swapchain_surface_format(std::vector<vk::Sur
 	}
 }
 
-
-
 vk::PresentModeKHR vkInit::choose_swapchain_present_mode(std::vector<vk::PresentModeKHR> presentModes) {
 	for (vk::PresentModeKHR presentMode : presentModes) {
 		if (presentMode == vk::PresentModeKHR::eMailbox) return presentMode;

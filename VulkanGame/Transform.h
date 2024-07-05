@@ -86,7 +86,6 @@ public:
 		return m_modelMatrix[0];
 	}
 
-
 	glm::vec3 getUp() const
 	{
 		return m_modelMatrix[1];
@@ -112,5 +111,3 @@ public:
 		return m_isDirty;
 	}
 };
-
-
