@@ -94,6 +94,8 @@ vk::Instance vkInit::make_instance(bool debugMode, const char* appName) {
 	std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 	if (debugMode) {
 		extensions.push_back("VK_EXT_debug_utils");
+		extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+		//extensions.push_back(VK_KHR_GET_DISPLAY_PROPERTIES_2_EXTENSION_NAME);
 	}
 
 	if (debugMode) {
@@ -112,7 +114,6 @@ vk::Instance vkInit::make_instance(bool debugMode, const char* appName) {
 		
 		return nullptr;
 	}
-	std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << layers.size() << std::endl;
 	vk::InstanceCreateInfo createInfo = vk::InstanceCreateInfo(
 		vk::InstanceCreateFlags(),
 		&appInfo,

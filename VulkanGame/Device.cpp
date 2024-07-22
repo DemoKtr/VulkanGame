@@ -37,7 +37,7 @@ bool vkInit::isSuitable(const vk::PhysicalDevice& device, bool debugMode)
 	* the swapchain extension
 	*/
 	const std::vector<const char*> requestedExtensions = {
-		{VK_KHR_SWAPCHAIN_EXTENSION_NAME}, VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME
+		{VK_KHR_SWAPCHAIN_EXTENSION_NAME},  {VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME},VK_KHR_DRIVER_PROPERTIES_EXTENSION_NAME ,
 
 	};
 

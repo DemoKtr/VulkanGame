@@ -98,7 +98,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -117,7 +117,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -132,7 +132,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -151,11 +151,19 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AnimatedMesh.cpp" />
+    <ClCompile Include="AnimatedModel.cpp" />
+    <ClCompile Include="AnimatedSceneObjects.cpp" />
+    <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="AnimationDataMenagerie.cpp" />
+    <ClCompile Include="AnimationsVerticiesMenagerie.cpp" />
+    <ClCompile Include="Animator.cpp" />
     <ClCompile Include="app.cpp" />
+    <ClCompile Include="Bone.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="Cubemap.cpp" />
     <ClCompile Include="CubeMapMesh.cpp" />
@@ -169,6 +177,7 @@
     <ClCompile Include="Logging.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Memory.cpp" />
+    <ClCompile Include="ModelMenagerie.cpp" />
     <ClCompile Include="NoiseTexture.cpp" />
     <ClCompile Include="ObjMesh.cpp" />
     <ClCompile Include="Particle.cpp" />
@@ -188,7 +197,16 @@
     <ClCompile Include="VertexMenagerie.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AnimatedMesh.h" />
+    <ClInclude Include="AnimatedModel.h" />
+    <ClInclude Include="AnimatedSceneObjects.h" />
+    <ClInclude Include="Animation.h" />
+    <ClInclude Include="AnimationDataMenagerie.h" />
+    <ClInclude Include="AnimationsVerticiesMenagerie.h" />
+    <ClInclude Include="Animator.h" />
     <ClInclude Include="app.h" />
+    <ClInclude Include="Bone.h" />
+    <ClInclude Include="Bones.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Commands.h" />
     <ClInclude Include="config.h" />
@@ -199,12 +217,14 @@
     <ClInclude Include="Frame.h" />
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="Gbuffer.h" />
+    <ClInclude Include="GLMConverter.h" />
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="Logging.h" />
     <ClInclude Include="Memory.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="ModelMenagerie.h" />
     <ClInclude Include="NoiseTexture.h" />
     <ClInclude Include="ObjMesh.h" />
     <ClInclude Include="Particle.h" />

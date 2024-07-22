@@ -26,4 +26,13 @@ enum class meshTypes {
 	DOG
 };
 
+enum class modelTypes {
+	
+};
+
+enum class animatedModelTypes {
+	DANCE,
+	QUEEN
+};
+
 std::vector<std::string> split(std::string line, std::string delimiter);

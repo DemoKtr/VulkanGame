@@ -104,6 +104,7 @@ class GraphicsEngine
 	vkImage::ParticleTexture*  particleTexture;
 	std::unordered_map<meshTypes, int> instanceCounter;
 	std::unordered_map<meshTypes, std::vector<SceneObject*>> models;
+	std::unordered_map<animatedModelTypes, std::vector<AnimatedSceneObjects*>> animatiedModels;
 	
 	//Descriptor objects
 

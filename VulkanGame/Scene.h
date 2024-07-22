@@ -4,6 +4,7 @@
 #include "SceneObject.h"
 #include <unordered_map>
 #include "ParticleEmiter.h"
+#include "AnimatedSceneObjects.h"
 
 
 
@@ -16,6 +17,7 @@ public:
 	~Scene();
 	//std::unordered_map <meshTypes, std::vector<SceneObject*>> positions;
 	std::vector<SceneObject*> sceneObjects;
+	std::vector<AnimatedSceneObjects*> animatedSceneObjects;
 	std::vector<Light*> lights;
 	std::vector<ParticleEmiter*> particleEmiters;
 	void updateScene(float deltaTime);

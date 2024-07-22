@@ -32,11 +32,42 @@ void GraphicsEngine::make_assets(Scene* scene)
 		}
 	}
 
+
+
 	for (std::pair<meshTypes, std::array<char*,2>> pair : model_filenames) {
 		vkMesh::ObjMesh model(pair.second[0], pair.second[1], glm::mat4(1.0f));
 		meshes->consume(pair.first, model.vertices, model.indices);
 		verticesonScene += model.vertices.size()/14;
 	}
+
+
+	std::unordered_map<meshTypes, char*> animated_model_filenames = {};// { { meshTypes::KITTY, { "box.obj","box.mtl" } }, { meshTypes::DOG, {"box.obj","box.mtl"} } };
+
+	//animation
+	for (AnimatedSceneObjects* obj : scene->animatedSceneObjects) {
+		if (animated_model_filenames.find(obj->objMaterial.meshType) == animated_model_filenames.end()) {
+			// Jeœli klucz nie istnieje, dodajemy do mapy
+			animated_model_filenames[obj->objMaterial.meshType] = obj->objMaterial.model;
+			instanceCounter[obj->objMaterial.meshType]++;
+			//animatedModels[obj->objMaterial.meshType].push_back(obj);
+		}
+		else {
+			instanceCounter[obj->objMaterial.meshType]++; models[obj->objMaterial.meshType].push_back(obj);
+		}
+	}
+
+
+
+	for (std::pair<meshTypes, char*> pair : animated_model_filenames) {
+		AnimatedModel model(pair.second);
+		for (vkMesh::AnimatedMesh mesh : model.meshes) {
+			//meshes->consume(pair.first, model.vertices, model.indices);
+		//verticesonScene += model.vertices.size() / 14;
+		}
+
+		
+	}
+
 
 
 
@@ -789,7 +820,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 	particleGraphicRenderPass.clearValueCount = cV.size();
 	particleGraphicRenderPass.pClearValues = cV.data();
 
-	/*
+	
 	vk::BufferMemoryBarrier bufferBarrier = {  // sType                                  // pNext
 	vk::AccessFlagBits::eMemoryRead,          // srcAccessMask
 	vk::AccessFlagBits::eVertexAttributeRead,           // dstAccessMask
@@ -809,7 +840,7 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 		bufferBarrier,                             // bufferBarriers
 		nullptr                                    // imageBarriers
 	);
-	*/
+	
 
 	commandBuffer.beginRenderPass(&particleGraphicRenderPass,vk::SubpassContents::eSecondaryCommandBuffers);
 	
@@ -835,10 +866,10 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 
 
 	commandBuffer.beginRenderPass(&skyboxrenderPassInfo, vk::SubpassContents::eSecondaryCommandBuffers);
-	commandBuffer.executeCommands(skyboxCommandBuffer);
+commandBuffer.executeCommands(skyboxCommandBuffer);
 	commandBuffer.endRenderPass();
 
-	/*
+	
 	vk::BufferMemoryBarrier bufferBarrierparticle = {  // sType                                  // pNext
 	vk::AccessFlagBits::eVertexAttributeRead,          // srcAccessMask
 	vk::AccessFlagBits::eMemoryRead,           // dstAccessMask
@@ -858,10 +889,10 @@ void GraphicsEngine::record_draw_commands(vk::CommandBuffer commandBuffer, vk::C
 		nullptr                                    // imageBarriers
 	);
 
-	*/
+	
 	
 
-	//commandBuffer.executeCommands(particleCommandBuffer);
+//commandBuffer.executeCommands(particleCommandBuffer);
 
 	vk::ClearValue dClear;
 	dClear.depthStencil = vk::ClearDepthStencilValue({ 1.0f, 0 });
@@ -1103,7 +1134,7 @@ void GraphicsEngine::record_compute_commands(vk::CommandBuffer commandBuffer, ui
 			std::cout << "Failed to begin recording compute command buffer!" << std::endl;
 		}
 	}
-	/*
+	
 	vk::BufferMemoryBarrier bufferBarrier = {  // sType                                  // pNext
 	vk::AccessFlagBits::eMemoryRead,          // srcAccessMask
 	vk::AccessFlagBits::eShaderRead,           // dstAccessMask
@@ -1124,7 +1155,7 @@ void GraphicsEngine::record_compute_commands(vk::CommandBuffer commandBuffer, ui
 		nullptr                                    // imageBarriers
 	);
 	
-	*/
+	
 	// Dispatch the compute job
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eCompute, particleComputePipeline);
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eCompute, particleComputeLayout, 0, swapchainFrames[imageIndex].particleDescriptorSet, nullptr);
@@ -1134,7 +1165,7 @@ void GraphicsEngine::record_compute_commands(vk::CommandBuffer commandBuffer, ui
 	// Without this the (rendering) vertex shader may display incomplete results (partial data from last frame)
 	
 
-	/*
+	
 	vk::BufferMemoryBarrier bufferBarrier2 = {  // sType                                  // pNext
 	vk::AccessFlagBits::eShaderRead,          // srcAccessMask
 	vk::AccessFlagBits::eMemoryRead,           // dstAccessMask
@@ -1154,7 +1185,7 @@ void GraphicsEngine::record_compute_commands(vk::CommandBuffer commandBuffer, ui
 		bufferBarrier2,                             // bufferBarriers
 		nullptr                                    // imageBarriers
 	);
-	*/
+	
 	
 
 

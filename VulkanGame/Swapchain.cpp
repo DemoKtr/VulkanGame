@@ -108,9 +108,11 @@ vk::SurfaceFormatKHR vkInit::choose_swapchain_surface_format(std::vector<vk::Sur
 
 vk::PresentModeKHR vkInit::choose_swapchain_present_mode(std::vector<vk::PresentModeKHR> presentModes) {
 	for (vk::PresentModeKHR presentMode : presentModes) {
-		if (presentMode == vk::PresentModeKHR::eMailbox) return presentMode;
+		if (presentMode == vk::PresentModeKHR::eMailbox) {
+			return presentMode;
+		}
 	}
-	return vk::PresentModeKHR::eMailbox; //mobilki kiedy chcemy ograniczyæ power consumption z jakiegoœ powodu ustawia siê na domyœlne
+	return vk::PresentModeKHR::eFifo;
 }
 
 vk::Extent2D vkInit::choose_swapchain_exten(uint32_t width, uint32_t height, vk::SurfaceCapabilitiesKHR capabilities) {
