@@ -1,7 +1,7 @@
 #include "AnimatedModel.h"
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
-AnimatedModel::AnimatedModel(char* const& path)
+AnimatedModel::AnimatedModel(const char* path)
 {
 	loadModel(path);
 }
@@ -9,10 +9,11 @@ void AnimatedModel::Draw()
 {
 }
 
-void AnimatedModel::loadModel(std::string const& path)
+void AnimatedModel::loadModel(const char* path)
 {
 	// read file via ASSIMP
 	Assimp::Importer importer;
+
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
 	// check for errors
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
@@ -21,7 +22,9 @@ void AnimatedModel::loadModel(std::string const& path)
 		return;
 	}
 	// retrieve the directory path of the filepath
-	directory = path.substr(0, path.find_last_of('/'));
+
+
+	//directory = path.substr(0, pathStr.find_last_of('/'));
 
 	// process ASSIMP's root node recursively
 	processNode(scene->mRootNode, scene);
@@ -97,8 +100,10 @@ std::vector<vkMesh::AnimatedMesh> AnimatedModel::getMeshVertices()
 }
 
 
+
 void AnimatedModel::SetVertexBoneData(vkMesh::Vertex& vertex, int boneID, float weight)
 {
+
 	for (int i = 0; i < MAX_BONE_INFLUENCE; ++i)
 	{
 		if (vertex.m_BoneIDs[i] < 0)

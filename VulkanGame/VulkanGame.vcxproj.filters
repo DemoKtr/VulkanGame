@@ -174,13 +174,7 @@
     <ClCompile Include="AnimatedSceneObjects.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AnimationDataMenagerie.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ModelMenagerie.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AnimationsVerticiesMenagerie.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -332,13 +326,7 @@
     <ClInclude Include="AnimatedSceneObjects.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AnimationDataMenagerie.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ModelMenagerie.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AnimationsVerticiesMenagerie.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

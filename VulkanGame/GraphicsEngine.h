@@ -98,11 +98,13 @@ class GraphicsEngine
 	int maxFramesInFlight, frameNumber;
 
 	VertexMenagerie* meshes;
+	VertexMenagerie* animatedMeshes;
 	ParticleMenagerie* particles;
 
 	std::unordered_map<meshTypes, vkImage::Texture*>  materials;
 	vkImage::ParticleTexture*  particleTexture;
 	std::unordered_map<meshTypes, int> instanceCounter;
+	std::unordered_map<animatedModelTypes, int> animatedinstanceCounter;
 	std::unordered_map<meshTypes, std::vector<SceneObject*>> models;
 	std::unordered_map<animatedModelTypes, std::vector<AnimatedSceneObjects*>> animatiedModels;
 	

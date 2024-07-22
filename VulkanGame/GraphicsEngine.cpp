@@ -16,6 +16,7 @@
 void GraphicsEngine::make_assets(Scene* scene)
 {
 	meshes = new VertexMenagerie();
+	animatedMeshes = new VertexMenagerie();
 	this->particles = new ParticleMenagerie();
 	std::unordered_map<meshTypes, std::array<char*,2>> model_filenames = {};// { { meshTypes::KITTY, { "box.obj","box.mtl" } }, { meshTypes::DOG, {"box.obj","box.mtl"} } };
 
@@ -37,32 +38,32 @@ void GraphicsEngine::make_assets(Scene* scene)
 	for (std::pair<meshTypes, std::array<char*,2>> pair : model_filenames) {
 		vkMesh::ObjMesh model(pair.second[0], pair.second[1], glm::mat4(1.0f));
 		meshes->consume(pair.first, model.vertices, model.indices);
-		verticesonScene += model.vertices.size()/14;
+		verticesonScene += model.vertices.size();
 	}
 
 
-	std::unordered_map<meshTypes, char*> animated_model_filenames = {};// { { meshTypes::KITTY, { "box.obj","box.mtl" } }, { meshTypes::DOG, {"box.obj","box.mtl"} } };
+	std::unordered_map<animatedModelTypes, char*> animated_model_filenames = {};// { { meshTypes::KITTY, { "box.obj","box.mtl" } }, { meshTypes::DOG, {"box.obj","box.mtl"} } };
 
 	//animation
 	for (AnimatedSceneObjects* obj : scene->animatedSceneObjects) {
-		if (animated_model_filenames.find(obj->objMaterial.meshType) == animated_model_filenames.end()) {
+		if (animated_model_filenames.find(obj->AobjMaterial.meshType) == animated_model_filenames.end()) {
 			// Jeœli klucz nie istnieje, dodajemy do mapy
-			animated_model_filenames[obj->objMaterial.meshType] = obj->objMaterial.model;
-			instanceCounter[obj->objMaterial.meshType]++;
-			//animatedModels[obj->objMaterial.meshType].push_back(obj);
+			animated_model_filenames[obj->AobjMaterial.meshType] = obj->AobjMaterial.model;
+			animatedinstanceCounter[obj->AobjMaterial.meshType]++;
+			animatiedModels[obj->AobjMaterial.meshType].push_back(obj);
 		}
 		else {
-			instanceCounter[obj->objMaterial.meshType]++; models[obj->objMaterial.meshType].push_back(obj);
+			instanceCounter[obj->objMaterial.meshType]++; animatiedModels[obj->AobjMaterial.meshType].push_back(obj);
 		}
 	}
 
 
 
-	for (std::pair<meshTypes, char*> pair : animated_model_filenames) {
+	for (std::pair<animatedModelTypes, char*> pair : animated_model_filenames) {
 		AnimatedModel model(pair.second);
 		for (vkMesh::AnimatedMesh mesh : model.meshes) {
-			//meshes->consume(pair.first, model.vertices, model.indices);
-		//verticesonScene += model.vertices.size() / 14;
+			animatedMeshes->consume(pair.first, mesh.vertices, mesh.indices);
+			verticesonScene += mesh.vertices.size() / 14;
 		}
 
 		
@@ -77,6 +78,7 @@ void GraphicsEngine::make_assets(Scene* scene)
 	finalizationChunk.queue =graphicsQueue;
 	finalizationChunk.commandBuffer = maincommandBuffer;
 	meshes->finalize(finalizationChunk);
+	animatedMeshes->finalize(finalizationChunk);
 
 	//Materials
 	std::unordered_map<meshTypes, std::array<char*,4>> filenames = {
@@ -503,6 +505,7 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyDescriptorPool(shadowDescriptorPool);
 	delete bloom;
 	delete meshes;
+	delete animatedMeshes;
 	delete particles;
 	delete particleTexture;
 	delete cubeMapMesh;

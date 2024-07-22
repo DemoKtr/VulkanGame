@@ -172,15 +172,18 @@ void vkMesh::ObjMesh::read_corner(const std::string& vertex_description,glm::vec
 
 	//position
 	glm::vec3 pos = v[std::stol(v_vt_vn[0]) - 1];
-	vertices.push_back(pos[0]);
-	vertices.push_back(pos[1]);
-	vertices.push_back(pos[2]);
+	Vert vertex;
+	vertex.Position[0] = pos[0];
+	vertex.Position[1] = pos[1];
+	vertex.Position[2] = pos[2];
+
 	
 	
 	//color diffuse
-	vertices.push_back(brushColor.r);
-	vertices.push_back(brushColor.g);
-	vertices.push_back(brushColor.b);
+	vertex.Color[0] = brushColor.r;
+	vertex.Color[1] = brushColor.g;
+	vertex.Color[2] = brushColor.b;
+	
 	
 	
 
@@ -189,18 +192,19 @@ void vkMesh::ObjMesh::read_corner(const std::string& vertex_description,glm::vec
 	if (v_vt_vn.size() == 3 && v_vt_vn[1].size() > 0) {
 		texcoord = vt[std::stol(v_vt_vn[1]) - 1];
 	}
-	vertices.push_back(texcoord[0]);
-	vertices.push_back(texcoord[1]);
+	vertex.TexCoords[0] = texcoord[0];
+	vertex.TexCoords[1] = texcoord[1];
 	//normal
 	glm::vec3 normal = vn[std::stol(v_vt_vn[2]) - 1];
-	vertices.push_back(normal[0]);
-	vertices.push_back(normal[1]);
-	vertices.push_back(normal[2]);
-
+	vertex.Normal[0] = normal[0];
+	vertex.Normal[1] = normal[1];
+	vertex.Normal[2] = normal[2];
 	//tangent
-	vertices.push_back(tangent.x);
-	vertices.push_back(tangent.y);
-	vertices.push_back(tangent.z);
+	vertex.Tangent[0] = tangent.x;
+	vertex.Tangent[1] = tangent.y;
+	vertex.Tangent[2] = tangent.z;
+
+	vertices.push_back(vertex);
 
 	/*
 	std::cout << "Pozycje" << std::endl;

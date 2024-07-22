@@ -1,16 +1,31 @@
 #pragma once
 #include "config.h"
 #include <unordered_map>
+#include "AnimatedMesh.h"
 
 
 namespace vkMesh {
 
-	
+	struct Vert {
+		// position
+		glm::vec3 Position;
+		// bitangent
+		glm::vec3 Color;
+		// texCoords
+		glm::vec2 TexCoords;
+		// normal
+		glm::vec3 Normal;
+		
+		// tangent
+		glm::vec3 Tangent;
+		
+	};
+
 
 	class ObjMesh
 	{
 	public:
-		std::vector<float> vertices;
+		std::vector<Vert> vertices;
 		std::vector<uint32_t> indices;
 		std::vector<glm::vec3> v, vn;
 		std::vector<glm::vec2> vt;

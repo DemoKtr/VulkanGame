@@ -5,12 +5,12 @@
 
 struct objectMaterial {
 	meshTypes meshType;
-	char* model;
-	char* material;
-	char* diffuse;
-	char* normalMap;
-	char* armMap;
-	char* depthMap;
+	char* model{};
+	char* material{};
+	char* diffuse{};
+	char* normalMap{};
+	char* armMap{};
+	char* depthMap{};
 
 	void setFilenames(const char* newModel, const char* newMaterial, const char* newDiffuse, const char* newNormalMap,const char* newArmMap, const char* newDepthMap) {
 		// Zwolnienie poprzednio alokowanej pamiêci (jeœli istnieje)
@@ -25,6 +25,8 @@ struct objectMaterial {
 		depthMap = _strdup(newDepthMap);
 
 	}
+
+
 
 	void clear() {
 		delete[] model;

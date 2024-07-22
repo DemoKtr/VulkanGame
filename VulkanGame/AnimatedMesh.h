@@ -23,6 +23,7 @@ namespace vkMesh {
         float m_Weights[MAX_BONE_INFLUENCE];
     };
 
+   
 class AnimatedMesh
 {
 public:

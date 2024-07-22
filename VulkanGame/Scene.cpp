@@ -59,14 +59,15 @@ Scene::Scene()
 	pointLight1->transform.computeModelMatrix();
 	pointLight2->transform.setLocalPosition(glm::vec3(5.0f, 1.0f,-3.0f));
 	pointLight2->transform.computeModelMatrix();
-	
 	lights.push_back(pointLight1);
 	lights.push_back(pointLight2);
 
 
 	ParticleEmiter *p1 = new ParticleEmiter(glm::vec3(0.7f,0.0f,0.6f));
-
 	particleEmiters.push_back(p1);
+
+	AnimatedSceneObjects* animObj = new AnimatedSceneObjects();
+	animatedSceneObjects.push_back(animObj);
 
 
 }
@@ -79,7 +80,9 @@ Scene::~Scene()
 	for (ParticleEmiter* obj : particleEmiters) {
 		delete obj;
 	}
-	
+	for (AnimatedSceneObjects* obj : animatedSceneObjects) {
+		delete obj;
+	}
 }
 
 void Scene::updateScene(float deltaTime)
