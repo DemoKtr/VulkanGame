@@ -179,7 +179,44 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 
 		}
 
-		void vkUtil::SwapChainFrame::wirte_samplingdescriptor_set(std::vector<vk::ImageView> mipImagesView,vk::Sampler sampler)
+void vkUtil::SwapChainFrame::make_animated_descriptor_resources(uint32_t animatorCounter) {
+	BufferInputChunk input;
+	input.logicalDevice = logicalDevice;
+	input.memoryProperties = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
+	input.physicalDevice = physicalDevice;
+	input.size = sizeof(animatedUBO);
+	input.usage = vk::BufferUsageFlagBits::eUniformBuffer;
+	animationsUBOBuffer = createBuffer(input);
+	input.size = sizeof(animatedSBO)*animatorCounter;
+	input.usage = vk::BufferUsageFlagBits::eStorageBuffer;
+	animationsSBOBuffer = createBuffer(input);
+
+	animationsUBOWriteLoacation = logicalDevice.mapMemory(animationsUBOBuffer.bufferMemory, 0, sizeof(animatedUBO));
+	animationsSBOWriteLoacation = logicalDevice.mapMemory(animationsSBOBuffer.bufferMemory, 0, sizeof(animatedSBO)*animatorCounter);
+
+
+	animationsSBOData.reserve(animatorCounter);
+
+
+	for (int i = 0; i < animatorCounter; ++i)
+	{
+		animationsSBOData[i].model = glm::mat4(1.0f);
+		for (uint32_t j = 0; j < 100; ++j) {
+			animationsSBOData[i].finalBoneMatrices[j] = glm::mat4(1.0f);
+		}
+	}
+
+	animationsUBOBufferDescriptor.buffer = camPosBuffer.buffer;
+	animationsUBOBufferDescriptor.offset = 0;
+	animationsUBOBufferDescriptor.range = sizeof(animatedUBO);
+
+	animationsSBOBufferDescriptor.buffer = camPosBuffer.buffer;
+	animationsSBOBufferDescriptor.offset = 0;
+	animationsSBOBufferDescriptor.range = sizeof(animatedSBO) * animatorCounter;
+
+}
+
+void vkUtil::SwapChainFrame::wirte_samplingdescriptor_set(std::vector<vk::ImageView> mipImagesView,vk::Sampler sampler)
 		{
 			std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {};
 
@@ -342,7 +379,7 @@ void vkUtil::SwapChainFrame::make_descriptor_resources() {
 			logicalDevice.updateDescriptorSets(writeDescriptorSets, nullptr);
 		}
 
-		void vkUtil::SwapChainFrame::wirte_samplingubo_set(glm::vec2 screenSize, std::vector<glm::vec2> mipSize)
+void vkUtil::SwapChainFrame::wirte_samplingubo_set(glm::vec2 screenSize, std::vector<glm::vec2> mipSize)
 		{
 			downScaleUBOData.mipLevel = 1;
 			downScaleUBOData.srcResolution = screenSize;
@@ -820,6 +857,14 @@ void vkUtil::SwapChainFrame::destroy()
 			logicalDevice.unmapMemory(cameraDataBuffer.bufferMemory);
 			logicalDevice.freeMemory(cameraDataBuffer.bufferMemory);
 			logicalDevice.destroyBuffer(cameraDataBuffer.buffer);
+
+			logicalDevice.unmapMemory(animationsSBOBuffer.bufferMemory);
+			logicalDevice.freeMemory(animationsSBOBuffer.bufferMemory);
+			logicalDevice.destroyBuffer(animationsSBOBuffer.buffer);
+
+			logicalDevice.unmapMemory(animationsUBOBuffer.bufferMemory);
+			logicalDevice.freeMemory(animationsUBOBuffer.bufferMemory);
+			logicalDevice.destroyBuffer(animationsUBOBuffer.buffer);
 
 			logicalDevice.unmapMemory(modelBuffer.bufferMemory);
 			logicalDevice.freeMemory(modelBuffer.bufferMemory);

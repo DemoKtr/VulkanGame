@@ -58,6 +58,16 @@ namespace vkUtil {
 	};
 
 
+	struct animatedUBO {
+		glm::mat4 view;
+		glm::mat4 projection;	
+	};
+	struct animatedSBO {
+		glm::mat4 model;
+		glm::mat4 finalBoneMatrices[100];
+	};
+
+
 	/**
 		Holds the data structures associated with a "Frame"
 	*/
@@ -196,11 +206,22 @@ namespace vkUtil {
 		void* ssaoUBOWriteLoacation;
 		vk::DescriptorBufferInfo ssaoUBOBufferDescriptor;
 
+		animatedUBO animationsUBOData;
+		Buffer animationsUBOBuffer;
+		void* animationsUBOWriteLoacation;
+		vk::DescriptorBufferInfo animationsUBOBufferDescriptor;
+
+		std::vector<animatedSBO> animationsSBOData;
+		Buffer animationsSBOBuffer;
+		void* animationsSBOWriteLoacation;
+		vk::DescriptorBufferInfo animationsSBOBufferDescriptor;
+
 		vk::Sampler upscaleSampler;
 
 		void shadowDescripotrsWrite();
 		
 		void make_descriptor_resources();
+		void make_animated_descriptor_resources(uint32_t animatorCounter);
 		void wirte_samplingdescriptor_set(std::vector<vk::ImageView> mipImagesView, vk::Sampler sampler);
 		void wirte_samplingubo_set(glm::vec2 screenSize, std::vector<glm::vec2> mipSize);
 		void make_depth_resources();

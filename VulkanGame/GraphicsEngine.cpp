@@ -61,6 +61,22 @@ void GraphicsEngine::make_assets(Scene* scene)
 
 	for (std::pair<animatedModelTypes, char*> pair : animated_model_filenames) {
 		AnimatedModel model(pair.second);
+
+		auto it = animatiedModels.find(pair.first);
+		if (it != animatiedModels.end()) {
+			std::vector<AnimatedSceneObjects*>& objects = it->second;
+
+			// Iteruj przez ka¿dy AnimatedSceneObjects* w wektorze
+			for (AnimatedSceneObjects* object : objects) {
+				if (object) {
+					object->load_animations(model);  // Wykonaj operacjê na obiekcie
+				}
+			}
+		}
+		else {
+			std::cout << "No objects found for the specified key." << std::endl;
+		}
+
 		for (vkMesh::AnimatedMesh mesh : model.meshes) {
 			animatedMeshes->consume(pair.first, mesh.vertices, mesh.indices);
 			verticesonScene += mesh.vertices.size() / 14;
@@ -457,7 +473,7 @@ GraphicsEngine::GraphicsEngine(ivec2 screenSize, GLFWwindow* window,Scene* scene
 	create_descriptor_set_layouts();
 
 	create_pipeline();
-	finalize_setup();
+	finalize_setup(scene);
 	make_assets(scene);
 
 }
@@ -784,7 +800,7 @@ void GraphicsEngine::create_descriptor_set_layouts()
 
 }
 
-void GraphicsEngine::finalize_setup()
+void GraphicsEngine::finalize_setup(Scene* scene)
 {
 	create_framebuffers();
 
@@ -796,12 +812,12 @@ void GraphicsEngine::finalize_setup()
 	maincommandBuffer = output.graphicCommandBuffer;
 	vkInit::make_frame_command_buffers(commandBufferInput, debugMode);
 	
-	create_frame_resources();
+	create_frame_resources(scene);
 	
 
 }
 
-void GraphicsEngine::recreate_swapchain()
+void GraphicsEngine::recreate_swapchain(Scene* scene)
 {
 	this->screenSize.x = 0;
 	this->screenSize.y = 0;
@@ -815,7 +831,7 @@ void GraphicsEngine::recreate_swapchain()
 	cleanup_swapchain();
 	create_swapchain();
 	create_framebuffers();
-	create_frame_resources();
+	create_frame_resources(scene);
 	vkInit::commandBufferInputChunk commandBufferInput = { device, commandPool,computeCommandPool ,swapchainFrames };
 	vkInit::make_frame_command_buffers(commandBufferInput, debugMode);
 	
@@ -1400,12 +1416,12 @@ void GraphicsEngine::render(Scene *scene,int &verticesCounter,float deltaTime,Ca
 	}
 	catch (vk::OutOfDateKHRError error) {
 		std::cout << "Recreate" << std::endl;
-		recreate_swapchain();
+		recreate_swapchain(scene);
 		return;
 	}
 	catch (vk::IncompatibleDisplayKHRError error) {
 		std::cout << "Recreate" << std::endl;
-		recreate_swapchain();
+		recreate_swapchain(scene);
 		return;
 	}
 	catch (vk::SystemError error) {
@@ -1521,14 +1537,14 @@ void GraphicsEngine::render(Scene *scene,int &verticesCounter,float deltaTime,Ca
 
 	if (present == vk::Result::eErrorOutOfDateKHR || present == vk::Result::eSuboptimalKHR) {
 		std::cout << "Recreate" << std::endl;
-		recreate_swapchain();
+		recreate_swapchain(scene);
 		return;
 	}
 
 	frameNumber = (frameNumber + 1) % maxFramesInFlight;
 }
 
-void GraphicsEngine::create_frame_resources()
+void GraphicsEngine::create_frame_resources(Scene* scene)
 {
 
 	vkInit::descriptorSetLayoutData bindings;
@@ -1610,6 +1626,7 @@ void GraphicsEngine::create_frame_resources()
 		frame.inFlight = vkInit::make_fence(device, debugMode);
 		
 		frame.make_descriptor_resources();
+		frame.make_animated_descriptor_resources(scene->animatedSceneObjects.size());
 		
 		frame.descriptorSet = vkInit::allocate_descriptor_set(device, frameDescriptorPool, frameSetLayout);
 	

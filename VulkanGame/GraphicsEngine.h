@@ -177,11 +177,11 @@ class GraphicsEngine
 	void make_debug_messenger();
 	void choice_device();
 	void create_swapchain();
-	void recreate_swapchain();
+	void recreate_swapchain(Scene* scene);
 	void create_descriptor_set_layouts();
 	void create_pipeline();
-	void finalize_setup();
-	void create_frame_resources();
+	void finalize_setup(Scene* scene);
+	void create_frame_resources(Scene* scene);
 	void create_framebuffers();
 	void cleanup_swapchain();
 

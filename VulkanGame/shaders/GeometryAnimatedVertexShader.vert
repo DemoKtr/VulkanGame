@@ -6,7 +6,6 @@ layout(set = 0,binding = 0) uniform UBO {
 	mat4 view;
 	mat4 projection;
 	mat4 viewProjection;
-	vec4 camPos;
 	mat4 finalBonesMatrices[MAX_BONES];
 } cameraData;
 
