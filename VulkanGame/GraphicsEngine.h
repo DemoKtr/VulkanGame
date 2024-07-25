@@ -102,6 +102,7 @@ class GraphicsEngine
 	ParticleMenagerie* particles;
 
 	std::unordered_map<meshTypes, vkImage::Texture*>  materials;
+	std::unordered_map<animatedModelTypes, vkImage::Texture*>  animatedMaterials;
 	vkImage::ParticleTexture*  particleTexture;
 	std::unordered_map<meshTypes, int> instanceCounter;
 	std::unordered_map<animatedModelTypes, int> animatedinstanceCounter;
@@ -151,6 +152,9 @@ class GraphicsEngine
 
 	vk::DescriptorSetLayout blurDescriptorSetLayout;
 	vk::DescriptorPool blurDescriptorPool;
+
+	vk::DescriptorSetLayout animationDescriptorSetLayout;
+	vk::DescriptorPool animationDescriptorPool;
 
 	CubeMapMesh* cubeMapMesh;
 

@@ -12,6 +12,6 @@ namespace vkInit {
 	vk::RenderPass create_skybox_renderpass(vk::Device logicalDevice, vk::Format swapchainImageFormat, vk::Format depthFormat, vkUtil::FrameBufferAttachment skyBox);
 	vk::RenderPass create_downscale_renderpass(vk::Device logicalDevice);
 	vk::RenderPass create_upscale_renderpass(vk::Device logicalDevice);
-
+	vk::RenderPass create_animation_renderpass(vk::Device logicalDevice, vk::Format depthFormat, vkUtil::FrameBufferAttachment animationOutput);
 }
 

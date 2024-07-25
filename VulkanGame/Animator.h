@@ -13,6 +13,11 @@ namespace vkAnimation {
 
 	class Animator
 	{
+	public:
+		Animator()
+		{
+
+		}
 		Animator(Animation* animation)
 		{
 			m_CurrentTime = 0.0;
@@ -23,6 +28,7 @@ namespace vkAnimation {
 			for (int i = 0; i < 100; i++)
 				m_FinalBoneMatrices.push_back(glm::mat4(1.0f));
 		}
+		
 
 		void UpdateAnimation(float dt)
 		{

@@ -19,7 +19,8 @@ void AnimatedSceneObjects::create_vertex_buffer()
 
 AnimatedSceneObjects::AnimatedSceneObjects()
 {
-	AobjMaterial.setFilenames("res/animations/hero.fbx");
+	animator = new vkAnimation::Animator();
+	AobjMaterial.setFilenames("res/animations/hero.fbx","res/textures/diffuse/floor.jpg", "res/textures/normals/floor.jpg", "res/textures/arm/floor.jpg", "res/textures/depth/floor.jpg");
 	AobjMaterial.meshType = animatedModelTypes::DANCE;
 }
 

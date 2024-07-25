@@ -93,6 +93,18 @@ void GraphicsEngine::make_assets(Scene* scene)
 		}
 	}
 	
+	//Materials
+	std::unordered_map<animatedModelTypes, std::array<char*, 4>> animatedfilenames = {
+	};
+	for (AnimatedSceneObjects* obj : scene->animatedSceneObjects) {
+		if (animatedfilenames.find(obj->AobjMaterial.meshType) == animatedfilenames.end())
+		{
+			animatedfilenames[obj->AobjMaterial.meshType][0] = obj->AobjMaterial.diffuse;
+			animatedfilenames[obj->AobjMaterial.meshType][1] = obj->AobjMaterial.normalMap;
+			animatedfilenames[obj->AobjMaterial.meshType][2] = obj->AobjMaterial.armMap;
+			animatedfilenames[obj->AobjMaterial.meshType][3] = obj->AobjMaterial.depthMap;
+		}
+	}
 	
 	//make Descriptor pool
 	vkInit::descriptorSetLayoutData bindings;
@@ -102,6 +114,7 @@ void GraphicsEngine::make_assets(Scene* scene)
 	bindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
 	bindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
 	meshDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(filenames.size()) + 1, bindings);
+	animationDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(animatedfilenames.size()) + 1, bindings);
 
 
 
@@ -129,6 +142,14 @@ void GraphicsEngine::make_assets(Scene* scene)
 		textureInfo.armfilenames = filename[2];
 		textureInfo.depthfilenames = filename[3];
 		materials[obj] = new vkImage::Texture(textureInfo);
+	}
+
+	for (const auto& [obj, animatedfilename] : animatedfilenames) {
+		textureInfo.diffusefilenames = animatedfilename[0];
+		textureInfo.normalfilenames = animatedfilename[1];
+		textureInfo.armfilenames = animatedfilename[2];
+		textureInfo.depthfilenames = animatedfilename[3];
+		animatedMaterials[obj] = new vkImage::Texture(textureInfo);
 	}
 	/*
 	textureInfo.layout = meshSetLayout;
@@ -489,6 +510,7 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyDescriptorSetLayout(finalDescriptorSetLayout);
 	device.destroyDescriptorSetLayout(downScaleDescriptorSetLayout);
 	device.destroyDescriptorSetLayout(upScaleDescriptorSetLayout);
+	device.destroyDescriptorSetLayout(animationDescriptorSetLayout);
 	device.destroyDescriptorPool(meshDescriptorPool);
 	device.destroyDescriptorPool(particleTextureGraphicDescriptorPool);
 	device.destroyDescriptorPool(particleComputeDescriptorPool);
@@ -501,6 +523,7 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyDescriptorPool(downScaleDescriptorPool);
 	device.destroyDescriptorPool(upScaleDescriptorPool);
 	device.destroyDescriptorPool(finalDescriptorPool);
+	device.destroyDescriptorPool(animationDescriptorPool);
 	
 	device.destroyDescriptorPool(shadowDescriptorPool);
 	delete bloom;
@@ -512,8 +535,12 @@ GraphicsEngine::~GraphicsEngine()
 	delete noiseTexture;
 	
 	for (const auto& [key, texture] : materials) delete texture;
+	for (const auto& [key, texture] : animatedMaterials) delete texture;
 	for (const auto& [key, SceneObjects] : models) {
 		for (SceneObject* obj : SceneObjects) delete obj;
+	}
+	for (const auto& [key, SceneObjects] : animatiedModels) {
+		for (AnimatedSceneObjects* obj : SceneObjects) delete obj;
 	}
 	delete cubemap;
 	
@@ -637,6 +664,7 @@ void GraphicsEngine::create_descriptor_set_layouts()
 
 
 	meshSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+	animationDescriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
 	bindings.count = 2;
 	bindings.indices[0] = 0;

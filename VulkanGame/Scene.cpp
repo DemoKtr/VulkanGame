@@ -80,9 +80,7 @@ Scene::~Scene()
 	for (ParticleEmiter* obj : particleEmiters) {
 		delete obj;
 	}
-	for (AnimatedSceneObjects* obj : animatedSceneObjects) {
-		delete obj;
-	}
+	
 }
 
 void Scene::updateScene(float deltaTime)
