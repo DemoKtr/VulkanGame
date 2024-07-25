@@ -130,7 +130,7 @@ void GraphicsEngine::make_assets(Scene* scene)
 	bindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
 	bindings.types.push_back(vk::DescriptorType::eCombinedImageSampler);
 	meshDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(filenames.size()) + 1, bindings);
-	animationDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(animatedfilenames.size()) + 1, bindings);
+	animationTextureDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(animatedfilenames.size()) + 1, bindings);
 
 
 
@@ -534,6 +534,7 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyDescriptorSetLayout(finalDescriptorSetLayout);
 	device.destroyDescriptorSetLayout(downScaleDescriptorSetLayout);
 	device.destroyDescriptorSetLayout(upScaleDescriptorSetLayout);
+	device.destroyDescriptorSetLayout(animationTextureDescriptorSetLayout);
 	device.destroyDescriptorSetLayout(animationDescriptorSetLayout);
 	device.destroyDescriptorPool(meshDescriptorPool);
 	device.destroyDescriptorPool(particleTextureGraphicDescriptorPool);
@@ -547,6 +548,7 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyDescriptorPool(downScaleDescriptorPool);
 	device.destroyDescriptorPool(upScaleDescriptorPool);
 	device.destroyDescriptorPool(finalDescriptorPool);
+	device.destroyDescriptorPool(animationTextureDescriptorPool);
 	device.destroyDescriptorPool(animationDescriptorPool);
 	
 	device.destroyDescriptorPool(shadowDescriptorPool);
@@ -612,6 +614,7 @@ void GraphicsEngine::create_descriptor_set_layouts()
 	
 
 	frameSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+	animationDescriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
 	bindings.count = 9;
 	bindings.indices[0] = 0;
@@ -688,7 +691,7 @@ void GraphicsEngine::create_descriptor_set_layouts()
 
 
 	meshSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
-	animationDescriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
+	animationTextureDescriptorSetLayout = vkInit::make_descriptor_set_layout(device, bindings);
 
 	bindings.count = 2;
 	bindings.indices[0] = 0;
@@ -1586,6 +1589,8 @@ void GraphicsEngine::create_frame_resources(Scene* scene)
 	
 	
 	frameDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);
+
+	animationDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), bindings);
 	
 	deferedDescriptorPool = vkInit::make_descriptor_pool(device, static_cast<uint32_t>(swapchainFrames.size()), gbindings);
 	
@@ -1638,6 +1643,8 @@ void GraphicsEngine::create_frame_resources(Scene* scene)
 		
 		frame.descriptorSet = vkInit::allocate_descriptor_set(device, frameDescriptorPool, frameSetLayout);
 	
+		frame.animationDescriptorSet = vkInit::allocate_descriptor_set(device, animationDescriptorPool, animationDescriptorSetLayout);
+
 		frame.deferedDescriptorSet = vkInit::allocate_descriptor_set(device, deferedDescriptorPool, deferedSetLayout);
 		
 		frame.shadowDescriptorSet = vkInit::allocate_descriptor_set(device, shadowDescriptorPool, shadowSetLayout);
@@ -1797,6 +1804,7 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), k * sizeof(vkUtil::animatedSBO));
 	
 	_frame.write_descriptor_set();
+	_frame.write_animated_descriptor_set();
 	_frame.writeGbufferDescriptor(_frame.deferedDescriptorSet, device);
 	_frame.shadowDescripotrsWrite();
 	_frame.writeParticleDescriptor(particles->particleBufferDescriptor);

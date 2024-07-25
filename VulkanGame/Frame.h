@@ -168,6 +168,7 @@ namespace vkUtil {
 
 
 		vk::DescriptorSet descriptorSet;
+		vk::DescriptorSet animationDescriptorSet;
 		vk::DescriptorSet deferedDescriptorSet;
 		vk::DescriptorSet particleDescriptorSet;
 		vk::DescriptorSet particleCameraDescriptorSet;
@@ -226,6 +227,7 @@ namespace vkUtil {
 		void wirte_samplingubo_set(glm::vec2 screenSize, std::vector<glm::vec2> mipSize);
 		void make_depth_resources();
 		void write_descriptor_set();
+		void write_animated_descriptor_set();
 		void writeGbufferDescriptor(vk::DescriptorSet descriptorSet, vk::Device logicalDevice);
 		void writeParticleDescriptor(vk::DescriptorBufferInfo &particleBufferDescriptor);
 		void write_skybox_descriptor(std::vector<vk::ImageView> &mipImagesView,vk::Sampler sampler);

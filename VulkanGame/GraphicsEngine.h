@@ -156,6 +156,11 @@ class GraphicsEngine
 	vk::DescriptorSetLayout animationDescriptorSetLayout;
 	vk::DescriptorPool animationDescriptorPool;
 
+	vk::DescriptorSetLayout animationTextureDescriptorSetLayout;
+	vk::DescriptorPool animationTextureDescriptorPool;
+
+
+
 	CubeMapMesh* cubeMapMesh;
 
 	vkImage::Cubemap* cubemap;

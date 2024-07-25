@@ -206,11 +206,11 @@ void vkUtil::SwapChainFrame::make_animated_descriptor_resources(uint32_t animato
 		}
 	}
 
-	animationsUBOBufferDescriptor.buffer = camPosBuffer.buffer;
+	animationsUBOBufferDescriptor.buffer = animationsUBOBuffer.buffer;
 	animationsUBOBufferDescriptor.offset = 0;
 	animationsUBOBufferDescriptor.range = sizeof(animatedUBO);
 
-	animationsSBOBufferDescriptor.buffer = camPosBuffer.buffer;
+	animationsSBOBufferDescriptor.buffer = animationsSBOBuffer.buffer;
 	animationsSBOBufferDescriptor.offset = 0;
 	animationsSBOBufferDescriptor.range = sizeof(animatedSBO) * animatorCounter;
 
@@ -477,6 +477,28 @@ void vkUtil::SwapChainFrame::write_descriptor_set() {
 			
 			
 		}
+
+void vkUtil::SwapChainFrame::write_animated_descriptor_set(){
+	vk::WriteDescriptorSet writeInfo;
+	writeInfo.dstSet = animationDescriptorSet;
+	writeInfo.dstBinding = 0;
+	writeInfo.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+	writeInfo.descriptorCount = 1;
+	writeInfo.descriptorType = vk::DescriptorType::eUniformBuffer;
+	writeInfo.pBufferInfo = &animationsUBOBufferDescriptor;
+
+	logicalDevice.updateDescriptorSets(writeInfo, nullptr);
+
+	vk::WriteDescriptorSet writeInfo2;
+	writeInfo2.dstSet = animationDescriptorSet;
+	writeInfo2.dstBinding = 1;
+	writeInfo2.dstArrayElement = 0; //byte offset within binding for inline uniform blocks
+	writeInfo2.descriptorCount = 1;
+	writeInfo2.descriptorType = vk::DescriptorType::eStorageBuffer;
+	writeInfo2.pBufferInfo = &animationsSBOBufferDescriptor;
+
+	logicalDevice.updateDescriptorSets(writeInfo2, nullptr);
+}
 	
 void vkUtil::SwapChainFrame::make_depth_resources()
 		{
