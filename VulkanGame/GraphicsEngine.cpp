@@ -278,6 +278,14 @@ void GraphicsEngine::prepare_scene(vk::CommandBuffer commandBuffer)
 	commandBuffer.bindIndexBuffer(meshes->indexBuffer.buffer,0,vk::IndexType::eUint32);
 }
 
+void GraphicsEngine::prepare_animated_scene(vk::CommandBuffer commandBuffer)
+{
+	vk::Buffer vertexBuffers[] = { animatedMeshes->vertexBuffer.buffer };
+	vk::DeviceSize offets[] = { 0 };
+	commandBuffer.bindVertexBuffers(0, 1, vertexBuffers, offets);
+	commandBuffer.bindIndexBuffer(animatedMeshes->indexBuffer.buffer, 0, vk::IndexType::eUint32);
+}
+
 void GraphicsEngine::make_instance()
 {
 	this->instance = vkInit::make_instance(this->debugMode, this->appName);
@@ -1749,7 +1757,21 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 		
 		//std::cout << light->transform.getGlobalPosition().x<< light->transform.getGlobalPosition().y<< light->transform.getGlobalPosition().z << std::endl;
 	}
+
+	size_t k = 0;
+	for (AnimatedSceneObjects* obj : scene->animatedSceneObjects) {
+		_frame.animationsSBOData[k].model = scene->animatedSceneObjects[k]->getTransform().getModelMatrix();
+		for (uint32_t bonesNumber = 0; bonesNumber < scene->animatedSceneObjects[k]->animator.GetFinalBoneMatrices().size(); ++bonesNumber) {
+			_frame.animationsSBOData[k].finalBoneMatrices[bonesNumber] = scene->animatedSceneObjects[k]->animator.GetFinalBoneMatrices()[bonesNumber];
+		}
+		
+	}
+
+	_frame.animationsUBOData.view = camera.GetViewMatrix();
+	_frame.animationsUBOData.projection;
+		
 	
+
 	_frame.particleUBOData.deltaT =  deltaTime;
 	_frame.particleUBOData.particleCount = particles->burstParticleCount * particles->numberOfEmiter;
 	
@@ -1771,6 +1793,8 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	memcpy(_frame.ssaoUBOWriteLoacation, &(_frame.ssaoUBOData), sizeof(vkUtil::ssaoUBO));
 	memcpy(_frame.lightDataWriteLocation, (_frame.LightTransforms.data()), j * sizeof(vkUtil::PointLight));
 	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), i * sizeof(glm::mat4));
+	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), sizeof(vkUtil::animatedUBO));
+	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), k * sizeof(vkUtil::animatedSBO));
 	
 	_frame.write_descriptor_set();
 	_frame.writeGbufferDescriptor(_frame.deferedDescriptorSet, device);

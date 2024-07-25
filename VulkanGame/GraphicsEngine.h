@@ -166,6 +166,7 @@ class GraphicsEngine
 
 	void make_assets(Scene* scene);
 	void prepare_scene(vk::CommandBuffer commandBuffer);
+	void prepare_animated_scene(vk::CommandBuffer commandBuffer);
 	void prepare_frame(uint32_t imageIndex, Scene* scene, float deltaTime, Camera::Camera camera);
 
 
