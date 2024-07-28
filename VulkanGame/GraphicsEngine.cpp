@@ -416,6 +416,16 @@ void GraphicsEngine::create_pipeline()
 	skyBoxPipelineLayout = skyBoxOutput.skyBoxPipelineLayout;
 	skyBoxPipeline = skyBoxOutput.skyBoxgraphicsPipeline;
 	skyBoxRenderPass = skyBoxOutput.renderpass;
+	
+
+	skyBoxInput.vertexFilePath = "shaders/geoAnimVert.spv";
+	skyBoxInput.fragmentFilePath = "shaders/geoAnimFrag.spv";
+	skyBoxInput.skyBoxSetLayout = { animationDescriptorSetLayout, animationTextureDescriptorSetLayout };
+	skyBoxInput.Attachment = swapchainFrames[0].postProcessInputAttachment;
+	skyBoxOutput = vkInit::create_animation_pipeline(skyBoxInput, debugMode);
+	animationPipelineLayou = skyBoxOutput.skyBoxPipelineLayout;
+	animationPipeline = skyBoxOutput.skyBoxgraphicsPipeline;
+	animationRenderPass = skyBoxOutput.renderpass;
 
 	
 	bloom = new vkBloom::PBBloom(1920.0f, 1080.0f, device, physicalDevice);
@@ -503,6 +513,7 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyPipeline(finalPipeline);
 	device.destroyPipeline(deferedGraphicsPipeline);
 	device.destroyPipeline(shadowPipeline);
+	device.destroyPipeline(animationPipeline);
 	device.destroyPipelineLayout(layout);
 	device.destroyPipelineLayout(deferedLayout);
 	device.destroyPipelineLayout(shadowLayout);
@@ -511,12 +522,14 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyPipelineLayout(postProcessPipelineLayout);
 	device.destroyPipelineLayout(skyBoxPipelineLayout);
 	device.destroyPipelineLayout(finalPipelineLayou);
+	device.destroyPipelineLayout(animationPipelineLayou);
 	device.destroyRenderPass(renderpass);
 	device.destroyRenderPass(shadowRenderPass);
 	device.destroyRenderPass(particleRenderPass);
 	device.destroyRenderPass(postProcessRenderPass);
 	device.destroyRenderPass(skyBoxRenderPass);
 	device.destroyRenderPass(finalRenderPass);
+	device.destroyRenderPass(animationRenderPass);
 	
 	this->cleanup_swapchain();
 	

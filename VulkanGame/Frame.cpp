@@ -829,6 +829,7 @@ void vkUtil::SwapChainFrame::destroy()
 		{
 			logicalDevice.destroyImageView(imageView);
 			logicalDevice.destroyFramebuffer(framebuffer);
+			logicalDevice.destroyFramebuffer(animationFramebuffer);
 			logicalDevice.destroyFramebuffer(shadowFramebuffer);
 			logicalDevice.destroyFramebuffer(particleFramebuffer);
 			logicalDevice.destroyFramebuffer(postProcessFramebuffer);

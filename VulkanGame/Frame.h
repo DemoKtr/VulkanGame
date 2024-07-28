@@ -81,6 +81,7 @@ namespace vkUtil {
 		vk::Image image;
 		vk::ImageView imageView;
 		vk::Framebuffer framebuffer;
+		vk::Framebuffer animationFramebuffer;
 		vk::Framebuffer shadowFramebuffer;
 		vk::Framebuffer particleFramebuffer;
 		vk::Framebuffer postProcessFramebuffer;

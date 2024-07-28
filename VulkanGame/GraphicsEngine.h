@@ -158,6 +158,10 @@ class GraphicsEngine
 
 	vk::DescriptorSetLayout animationTextureDescriptorSetLayout;
 	vk::DescriptorPool animationTextureDescriptorPool;
+	vk::Pipeline animationPipeline;
+	vk::RenderPass animationRenderPass;
+	vk::PipelineLayout animationPipelineLayou;
+
 
 
 
