@@ -6,14 +6,14 @@ layout(set = 0,binding = 0) uniform UBO {
 	mat4 projection;
 } cameraData;
 
-struct SBO{
-	mat4 model;
-	mat4 finalBonesMatrices[MAX_BONES];
+struct SBO {
+    mat4 model;
+    mat4 finalBonesMatrices[MAX_BONES];
 };
 
 
-layout(std140,set = 0, binding = 1) readonly buffer storageBuffer {
-	SBO[]
+layout(std140, set = 0, binding = 1) readonly buffer StorageBuffer {
+    SBO sbo[];
 } ObjectData;
 
 layout(location = 0) in vec3 vertexPosition;
@@ -44,12 +44,12 @@ void main() {
             totalPosition = vec4(vertexPosition,1.0f);
             break;
         }
-        vec4 localPosition = ObjectData.SBO[gl_InstanceIndex].finalBonesMatrices[boneIds[i]] * vec4(vertexPosition,1.0f);
+        vec4 localPosition = ObjectData.sbo[gl_InstanceIndex].finalBonesMatrices[boneIds[i]] * vec4(vertexPosition,1.0f);
         totalPosition += localPosition * weights[i];
-        vec3 localNormal = mat3(ObjectData.SBO(gl_InstanceIndex)finalBonesMatrices[boneIds[i]]) * vertexNormal;
+        vec3 localNormal = mat3(ObjectData.sbo[gl_InstanceIndex].finalBonesMatrices[boneIds[i]]) * vertexNormal;
    }
 	
-    mat4 viewModel = cameraData.view * ObjectData.SBO[gl_InstanceIndex].model;
+    mat4 viewModel = cameraData.view * ObjectData.sbo[gl_InstanceIndex].model;
     gl_Position =  cameraData.projection * viewModel * totalPosition;
 	vs_out.TexCoords = vertexTexCoord;
 
