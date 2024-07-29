@@ -19,7 +19,7 @@ struct BufferInputChunk {
 };
 
 
-
+void removePrefix(std::vector<std::string>& strings, const std::string& prefix);
 
 enum class meshTypes {
 	KITTY,

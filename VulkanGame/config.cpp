@@ -1,5 +1,17 @@
 #include "config.h"
 
+void removePrefix(std::vector<std::string>& strings, const std::string& prefix)
+{
+	size_t prefixLength = prefix.length();
+	for (auto& str : strings) {
+		// SprawdŸ, czy ci¹g zaczyna siê od prefiksu
+		if (str.compare(0, prefixLength, prefix) == 0) {
+			// U¿yj substr, aby usun¹æ prefiks
+			str = str.substr(prefixLength);
+		}
+	}
+}
+
 std::vector<std::string> split(std::string line, std::string delimiter)
 {
 	std::vector<std::string> split_line;

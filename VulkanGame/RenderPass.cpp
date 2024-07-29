@@ -814,20 +814,20 @@ vk::RenderPass vkInit::create_animation_renderpass(vk::Device logicalDevice, vk:
 
 	attachment[0].flags = vk::AttachmentDescriptionFlags();
 	attachment[0].samples = vk::SampleCountFlagBits::e1;
-	attachment[0].loadOp = vk::AttachmentLoadOp::eClear;
-	attachment[0].storeOp = vk::AttachmentStoreOp::eDontCare;
-	attachment[0].stencilLoadOp = vk::AttachmentLoadOp::eClear;
+	attachment[0].loadOp = vk::AttachmentLoadOp::eLoad;
+	attachment[0].storeOp = vk::AttachmentStoreOp::eStore;
+	attachment[0].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
 	attachment[0].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
-	attachment[0].initialLayout = vk::ImageLayout::eUndefined;
-	attachment[0].finalLayout = vk::ImageLayout::eColorAttachmentOptimal;
+	attachment[0].initialLayout = vk::ImageLayout::eColorAttachmentOptimal;
+	attachment[0].finalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 	attachment[0].format = animationOutput.format;
 
 	attachment[1].format = depthFormat;
 	attachment[1].samples = vk::SampleCountFlagBits::e1;
 	attachment[1].loadOp = vk::AttachmentLoadOp::eLoad;
 	attachment[1].storeOp = vk::AttachmentStoreOp::eStore;
-	attachment[1].stencilLoadOp = vk::AttachmentLoadOp::eLoad;
-	attachment[1].stencilStoreOp = vk::AttachmentStoreOp::eStore;
+	attachment[1].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+	attachment[1].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
 	attachment[1].initialLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
 	attachment[1].finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
 

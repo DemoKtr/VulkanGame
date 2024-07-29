@@ -16,6 +16,7 @@ void main() {
 
     vec2 texCoords = fs_in.TexCoords;
 	vec4 color = texture(albedo,texCoords);
+	color.w = gl_FragCoord.z;
 	finalColor = color;
 	
 }

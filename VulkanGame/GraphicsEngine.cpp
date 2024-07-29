@@ -1109,27 +1109,40 @@ commandBuffer.executeCommands(skyboxCommandBuffer);
 		skyboxbarrier // image memory barriers
 	);
 
-	vk::RenderPassBeginInfo skyBoxRenderpassInfo = {};
-	skyBoxRenderpassInfo.renderPass = postProcessRenderPass;
-	skyBoxRenderpassInfo.framebuffer = swapchainFrames[imageIndex].postProcessFramebuffer;
-	skyBoxRenderpassInfo.renderArea.offset.x = 0;
-	skyBoxRenderpassInfo.renderArea.offset.y = 0;
-	skyBoxRenderpassInfo.renderArea.extent = swapchainExtent;
+
+
+
+
+
+	vk::RenderPassBeginInfo PostProcessRenderpassInfo = {};
+	PostProcessRenderpassInfo.renderPass = postProcessRenderPass;
+	PostProcessRenderpassInfo.framebuffer = swapchainFrames[imageIndex].postProcessFramebuffer;
+	PostProcessRenderpassInfo.renderArea.offset.x = 0;
+	PostProcessRenderpassInfo.renderArea.offset.y = 0;
+	PostProcessRenderpassInfo.renderArea.extent = swapchainExtent;
 
 	
 
 	std::vector<vk::ClearValue> PostProcessclearValues = { {colorClear} };
 
-	skyBoxRenderpassInfo.clearValueCount = PostProcessclearValues.size();
-	skyBoxRenderpassInfo.pClearValues = PostProcessclearValues.data();
+	PostProcessRenderpassInfo.clearValueCount = PostProcessclearValues.size();
+	PostProcessRenderpassInfo.pClearValues = PostProcessclearValues.data();
 
-	commandBuffer.beginRenderPass(&skyBoxRenderpassInfo, vk::SubpassContents::eInline);
+	commandBuffer.beginRenderPass(&PostProcessRenderpassInfo, vk::SubpassContents::eInline);
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, postProcessPipeline);
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, postProcessPipelineLayout, 0, swapchainFrames[imageIndex].postProcessDescriptorSet, nullptr);
 
 
 	commandBuffer.draw(3, 1, 0, 0);
 	commandBuffer.endRenderPass();
+
+
+	
+
+
+
+
+
 
 
 	/*
@@ -1401,6 +1414,16 @@ void GraphicsEngine::render_objects(vk::CommandBuffer commandBuffer, meshTypes o
 	materials[objectType]->useTexture(commandBuffer, layout);
 	
 	commandBuffer.drawIndexed(indexCount, instanceCount, firstIndex,0 ,startInstance);
+	startInstance += instanceCount;
+}
+
+void GraphicsEngine::render_aniamted_objects(vk::CommandBuffer commandBuffer, animatedModelTypes objectType, uint32_t& startInstance, uint32_t instanceCount) {
+	//Triangles
+	int indexCount = animatedMeshes->AindexCounts.find(objectType)->second;
+	int firstIndex = animatedMeshes->AfirstIndices.find(objectType)->second;
+	animatedMaterials[objectType]->useTexture(commandBuffer, layout);
+
+	commandBuffer.drawIndexed(indexCount, instanceCount, firstIndex, 0, startInstance);
 	startInstance += instanceCount;
 }
 
@@ -1706,6 +1729,8 @@ void GraphicsEngine::create_framebuffers()
 	vkInit::make_postprocess_framebuffers(frameBufferInput, swapchainFrames, debugMode);
 	frameBufferInput.renderpass = skyBoxRenderPass;
 	vkInit::make_skybox_framebuffers(frameBufferInput, swapchainFrames, debugMode);
+	frameBufferInput.renderpass = animationRenderPass;
+	vkInit::make_framebuffers_animation(frameBufferInput, swapchainFrames, debugMode);
 	frameBufferInput.renderpass = finalRenderPass;
 	vkInit::make_final_framebuffers(frameBufferInput, swapchainFrames, debugMode);
 	frameBufferInput.renderpass = bloom->downScaleRenderpass;

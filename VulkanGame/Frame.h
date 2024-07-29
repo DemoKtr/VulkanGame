@@ -141,6 +141,7 @@ namespace vkUtil {
 		FrameBufferAttachment skyBoxAttachment;
 		FrameBufferAttachment sampledAttachment;
 		FrameBufferAttachment multiSampledattachment;
+		FrameBufferAttachment animationattachment;
 
 		std::vector<glm::mat4> modelTransforms;
 		std::vector<PointLight> LightTransforms;

@@ -203,6 +203,7 @@ class GraphicsEngine
 
 	float ourLerp(float a, float b, float f);
 	void render_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& starInstance, uint32_t instanceCount);
+	void render_aniamted_objects(vk::CommandBuffer commandBuffer, animatedModelTypes objectType, uint32_t& startInstance, uint32_t instanceCount);
 	void render_shadows_objects(vk::CommandBuffer commandBuffer, meshTypes objectType, uint32_t& starInstance, uint32_t instanceCount);
 public:
 	GraphicsEngine(ivec2 screenSize, GLFWwindow* window,Scene* scene ,bool debugMode);

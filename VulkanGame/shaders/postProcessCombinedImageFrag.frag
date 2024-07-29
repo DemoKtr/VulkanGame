@@ -12,22 +12,23 @@ layout(location = 0) in vec2 inUV;
 
 void main() {
 
-	vec3 color = vec3 (0.0f,0.0f,0.0f);
-	float zAlbedo = texture(albedoMap,inUV.xy).a;
-	float zParticle = texture(particleMap,inUV.xy).a;
 	
-	if(zAlbedo == 1.0f && zParticle == 1.0f){
-	color = texture(skybox,inUV.xy).rgb;
+	//vec3 color = vec3 (0.0f,0.0f,0.0f);
+	//float zAlbedo = texture(albedoMap,inUV.xy).a;
+	//float zParticle = texture(particleMap,inUV.xy).a;
 	
-	}else  
-	{
-	/*
+	//if(zAlbedo == 1.0f && zParticle == 1.0f){
+	//color = texture(skybox,inUV.xy).rgb;
+	
+	//}else  
+	//{
+	
 	//if(zParticle >= zAlbedo) color = texture(albedoMap,inUV.xy).rgb;
 	//else color =pow((texture(particleMap,inUV.xy).rgb),vec3(2.2f));
-	*/
-	color = texture(albedoMap,inUV.xy).rgb;
-	}
 	
-
-	outColor = vec4(color,1.0f);
+	//color = texture(albedoMap,inUV.xy).rgb;
+	//}
+	
+	vec4 color = vec4(texture(albedoMap,inUV.xy));
+	outColor = color;
 }
