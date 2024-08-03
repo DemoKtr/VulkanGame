@@ -1307,7 +1307,7 @@ void GraphicsEngine::record_particle_draw_commands(vk::CommandBuffer commandBuff
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, particleGraphicsLayout, 0, swapchainFrames[imageIndex].particleCameraDescriptorSet, nullptr);
 	particleTexture->useTexture(commandBuffer, particleGraphicsLayout);
 	commandBuffer.draw(particles->burstParticleCount * particles->numberOfEmiter,1,0,0);
-	//commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, particleGraphicsLayout, 0,nullptr, nullptr);
+	
 	
 
 	
