@@ -8,19 +8,19 @@ namespace vkMesh {
 
     struct Vertex {
         // position
-        glm::vec3 Position;
-        // normal
-        glm::vec3 Normal;
+        glm::vec4 Position;
         // texCoords
-        glm::vec2 TexCoords;
+        glm::vec4 TexCoords;
+        // normal
+        glm::vec4 Normal;
         // tangent
-        glm::vec3 Tangent;
+        glm::vec4 Tangent;
         // bitangent
-        glm::vec3 Bitangent;
+        glm::vec4 Bitangent;
         //bone indexes which will influence this vertex
-        int m_BoneIDs[MAX_BONE_INFLUENCE];
+        glm::ivec4 m_BoneIDs;
         //weights from each bone
-        float m_Weights[MAX_BONE_INFLUENCE];
+        glm::vec4 m_Weights;
     };
 
    

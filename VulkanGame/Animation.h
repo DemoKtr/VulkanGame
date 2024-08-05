@@ -27,10 +27,10 @@ namespace vkAnimation {
 		Bone* FindBone(const std::string& name);
 
 
-		inline float GetTicksPerSecond(); 
-		inline float GetDuration();
-		inline const AssimpNodeData& GetRootNode();
-		inline const std::map<std::string, BoneInfo>& GetBoneIDMap();
+		inline float GetTicksPerSecond() { return m_TicksPerSecond; };
+		inline float GetDuration() { return m_Duration; };
+		inline const AssimpNodeData& GetRootNode() { return m_RootNode; };
+		inline const std::map<std::string, BoneInfo>& GetBoneIDMap() { return m_BoneInfoMap; };
 
 	private:
 		void ReadMissingBones(const aiAnimation* animation, AnimatedModel& model);

@@ -67,9 +67,9 @@ Scene::Scene()
 	particleEmiters.push_back(p1);
 
 	AnimatedSceneObjects* animObj = new AnimatedSceneObjects();
-	animObj->getTransform().setLocalPosition(glm::vec3(0.0f, -0.0f, 0.0f));
+	animObj->getTransform().setLocalPosition(glm::vec3(0.0f, -25.0f, 0.0f));
 	//box->getTransform().rotate(glm::vec3(0.0f, 0.0f, 1.0f),(22.0f/28.0f));
-	animObj->getTransform().setLocalScale(glm::vec3(0.1f, 0.1f, 0.1f));
+	animObj->getTransform().setLocalScale(glm::vec3(0.05f, 0.05f, 0.05f));
 	animObj->getTransform().computeModelMatrix();
 	animatedSceneObjects.push_back(animObj);
 
@@ -91,6 +91,10 @@ void Scene::updateScene(float deltaTime)
 {
 	for (SceneObject* obj : sceneObjects) {
 		obj->update(deltaTime);
+	}
+
+	for (AnimatedSceneObjects* obj : animatedSceneObjects) {
+		obj->animator->UpdateAnimation(deltaTime);
 	}
 
 	for (Light* light : lights) {

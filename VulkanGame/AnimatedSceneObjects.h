@@ -45,15 +45,15 @@ class AnimatedObject {
 
 public:
 
-	vkAnimation::Animator animator;
+	vkAnimation::Animator* animator;
 	std::unordered_map<std::string, vkAnimation::Animation*> animations;
 	animatedobjectMaterial AobjMaterial;
 	void UpdateAnimation(float deltaTime) {
-		animator.UpdateAnimation(deltaTime);
+		animator->UpdateAnimation(deltaTime);
 	 }
 	void PlayAnimation(std::string animationName) {
-		if (!(animations.find(animationName) != animations.end())) {
-			animator.PlayAnimation(animations[animationName]);
+		if ((animations.find(animationName) != animations.end())) {
+			animator->PlayAnimation(animations[animationName]);
 		}
 		else {
 			std::cout << "Animation" + animationName + " does not exist" << std::endl;
@@ -61,7 +61,7 @@ public:
 	}
 	void loadAnimations(std::vector<std::string> filenames,AnimatedModel model) {
 		for (std::string filename : filenames) {
-			animations[filename] = new vkAnimation::Animation(filename,&model);
+			animations[filename] = new vkAnimation::Animation("res/animations/"+filename, &model);
 		}
 
 	}
@@ -71,9 +71,6 @@ public:
 
 class AnimatedSceneObjects : public SceneObject, public AnimatedObject
 {
-
-	
-
 	public:
 		std::vector<std::string> animationFilenames;
 		void draw() override;

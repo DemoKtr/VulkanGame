@@ -25,7 +25,7 @@ vkAnimation::Animation::~Animation()
 vkAnimation::Bone* vkAnimation::Animation::FindBone(const std::string& name)
 {
 	auto iter = std::find_if(m_Bones.begin(), m_Bones.end(),
-		[&](const Bone& Bone)
+		[&](Bone& Bone)
 		{
 			return Bone.GetBoneName() == name;
 		}
@@ -34,25 +34,6 @@ vkAnimation::Bone* vkAnimation::Animation::FindBone(const std::string& name)
 	else return &(*iter);
 }
 
-inline float vkAnimation::Animation::GetTicksPerSecond()
-{
-	return m_TicksPerSecond;
-}
-
-inline float vkAnimation::Animation::GetDuration()
-{
-	return m_Duration;
-}
-
-inline const vkAnimation::AssimpNodeData& vkAnimation::Animation::GetRootNode()
-{
-	return m_RootNode;
-}
-
-inline const std::map<std::string, BoneInfo>& vkAnimation::Animation::GetBoneIDMap()
-{
-	return m_BoneInfoMap;
-}
 
 void vkAnimation::Animation::ReadMissingBones(const aiAnimation* animation, AnimatedModel& model)
 {

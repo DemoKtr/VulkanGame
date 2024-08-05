@@ -66,18 +66,20 @@ vkMesh::AnimatedMesh AnimatedModel::processMesh(aiMesh* mesh, const aiScene* sce
 	{
 		vkMesh::Vertex vertex;
 		SetVertexBoneDataToDefault(vertex);
-		vertex.Position = Converter::GetGLMVec(mesh->mVertices[i]);
-		vertex.Normal = Converter::GetGLMVec(mesh->mNormals[i]);
+		vertex.Position = glm::vec4(Converter::GetGLMVec(mesh->mVertices[i]),1.0f);
+		vertex.Normal = glm::vec4(Converter::GetGLMVec(mesh->mNormals[i]),1.0f);
 
 		if (mesh->mTextureCoords[0])
 		{
-			glm::vec2 vec;
+			glm::vec4 vec;
 			vec.x = mesh->mTextureCoords[0][i].x;
 			vec.y = mesh->mTextureCoords[0][i].y;
+			vec.z = 0.0f;
+			vec.w = 1.0f;
 			vertex.TexCoords = vec;
 		}
 		else
-			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+			vertex.TexCoords = glm::vec4(0.0f, 0.0f,0.0f,0.0f);
 
 		vertices.push_back(vertex);
 	}
@@ -92,6 +94,11 @@ vkMesh::AnimatedMesh AnimatedModel::processMesh(aiMesh* mesh, const aiScene* sce
 	ExtractBoneWeightForVertices(vertices, mesh, scene);
 
 	return vkMesh::AnimatedMesh(vertices, indices);
+}
+
+int& AnimatedModel::GetBoneCount()
+{
+	return m_BoneCounter;
 }
 
 std::vector<vkMesh::AnimatedMesh> AnimatedModel::getMeshVertices()

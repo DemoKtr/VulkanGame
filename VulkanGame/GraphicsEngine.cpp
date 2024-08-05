@@ -57,7 +57,7 @@ void GraphicsEngine::make_assets(Scene* scene)
 		}
 	}
 
-
+	
 
 	for (std::pair<animatedModelTypes, char*> pair : animated_model_filenames) {
 		AnimatedModel model(pair.second);
@@ -85,6 +85,9 @@ void GraphicsEngine::make_assets(Scene* scene)
 		
 	}
 
+	for (AnimatedSceneObjects* object : scene->animatedSceneObjects) {
+		object->PlayAnimation("2.fbx");
+	}
 
 
 
@@ -1867,8 +1870,8 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	size_t k = 0;
 	for (AnimatedSceneObjects* obj : scene->animatedSceneObjects) {
 		
-		for (uint32_t bonesNumber = 0; bonesNumber < obj->animator.GetFinalBoneMatrices().size(); ++bonesNumber) {
-			_frame.animationsSBOData[k].finalBoneMatrices[bonesNumber] = obj->animator.GetFinalBoneMatrices()[bonesNumber];
+		for (uint32_t bonesNumber = 0; bonesNumber < obj->animator->GetFinalBoneMatrices().size(); ++bonesNumber) {
+			_frame.animationsSBOData[k].finalBoneMatrices[bonesNumber] = obj->animator->GetFinalBoneMatrices()[bonesNumber];
 		}
 		_frame.animationsSBOData[k++].model = obj->getTransform().getModelMatrix();
 	}

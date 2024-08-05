@@ -20,7 +20,7 @@ public:
 	void Draw();
 
 	auto& GetBoneInfoMap() { return m_BoneInfoMap; }
-	int& GetBoneCount() { return m_BoneCounter; }
+	int& GetBoneCount();
 	std::vector<vkMesh::AnimatedMesh> getMeshVertices();
 
 private:

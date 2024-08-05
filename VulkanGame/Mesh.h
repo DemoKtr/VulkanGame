@@ -90,7 +90,7 @@ namespace vkMesh {
 		vk::VertexInputBindingDescription bindingDescription;
 		bindingDescription.binding = 0;
 		// xy rgb uv
-		bindingDescription.stride =  sizeof(float)*5;
+		bindingDescription.stride =  sizeof(vkMesh::Vertex);
 		bindingDescription.inputRate = vk::VertexInputRate::eVertex; // einstance do instancjonowania
 
 		return bindingDescription;
@@ -104,22 +104,66 @@ namespace vkMesh {
 		vk::VertexInputAttributeDescription dummy;
 		attributes.push_back(dummy);
 		attributes.push_back(dummy);
+		attributes.push_back(dummy);
+		attributes.push_back(dummy);
+		attributes.push_back(dummy);
+		attributes.push_back(dummy);
+		attributes.push_back(dummy);
 
 
 
 		//Pos
 		attributes[0].binding = 0;
 		attributes[0].location = 0;
-		attributes[0].format = vk::Format::eR32G32B32Sfloat;
+		attributes[0].format = vk::Format::eR32G32B32A32Sfloat;
 		attributes[0].offset = 0;
 
 		//TexCoord
 		attributes[1].binding = 0;
 		attributes[1].location = 1;
-		attributes[1].format = vk::Format::eR32G32Sfloat;
-		attributes[1].offset = sizeof(float)*3;
+		attributes[1].format = vk::Format::eR32G32B32A32Sfloat;
+		attributes[1].offset = sizeof(float)*4;
+		
+		//Normal
+		attributes[2].binding = 0;
+		attributes[2].location = 2;
+		attributes[2].format = vk::Format::eR32G32B32A32Sfloat;
+		attributes[2].offset = sizeof(float) * 8;
 
+		//Tangent
+		attributes[3].binding = 0;
+		attributes[3].location = 3;
+		attributes[3].format = vk::Format::eR32G32B32A32Sfloat;
+		attributes[3].offset = sizeof(float) * 12;
 
+		//BTangent
+		attributes[4].binding = 0;
+		attributes[4].location = 4;
+		attributes[4].format = vk::Format::eR32G32B32A32Sfloat;
+		attributes[4].offset = sizeof(float) * 16;
+
+		attributes[5].binding = 0;
+		attributes[5].location = 5;
+		attributes[5].format = vk::Format::eR32G32B32A32Sint;
+		attributes[5].offset = sizeof(float) * 20;
+
+		//Weight
+		attributes[6].binding = 0;
+		attributes[6].location = 6;
+		attributes[6].format = vk::Format::eR32G32B32A32Sfloat;
+		attributes[6].offset = sizeof(float) * 20 + sizeof(int)*4;
+		/*
+		//bonesID
+		;
+		
+
+		//BTangent
+		attributes[6].binding = 0;
+		attributes[6].location = 6;
+		attributes[6].format = vk::Format::eR32G32B32A32Sfloat;
+		attributes[6].offset = sizeof(float) * 14 + sizeof(int)*3;
+
+		*/
 
 
 		return attributes;
