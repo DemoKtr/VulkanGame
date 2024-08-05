@@ -38,7 +38,7 @@ void GraphicsEngine::make_assets(Scene* scene)
 	for (std::pair<meshTypes, std::array<char*,2>> pair : model_filenames) {
 		vkMesh::ObjMesh model(pair.second[0], pair.second[1], glm::mat4(1.0f));
 		meshes->consume(pair.first, model.vertices, model.indices);
-		verticesonScene += model.vertices.size();
+		//verticesonScene += model.vertices.size();
 	}
 
 
@@ -79,7 +79,7 @@ void GraphicsEngine::make_assets(Scene* scene)
 
 		for (vkMesh::AnimatedMesh mesh : model.meshes) {
 			animatedMeshes->consume(pair.first, mesh.vertices, mesh.indices);
-			verticesonScene += mesh.vertices.size() / 14;
+			verticesonScene += mesh.vertices.size();
 		}
 
 		
@@ -422,10 +422,10 @@ void GraphicsEngine::create_pipeline()
 	skyBoxInput.fragmentFilePath = "shaders/geoAnimFrag.spv";
 	skyBoxInput.skyBoxSetLayout = { animationDescriptorSetLayout, animationTextureDescriptorSetLayout };
 	skyBoxInput.Attachment = swapchainFrames[0].postProcessInputAttachment;
-	skyBoxOutput = vkInit::create_animation_pipeline(skyBoxInput, debugMode);
-	animationPipelineLayou = skyBoxOutput.skyBoxPipelineLayout;
-	animationPipeline = skyBoxOutput.skyBoxgraphicsPipeline;
-	animationRenderPass = skyBoxOutput.renderpass;
+	vkInit::skyBoxGraphicsPipelineOutBundle animationOutput= vkInit::create_animation_pipeline(skyBoxInput, debugMode);
+	animationPipelineLayout = animationOutput.skyBoxPipelineLayout;
+	animationPipeline = animationOutput.skyBoxgraphicsPipeline;
+	animationRenderPass = animationOutput.renderpass;
 
 	
 	bloom = new vkBloom::PBBloom(1920.0f, 1080.0f, device, physicalDevice);
@@ -522,7 +522,7 @@ GraphicsEngine::~GraphicsEngine()
 	device.destroyPipelineLayout(postProcessPipelineLayout);
 	device.destroyPipelineLayout(skyBoxPipelineLayout);
 	device.destroyPipelineLayout(finalPipelineLayou);
-	device.destroyPipelineLayout(animationPipelineLayou);
+	device.destroyPipelineLayout(animationPipelineLayout);
 	device.destroyRenderPass(renderpass);
 	device.destroyRenderPass(shadowRenderPass);
 	device.destroyRenderPass(particleRenderPass);
@@ -1204,6 +1204,66 @@ commandBuffer.executeCommands(skyboxCommandBuffer);
 	}
 }
 
+void GraphicsEngine::record_animated_draw_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex)
+{
+	vk::CommandBufferBeginInfo beginInfo = {};
+
+	try {
+		commandBuffer.begin(beginInfo);
+	}
+	catch (vk::SystemError err) {
+		if (debugMode) {
+			std::cout << "Failed to begin recording command buffer!" << std::endl;
+		}
+	}
+
+
+	vk::ClearValue colorClear;
+	std::array<float, 4> colors = { 1.0f, 0.5f, 0.25f, 1.0f };
+	std::array<float, 4> colorsd = { 0.0f, 0.0f, .0f, 1.0f };
+	colorClear.color = vk::ClearColorValue(colors);
+	vk::ClearValue depthClear;
+
+	depthClear.depthStencil = vk::ClearDepthStencilValue({ 1.0f, 0 });
+	std::vector<vk::ClearValue> PostProcessclearValues = { {colorClear},{depthClear} };
+
+	vk::RenderPassBeginInfo finalRenderpassInfo = {};
+	finalRenderpassInfo.renderPass = animationRenderPass;
+	finalRenderpassInfo.framebuffer = swapchainFrames[imageIndex].animationFramebuffer;
+	finalRenderpassInfo.renderArea.offset.x = 0;
+	finalRenderpassInfo.renderArea.offset.y = 0;
+	finalRenderpassInfo.renderArea.extent = swapchainExtent;
+
+	finalRenderpassInfo.clearValueCount = PostProcessclearValues.size();
+	finalRenderpassInfo.pClearValues = PostProcessclearValues.data();
+
+	commandBuffer.beginRenderPass(&finalRenderpassInfo, vk::SubpassContents::eInline);
+	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, animationPipeline);
+	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, animationPipelineLayout, 0, swapchainFrames[imageIndex].animationDescriptorSet, nullptr);
+	prepare_animated_scene(commandBuffer);
+	uint32_t startInstance = 0;
+	//Triangles
+
+	for (std::pair<animatedModelTypes, std::vector<AnimatedSceneObjects*>> pair : animatiedModels) {
+		render_aniamted_objects(commandBuffer, pair.first, startInstance, static_cast<uint32_t>(pair.second.size()));
+	}
+
+
+	commandBuffer.draw(3, 1, 0, 0);
+	commandBuffer.endRenderPass();
+
+
+	try {
+		commandBuffer.end();
+	}
+	catch (vk::SystemError err) {
+
+		if (debugMode) {
+			std::cout << "failed to record command buffer!" << std::endl;
+		}
+	}
+}
+
 void GraphicsEngine::record_compute_commands(vk::CommandBuffer commandBuffer, uint32_t imageIndex)
 {
 
@@ -1421,7 +1481,7 @@ void GraphicsEngine::render_aniamted_objects(vk::CommandBuffer commandBuffer, an
 	//Triangles
 	int indexCount = animatedMeshes->AindexCounts.find(objectType)->second;
 	int firstIndex = animatedMeshes->AfirstIndices.find(objectType)->second;
-	animatedMaterials[objectType]->useTexture(commandBuffer, layout);
+	animatedMaterials[objectType]->useTexture(commandBuffer, animationPipelineLayout);
 
 	commandBuffer.drawIndexed(indexCount, instanceCount, firstIndex, 0, startInstance);
 	startInstance += instanceCount;
@@ -1492,7 +1552,8 @@ void GraphicsEngine::render(Scene *scene,int &verticesCounter,float deltaTime,Ca
 	record_compute_commands(computeParticleCommandBuffer,imageIndex);
 	record_skybox_draw_commands(graphicSkyBoxCommandBuffer,imageIndex);
 	record_particle_draw_commands(graphicParticleCommandBuffer, imageIndex);
-	record_draw_commands(commandBuffer,graphicParticleCommandBuffer, graphicSkyBoxCommandBuffer ,imageIndex);
+	//record_draw_commands(commandBuffer,graphicParticleCommandBuffer, graphicSkyBoxCommandBuffer ,imageIndex);
+	record_animated_draw_commands(commandBuffer, imageIndex);
 
 	/*
 
@@ -1805,15 +1866,17 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 
 	size_t k = 0;
 	for (AnimatedSceneObjects* obj : scene->animatedSceneObjects) {
-		_frame.animationsSBOData[k].model = scene->animatedSceneObjects[k]->getTransform().getModelMatrix();
-		for (uint32_t bonesNumber = 0; bonesNumber < scene->animatedSceneObjects[k]->animator.GetFinalBoneMatrices().size(); ++bonesNumber) {
-			_frame.animationsSBOData[k].finalBoneMatrices[bonesNumber] = scene->animatedSceneObjects[k]->animator.GetFinalBoneMatrices()[bonesNumber];
-		}
 		
+		for (uint32_t bonesNumber = 0; bonesNumber < obj->animator.GetFinalBoneMatrices().size(); ++bonesNumber) {
+			_frame.animationsSBOData[k].finalBoneMatrices[bonesNumber] = obj->animator.GetFinalBoneMatrices()[bonesNumber];
+		}
+		_frame.animationsSBOData[k++].model = obj->getTransform().getModelMatrix();
 	}
 
+	
+
 	_frame.animationsUBOData.view = camera.GetViewMatrix();
-	_frame.animationsUBOData.projection;
+	_frame.animationsUBOData.projection = projection;
 		
 	
 
@@ -1838,8 +1901,8 @@ void GraphicsEngine::prepare_frame(uint32_t imageIndex, Scene* scene,float delta
 	memcpy(_frame.ssaoUBOWriteLoacation, &(_frame.ssaoUBOData), sizeof(vkUtil::ssaoUBO));
 	memcpy(_frame.lightDataWriteLocation, (_frame.LightTransforms.data()), j * sizeof(vkUtil::PointLight));
 	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), i * sizeof(glm::mat4));
-	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), sizeof(vkUtil::animatedUBO));
-	memcpy(_frame.modelBufferWriteLocation, _frame.modelTransforms.data(), k * sizeof(vkUtil::animatedSBO));
+	memcpy(_frame.animationsUBOWriteLoacation, &(_frame.animationsUBOData), sizeof(vkUtil::animatedUBO));
+	memcpy(_frame.animationsSBOWriteLoacation, _frame.animationsSBOData.data(), k * sizeof(vkUtil::animatedSBO));
 	
 	_frame.write_descriptor_set();
 	_frame.write_animated_descriptor_set();

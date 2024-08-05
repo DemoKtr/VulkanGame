@@ -1542,7 +1542,7 @@ namespace vkInit {
         depthStageInfo.flags = vk::PipelineDepthStencilStateCreateFlags();
         depthStageInfo.depthTestEnable = true;
         depthStageInfo.depthWriteEnable = true;
-        depthStageInfo.depthCompareOp = vk::CompareOp::eLessOrEqual;
+        depthStageInfo.depthCompareOp = vk::CompareOp::eLess;
         depthStageInfo.depthBoundsTestEnable = false;
         depthStageInfo.stencilTestEnable = false;
         //Viewport and Scissor
@@ -1562,7 +1562,7 @@ namespace vkInit {
         vk::PipelineMultisampleStateCreateInfo multisampleState = make_multisampling_info();
         std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages;
 
-        vk::RenderPass renderpass = vkInit::create_skybox_renderpass(specyfication.device, specyfication.swapchainImageFormat, specyfication.depthFormat, specyfication.Attachment);
+        vk::RenderPass renderpass = vkInit::create_debug_renderpass(specyfication.device, specyfication.swapchainImageFormat, specyfication.depthFormat);
 
         vk::GraphicsPipelineCreateInfo pipelineInfo = {};
         pipelineInfo.pInputAssemblyState = &inputAssemblyState;
@@ -1602,12 +1602,12 @@ namespace vkInit {
         vk::Pipeline skyBoxPipeline = {};
 
         pipelineInfo.basePipelineHandle = nullptr;
-        if (debugMode) std::cout << "Creating SkyBox Graphics Pipeline " << std::endl;
+        if (debugMode) std::cout << "Creating animation Graphics Pipeline " << std::endl;
         try {
             skyBoxPipeline = specyfication.device.createGraphicsPipeline(nullptr, pipelineInfo).value;
         }
         catch (vk::SystemError err) {
-            if (debugMode) std::cout << "Failed create skyBox Graphics Pipeline!" << std::endl;
+            if (debugMode) std::cout << "Failed create animation Graphics Pipeline!" << std::endl;
         }
 
 

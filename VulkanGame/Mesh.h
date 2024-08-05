@@ -90,7 +90,7 @@ namespace vkMesh {
 		vk::VertexInputBindingDescription bindingDescription;
 		bindingDescription.binding = 0;
 		// xy rgb uv
-		bindingDescription.stride =  sizeof(vkMesh::Vertex);
+		bindingDescription.stride =  sizeof(float)*5;
 		bindingDescription.inputRate = vk::VertexInputRate::eVertex; // einstance do instancjonowania
 
 		return bindingDescription;
@@ -99,24 +99,12 @@ namespace vkMesh {
 
 	std::vector<vk::VertexInputAttributeDescription> getAnimPosColorAttributeDescriptions() {
 
-		/* Provided by VK_VERSION_1_0
-		typedef struct VkVertexInputAttributeDescription {
-			uint32_t    location;
-			uint32_t    binding;
-			VkFormat    format;
-			uint32_t    offset;
-		} VkVertexInputAttributeDescription;
-		*/
 
 		std::vector<vk::VertexInputAttributeDescription> attributes;
 		vk::VertexInputAttributeDescription dummy;
 		attributes.push_back(dummy);
 		attributes.push_back(dummy);
-		attributes.push_back(dummy);
-		attributes.push_back(dummy);
-		attributes.push_back(dummy);
-		attributes.push_back(dummy);
-		attributes.push_back(dummy);
+
 
 
 		//Pos
@@ -125,42 +113,13 @@ namespace vkMesh {
 		attributes[0].format = vk::Format::eR32G32B32Sfloat;
 		attributes[0].offset = 0;
 
-		//normal
+		//TexCoord
 		attributes[1].binding = 0;
 		attributes[1].location = 1;
 		attributes[1].format = vk::Format::eR32G32Sfloat;
-		attributes[1].offset = offsetof(vkMesh::Vertex, Position);
-
-		//TexCoord
-		attributes[2].binding = 0;
-		attributes[2].location = 2;
-		attributes[2].format = vk::Format::eR32G32B32Sfloat;
-		attributes[2].offset = offsetof(vkMesh::Vertex, TexCoords);
+		attributes[1].offset = sizeof(float)*3;
 
 
-		//Tangent
-		attributes[3].binding = 0;
-		attributes[3].location = 3;
-		attributes[3].format = vk::Format::eR32G32B32Sfloat;
-		attributes[3].offset =offsetof(vkMesh::Vertex, Normal);
-
-		//BTangent
-		attributes[4].binding = 0;
-		attributes[4].location = 4;
-		attributes[4].format = vk::Format::eR32G32B32Sfloat;
-		attributes[4].offset = offsetof(vkMesh::Vertex, Tangent);
-
-		//boneID
-		attributes[5].binding = 0;
-		attributes[5].location = 5;
-		attributes[5].format = vk::Format::eR32G32B32A32Sint;
-		attributes[5].offset = offsetof(vkMesh::Vertex, Bitangent);
-
-		//weights
-		attributes[6].binding = 0;
-		attributes[6].location = 6;
-		attributes[6].format = vk::Format::eR32G32B32A32Sfloat;
-		attributes[6].offset = offsetof(vkMesh::Vertex, m_BoneIDs);;
 
 
 		return attributes;

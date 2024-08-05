@@ -883,3 +883,84 @@ vk::RenderPass vkInit::create_animation_renderpass(vk::Device logicalDevice, vk:
 
 	return skyBoxRenderpass;
 }
+
+vk::RenderPass vkInit::create_debug_renderpass(vk::Device logicalDevice, vk::Format swapchainImageFormat, vk::Format depthFormat)
+{
+
+
+	std::array<vk::AttachmentDescription, 2> attachment = {};
+
+
+
+
+	attachment[0].flags = vk::AttachmentDescriptionFlags();
+	attachment[0].samples = vk::SampleCountFlagBits::e1;
+	attachment[0].loadOp = vk::AttachmentLoadOp::eClear;
+	attachment[0].storeOp = vk::AttachmentStoreOp::eStore;
+	attachment[0].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+	attachment[0].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+	attachment[0].initialLayout = vk::ImageLayout::eUndefined;
+	attachment[0].finalLayout = vk::ImageLayout::ePresentSrcKHR;
+	attachment[0].format = swapchainImageFormat;
+
+	attachment[1].format = depthFormat;
+	attachment[1].samples = vk::SampleCountFlagBits::e1;
+	attachment[1].loadOp = vk::AttachmentLoadOp::eClear;
+	attachment[1].storeOp = vk::AttachmentStoreOp::eStore;
+	attachment[1].stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+	attachment[1].stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+	attachment[1].initialLayout = vk::ImageLayout::eUndefined;
+	attachment[1].finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+
+	vk::AttachmentReference colorAttachmentRef = {};
+	colorAttachmentRef.attachment = 0;
+	colorAttachmentRef.layout = vk::ImageLayout::eColorAttachmentOptimal;
+	vk::AttachmentReference depthReference = {};
+	depthReference.attachment = 1;
+	depthReference.layout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+
+
+	vk::SubpassDescription subpass = {};
+	subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments = &colorAttachmentRef;
+	subpass.pDepthStencilAttachment = &depthReference;
+
+
+
+
+	std::array<vk::SubpassDependency, 2> dependencies;
+
+	dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependencies[0].dstSubpass = 0;
+	dependencies[0].srcStageMask = vk::PipelineStageFlagBits::eBottomOfPipe;
+	dependencies[0].dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+	dependencies[0].srcAccessMask = vk::AccessFlagBits::eMemoryRead;
+	dependencies[0].dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+	dependencies[0].dependencyFlags = vk::DependencyFlagBits::eByRegion;
+
+	dependencies[1].srcSubpass = 0;
+	dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+	dependencies[1].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+	dependencies[1].dstStageMask = vk::PipelineStageFlagBits::eFragmentShader;
+	dependencies[1].srcAccessMask = vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite;
+	dependencies[1].dstAccessMask = vk::AccessFlagBits::eShaderRead;
+	dependencies[1].dependencyFlags = vk::DependencyFlagBits::eByRegion;
+
+
+
+
+	vk::RenderPassCreateInfo renderPassCreateInfo = {};
+	renderPassCreateInfo.sType = vk::StructureType::eRenderPassCreateInfo;
+	renderPassCreateInfo.attachmentCount = attachment.size();
+	renderPassCreateInfo.pAttachments = attachment.data();
+	renderPassCreateInfo.subpassCount = 1;
+	renderPassCreateInfo.pSubpasses = &subpass;
+	renderPassCreateInfo.dependencyCount = 2;
+	renderPassCreateInfo.pDependencies = dependencies.data();
+
+	vk::RenderPass skyBoxRenderpass = logicalDevice.createRenderPass(renderPassCreateInfo);
+
+
+	return skyBoxRenderpass;
+}

@@ -64,13 +64,20 @@ void VertexMenagerie::finalize(FinalizationChunk finalizationChunk)
 
 
 	logicalDevice = finalizationChunk.logicalDevice;
+	for (vkMesh::Vertex vertex : animatedVertex) {
+		vertexLump.push_back(vertex.Position.x);
+		vertexLump.push_back(vertex.Position.y);
+		vertexLump.push_back(vertex.Position.z);
+		vertexLump.push_back(vertex.TexCoords.x);
+		vertexLump.push_back(vertex.TexCoords.y);
+	}
 	
 	//make a staging buffer for vertices
 	BufferInputChunk inputChunk;
 	inputChunk.logicalDevice = finalizationChunk.logicalDevice;
 	inputChunk.physicalDevice = finalizationChunk.physicalDevice;
 	if (isAnimated)
-	inputChunk.size = sizeof(vkMesh::Vertex) * animatedVertex.size();
+	inputChunk.size = sizeof(float) * vertexLump.size();
 	else
 	inputChunk.size = sizeof(vkMesh::Vert) * staticVertex.size();
 	inputChunk.usage = vk::BufferUsageFlagBits::eTransferSrc;
@@ -81,7 +88,7 @@ void VertexMenagerie::finalize(FinalizationChunk finalizationChunk)
 	//fill it with vertex data
 	void* memoryLocation = logicalDevice.mapMemory(stagingBuffer.bufferMemory, 0, inputChunk.size);
 	if (isAnimated)
-		memcpy(memoryLocation, animatedVertex.data(), inputChunk.size);
+		memcpy(memoryLocation, vertexLump.data(), inputChunk.size);
 	else
 	memcpy(memoryLocation, staticVertex.data(), inputChunk.size);
 	logicalDevice.unmapMemory(stagingBuffer.bufferMemory);

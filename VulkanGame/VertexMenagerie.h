@@ -20,6 +20,7 @@ class VertexMenagerie
 	bool isAnimated{ false };
 	vk::Device logicalDevice;
 	std::vector<vkMesh::Vert> staticVertex;
+	std::vector<float> vertexLump;
 	std::vector<vkMesh::Vertex> animatedVertex;
 	std::vector<uint32_t> indexLump;
 
